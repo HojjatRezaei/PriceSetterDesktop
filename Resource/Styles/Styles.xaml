@@ -9,22 +9,10 @@
     <Setter Property="MinWidth" Value="100"/>
     <Setter Property="VerticalContentAlignment" Value="Center"/>
     <Style.Triggers>
-      <Trigger Property="IsFocused" Value="True">
-        <Setter Property="Background" Value="{StaticResource Gray100Brush}"/>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Foreground" Value="{StaticResource Gray600Brush}"/>
       </Trigger>
     </Style.Triggers>
-    <!--<Setter Property="VisualStateManager.VisualStateGroups">
-      <Setter.Value>
-        <VisualStateGroup x:Name="CommonStates">
-          <VisualState x:Name="Normal" />
-          <VisualState x:Name="Disabled">
-            <Storyboard>
-              <ColorAnimation Storyboard.TargetName="Foreground" Storyboard.TargetProperty="Color" To="{StaticResource Gray600}"/>
-            </Storyboard>
-          </VisualState>
-        </VisualStateGroup>
-      </Setter.Value>
-    </Setter>-->
   </Style>
   <Style TargetType="{x:Type TextBlock}">
     <Setter Property="Foreground" Value="White" />
@@ -40,28 +28,19 @@
     <Setter Property="Padding" Value="14,10"/>
     <Setter Property="MinHeight" Value="44"/>
     <Setter Property="MinWidth" Value="44"/>
-    <!--<Setter Property="VisualStateManager.VisualStateGroups">
-      <Setter.Value>
-        <VisualStateGroup x:Name="CommonStates">
-          <VisualState x:Name="Normal" />
-          <VisualState x:Name="Disabled">
-            <Storyboard>
-              <ColorAnimation Storyboard.TargetName="Foreground" Storyboard.TargetProperty="Color" To="{StaticResource Gray200}"/>
-              <ColorAnimation Storyboard.TargetName="Background" Storyboard.TargetProperty="Color" To="{StaticResource Gray600}"/>
-            </Storyboard>
-
-          </VisualState>
-          <VisualState x:Name="PointerOver" />
-        </VisualStateGroup>
-      </Setter.Value>
-    </Setter>-->
+    <Style.Triggers>
+      <Trigger Property="IsEnabled" Value="False">
+        <Setter Property="Foreground" Value="{StaticResource Gray200Brush}"/>
+        <Setter Property="Background" Value="{StaticResource Gray600Brush}"/>
+      </Trigger>
+    </Style.Triggers>
   </Style>
 
   <Style TargetType="{x:Type Border}">
     <Setter Property="BorderBrush" Value="#6E6E6E" />
     <Setter Property="BorderThickness" Value="1"/>
   </Style>
-  <Style TargetType="{x:Type Window}">
+  <Style TargetType="{x:Type Window}" x:Key="WindowDefaultStyle">
     <Setter Property="Background" Value="#1f1f1f"/>
   </Style>
 </ResourceDictionary>
