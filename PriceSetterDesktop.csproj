@@ -17,6 +17,7 @@
     <Folder Include="PriceSetterLibraries\" />
     <Folder Include="Resource\StylesModel\" />
     <Folder Include="Resource\StylesModel\" />
+    <Folder Include="ViewModel\Functions\" />
   </ItemGroup>
 
 </Project>

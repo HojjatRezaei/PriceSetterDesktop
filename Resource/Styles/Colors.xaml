@@ -6,7 +6,7 @@
   <Color x:Key="Secondary">#DFD8F7</Color>
   <Color x:Key="SecondaryDarkText">#9880e5</Color>
   <Color x:Key="Tertiary">#2B0B98</Color>
-
+  
   <Color x:Key="White">White</Color>
   <Color x:Key="Black">Black</Color>
   <Color x:Key="Magenta">#D600AA</Color>
@@ -27,6 +27,7 @@
   <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
   <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
   <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
+  <SolidColorBrush x:Key="OffBlackBrush" Color="{StaticResource OffBlack}"/>
 
   <SolidColorBrush x:Key="Gray100Brush" Color="{StaticResource Gray100}"/>
   <SolidColorBrush x:Key="Gray200Brush" Color="{StaticResource Gray200}"/>
