@@ -11,22 +11,22 @@
     {
         public Article()
         {
-
+            
         }
         [XmlItem(nameof(Name), "string")]
-        public string Name { get; set; } = "";
-        public int ProviderSeed { get; set; }
-        public ViewCollection<URLScrap> URLScrapList { get 
+        public string Name { get; set; }
+        [XmlItem(nameof(URLID), "int")]
+        public int URLID { get; set; }
+        [XmlItem(nameof(PricesID), "int")]
+        public int PricesID { get; set; }
+        public IEnumerable<Prices> Prices
+        {
+            get
             {
                 var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<URLScrap>(nameof(URLScrap));
-                List<URLScrap> data = tb.List.Where(x => x.ArticleID == ElementSeed).ToList();
-                return data;
-            } } 
-        public override string ToString()
-        {
-            return $"{Name}";
+                var tb = db.GetTable<Prices>(nameof(Prices));
+                return tb.List.Where(x => x.ArticleID == ElementSeed);
+            }
         }
-        public void 
     }
 }

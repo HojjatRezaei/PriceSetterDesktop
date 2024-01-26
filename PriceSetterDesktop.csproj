@@ -9,15 +9,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FinalProjects\Libraries\WPF Libraries\WPFCollection\WPFCollection.csproj" />
+    <Compile Remove="PriceSetterLibraries\**" />
+    <Compile Remove="Resource\StylesModel\**" />
+    <Compile Remove="ViewModel\Functions\**" />
+    <EmbeddedResource Remove="PriceSetterLibraries\**" />
+    <EmbeddedResource Remove="Resource\StylesModel\**" />
+    <EmbeddedResource Remove="ViewModel\Functions\**" />
+    <None Remove="PriceSetterLibraries\**" />
+    <None Remove="Resource\StylesModel\**" />
+    <None Remove="ViewModel\Functions\**" />
+    <Page Remove="PriceSetterLibraries\**" />
+    <Page Remove="Resource\StylesModel\**" />
+    <Page Remove="ViewModel\Functions\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="PriceSetterLibraries\" />
-    <Folder Include="PriceSetterLibraries\" />
-    <Folder Include="Resource\StylesModel\" />
-    <Folder Include="Resource\StylesModel\" />
-    <Folder Include="ViewModel\Functions\" />
+    <ProjectReference Include="..\FinalProjects\Libraries\WPF Libraries\WPFCollection\WPFCollection.csproj" />
   </ItemGroup>
 
 </Project>

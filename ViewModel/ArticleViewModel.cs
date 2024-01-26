@@ -11,83 +11,36 @@
     {
         public ArticleViewModel()
         {
-            UpdateListOfArticles();
-            UpdateListofProviders();
-            _currentScrap = new();
+            
         }
 
-        public ViewCollection<Provider> ListofProviders
-        {
-            get { return _listOfProviders; }
-            set { _listOfProviders = value; PropertyCall(); }
-        }
-        public ViewCollection<Article> ListofArticles
-        {
-            get { return _listofArticles; }
-            set { _listofArticles = value; PropertyCall(); }
-        }
-        public string CurrentArticleName 
-        {
-            get { return _currentArticleName; }
-            set 
-            {
-                _currentArticleName = value;
-                PropertyCall();
-            }
-        }
-        public ICommand CreateArticle { get; set; } = new FastCommand(
-    (object parameter) => 
-    {
-        ArticleViewModel ins = (ArticleViewModel)parameter;
-        ins.CreateArticleCommand();
-    },
-    (object parameter) => { return true; });
-        public ICommand CreateProvider { get; set; } = new FastCommand(
-(object parameter) =>
-{
-ArticleViewModel ins = (ArticleViewModel)parameter;
-ins.CreateProviderCommand();
-},
-(object parameter) => { return true; });
-        public URLScrap CurrentScrap
-        { 
-            get { return _currentScrap; } 
-            set { _currentScrap = value; PropertyCall(); }
-        }
+        private Article _currentArticle;
+        public Article CurrentArticle
+        { get => _currentArticle; set { _currentArticle = value; PropertyCall(); } }
+        public ICommand GotoPrivdersPageCommand { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.GotoPrivdersPageCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand SubmitArticleInfoCommand { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.SubmitArticleInfoCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand UpdateArticleInfoCommand { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.UpdateArticleInfoCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand RemoveArticleCommand { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.RemoveArticleCommandHandler(); }, (object parameter) => { return true; });
 
+        private void GotoPrivdersPageCommandHandler()
+        {
 
-        private void CreateArticleCommand()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Article>(nameof(Article));
-            var newItem = new Article()
-            {
-                Name = CurrentArticleName
-            };
-            tb.Add(newItem);
-            UpdateListOfArticles();
         }
-        private void CreateProviderCommand()
+        private void SubmitArticleInfoCommandHandler()
         {
-            //open a textbox for entering new provider name
-            UpdateListofProviders();
-        }
-        private void UpdateListOfArticles()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Article>(nameof(Article));
-            ListofArticles = tb.List;
-        }
-        private void UpdateListofProviders()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Provider>(nameof(Provider));
-            ListofProviders = tb.List;
-        }
 
-        private ViewCollection<Provider> _listOfProviders;
-        private ViewCollection<Article> _listofArticles;
-        private URLScrap _currentScrap;
-        private string _currentArticleName="";
+        }
+        private void UpdateArticleInfoCommandHandler()
+        {
+
+        }
+        private void RemoveArticleCommandHandler()
+        {
+
+        }
     }
 }

@@ -33,5 +33,11 @@
     <Page Update="View\Dashboard.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="View\ProvidersView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\ReportView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
 </Project>
