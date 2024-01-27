@@ -21,6 +21,9 @@
     <Page Update="Resource\Styles\Colors.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Resource\Styles\Convertors.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Resource\Styles\Fonts.xaml">
       <SubType>Designer</SubType>
     </Page>

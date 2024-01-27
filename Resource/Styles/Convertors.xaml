@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vc="clr-namespace:PriceSetterDesktop.Libraries.Convertors">
+  <vc:MultiParameter x:Key="MultiParameter"/>
+  <vc:EventParameterMerge x:Key="EventParameterMerge"/>
+  <vc:BooleanToTextConvertor x:Key="BooleanToTextConvertor"/>
+</ResourceDictionary>

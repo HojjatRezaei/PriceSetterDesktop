@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:vm="clr-namespace:PriceSetterDesktop.ViewModel">
+                    xmlns:vm="clr-namespace:PriceSetterDesktop.ViewModel"
+                    xmlns:ec="clr-namespace:WPFCollection.Style.Model;assembly=WPFCollection">
   <Style TargetType="{x:Type vm:ProvidersViewModel}">
     <Setter Property="Template">
       <Setter.Value>
@@ -52,7 +53,7 @@
                              Text="تامین کننده های تعریف شده" 
                              FontWeight="Bold"
                              HorizontalAlignment="Center"/>
-                  <ListView ItemsSource="{Binding ProvidersList}" Grid.Row="1"/>
+                  <ListView ItemsSource="{Binding ProvidersList}" Grid.Row="1" SelectedItem="{Binding SelectedProvider}"/>
                 </Grid>
 
               </Border>

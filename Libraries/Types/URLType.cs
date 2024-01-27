@@ -3,8 +3,11 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
+    using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Windows.Forms;
     using System.Xml;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
@@ -25,6 +28,10 @@
         public int ArticleID { get; set; }
         public int ElementSeed { get; set; }
 
+        public double GetPriceFromWeb()
+        {
+            return 0;
+        }
         public IXmlItem CreateObject()
         {
             return (IXmlItem)this;

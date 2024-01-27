@@ -2,8 +2,11 @@
 {
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types;
+    using System.Reflection;
     using System.Windows;
+    using System.Windows.Controls;
     using System.Windows.Input;
+    using System.Windows.Navigation;
     using WPFCollection.Data.List;
     using WPFCollection.Data.Types;
     using WPFCollection.Data.Types.Generic;
@@ -22,15 +25,20 @@
         }
 
         public Article CurrentArticle
-        { get => _currentArticle; set { _currentArticle = value; PropertyCall(); } }
+        { 
+            get => _currentArticle; 
+            set {
+                _currentArticle = value;
+                PropertyCall();
+            } 
+        }
         public URLType CurrentURL
         { get => _currentURL; set { _currentURL = value; PropertyCall(); } }
-
-        public Provider SelectedProvider
+        public ProviderView SelectedProvider
         { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
         public Article SelectedArticle
         { get => _selectedArticle; set { _selectedArticle = value; PropertyCall(); } }
-        public ViewCollection<Provider> ListOfProviders
+        public ViewCollection<ProviderView> ListOfProviders
         { get => _listOfProviders; set { _listOfProviders = value; PropertyCall(); } }
         public ViewCollection<Article> ListofArticles
         { get => _listofArticles; set { _listofArticles = value; PropertyCall(); } }
@@ -42,6 +50,15 @@
             ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.UpdateArticleInfoCommandHandler(); }, (object parameter) => { return true; });
         public ICommand RemoveArticleCommand { get; set; } = new FastCommand
             ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.RemoveArticleCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand ProviderSelectionChanged { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)((object[])parameter)[1]; model.ProviderSelectionChangedHandler((SelectionChangedEventArgs)((object[])parameter)[0]); }, (object parameter) => { return true; });
+        public ICommand ArticleSelectionChanged { get; set; } = new FastCommand
+            ((object parameter) => 
+            { 
+                ArticleViewModel model = (ArticleViewModel)((object[])parameter)[1];
+                model.ArticleSelectionChangedHandler((SelectionChangedEventArgs)((object[])parameter)[0]);
+            }, (object parameter) => { return true; });
+
         /// <summary>
         /// add new article to the list
         /// </summary>
@@ -75,8 +92,8 @@
                 return;
             }
             //check if any provider have been selected
-            var selectedProvider = ListOfProviders.CurrentItemWithType;
-            if(selectedProvider == null)
+            
+            if(SelectedProvider == null)
             {
                 //promt user that no provider is selected and exit function
                 MessageBox.Show("تامین کننده ای انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.None, MessageBoxOptions.ServiceNotification);
@@ -90,38 +107,42 @@
 
             var newItem = CurrentArticle;
             var oldItem = _articleTable.List.FirstOrDefault(x=> x.ElementSeed == SelectedArticle.ElementSeed);
-            //if item cannot be find in the list , create new article
+            //if item cannot be find in the list , skip update operation
             if(oldItem != null)
             {
                 //compare entered name and update the value in table
                 if (!oldItem.Equals(newItem))
                 {
                     _articleTable.Update(SelectedArticle.ElementSeed, newItem);
+                    UpdateArticleList();
                 }
                 //update values in other tables 
                 //update url and xpath
                 //check if any details have been entered in database related to article and provider
-                var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == ListOfProviders.CurrentItemWithType.ElementSeed && x.ArticleID == ListofArticles.CurrentItemWithType.ElementSeed);
+                var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ElementSeed && x.ArticleID == SelectedArticle.ElementSeed);
                 if(urlSearchResult != null)
                 {
                     //update information for xpath and url in table
                     var newURL = CurrentURL;
-                    newURL.ProviderID = ListOfProviders.CurrentItemWithType.ElementSeed;
-                    newURL.ArticleID = ListofArticles.CurrentItemWithType.ElementSeed;
+                    newURL.ProviderID = SelectedProvider.ElementSeed;
+                    newURL.ArticleID = SelectedArticle.ElementSeed;
                     _urlTypeTable.Update(urlSearchResult.ElementSeed,newURL);
                 }
                 else
                 {
-                    //add information for xpath and url to the table
-                    var newURL = CurrentURL;
-                    newURL.ProviderID = ListOfProviders.CurrentItemWithType.ElementSeed;
-                    newURL.ArticleID = ListofArticles.CurrentItemWithType.ElementSeed;
-                    _urlTypeTable.Add(newURL);
+                    if(CurrentURL.XPath != string.Empty || CurrentURL.URL != string.Empty)
+                    {
+                        //add information for xpath and url to the table
+                        var newURL = CurrentURL;
+                        newURL.ProviderID = SelectedProvider.ElementSeed;
+                        newURL.ArticleID = SelectedArticle.ElementSeed;
+                        _urlTypeTable.Add(newURL);
+                    }
                 }
             }
             //check if any value have changed
-            _articleTable.Update(SelectedArticle.ElementSeed, newItem);
-            UpdateArticleList();
+            CurrentURL = new();
+            MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         /// <summary>
         /// 
@@ -164,19 +185,91 @@
         /// <summary>
         /// Update <see cref="ListOfProviders"/>
         /// </summary>
-        private void UpdateProviderList()
+        private void UpdateProviderList(Article? art = null)
         {
-            ListOfProviders = _providerTable.List;
+            if (SelectedArticle == null || art == null)
+            {
+                ListOfProviders = _providerTable.List.Select(x=> new ProviderView() {ProviderName = x.Name , ElementSeed = x.ElementSeed}).ToList();
+            }
+            else
+            {
+                Article ArticleSelection = art ?? SelectedArticle;
+                var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ElementSeed);
+                var list = _providerTable.List.Select((providerIns) => 
+                {
+                    string url="";
+                    string xpath = "";
+                    var selectedURl = urlList.FirstOrDefault(y => y.ProviderID == providerIns.ElementSeed);
+                    if(selectedURl != null)
+                    {
+                        url = selectedURl.URL;
+                        xpath = selectedURl.XPath;
+                    }
+
+                    return new ProviderView()
+                    {
+                        ElementSeed = providerIns.ElementSeed,
+                        ProviderName = providerIns.Name,
+                        URL = url,
+                        XPath = xpath,
+                    };
+                });
+                ListOfProviders = list.ToList();
+            }
+        }
+        private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
+        {
+            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is Article selectedItem)
+            {
+                castedModel.UpdateProviderList(selectedItem);
+                castedModel.CurrentArticle.Name = selectedItem.Name;
+                castedModel.CurrentArticle.ElementSeed = selectedItem.ElementSeed;
+                castedModel.CurrentURL = new();
+            }
+
+        }
+        private void ProviderSelectionChangedHandler(SelectionChangedEventArgs e)
+        {
+            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 &&e.AddedItems[0] is ProviderView selectedItem && castedModel.SelectedArticle != null)
+            {
+                var searchResult = castedModel._urlTypeTable.List.FirstOrDefault(x => x.ArticleID == castedModel.SelectedArticle.ElementSeed && x.ProviderID == selectedItem.ElementSeed);
+                if (searchResult != null)
+                {
+
+                    castedModel.CurrentURL = new URLType() 
+                    { 
+                        ArticleID = castedModel.SelectedArticle.ElementSeed,
+                        ProviderID = selectedItem.ElementSeed,
+                        URL = searchResult.URL,
+                        XPath = searchResult.XPath,
+                        ElementSeed = searchResult.ElementSeed
+                    };
+                }
+                else
+                {
+                    castedModel.CurrentURL = new();
+                }
+                e.Handled = true;
+            }
         }
         private Article _currentArticle=new();
         private URLType _currentURL=new();
-        private Provider _selectedProvider;
+        private ProviderView _selectedProvider;
         private Article _selectedArticle;
-        private ViewCollection<Provider> _listOfProviders;
+        private ViewCollection<ProviderView> _listOfProviders;
         private ViewCollection<Article> _listofArticles;
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Article> _articleTable;
         private readonly XMLTable<Provider> _providerTable;
         private readonly XMLTable<URLType> _urlTypeTable;
+        public class ProviderView
+        {
+            public int ElementSeed { get; set; } = -1;
+            public string ProviderName { get; set; } = "";
+            public string URL { get; set; } = "";
+            public string XPath { get; set; } = "";
+            public bool HaveURl { get { return URL != string.Empty; } }
+            public bool HaveXpath { get { return XPath != string.Empty; } }
+        }
     }
 }

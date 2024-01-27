@@ -2,7 +2,10 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:PriceSetterDesktop.ViewModel"
                     xmlns:ec="clr-namespace:WPFCollection.Style.Model;assembly=WPFCollection"
-                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors">
+                    xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+                    xmlns:vc="clr-namespace:PriceSetterDesktop.Libraries.Convertors"
+                    xmlns:types="clr-namespace:PriceSetterDesktop.Libraries.Types">
+
   <Style TargetType="{x:Type vm:ArticleViewModel}">
     <Setter Property="Template">
       <Setter.Value>
@@ -45,7 +48,7 @@
                     Grid.Row="0"
                     Grid.Column="0"/>
                   <TextBox
-                    Text="{Binding CurrentArticle.Name , Mode=TwoWay}"
+                    Text="{Binding CurrentArticle.Name ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
                     Grid.Row="0"
                     Grid.Column="1" 
                     Margin="0,0,0,0"/>
@@ -84,7 +87,9 @@
                         Text="{Binding CurrentURL.URL}"
                         Grid.Row="1" 
                         Grid.Column="1" 
-                        Grid.ColumnSpan="3"/>
+                        Grid.ColumnSpan="3"
+                        TextWrapping="Wrap"
+                        FlowDirection="LeftToRight"/>
                       <TextBlock 
                         Text="آدرس منبع : " 
                         Grid.Row="2"
@@ -93,16 +98,64 @@
                         Text="{Binding CurrentURL.XPath}" 
                         Grid.Row="2" 
                         Grid.Column="1" 
-                        Grid.ColumnSpan="3"/>
+                        Grid.ColumnSpan="3"
+                        TextWrapping="Wrap"
+                        FlowDirection="LeftToRight"/>
                     </Grid>
                   </Border>
                   <!--Provider Lists-->
                   <ListView 
                     ItemsSource="{Binding ListOfProviders}" 
+                    SelectedItem="{Binding SelectedProvider}"
                     Grid.Row="3" 
                     Grid.Column="0"
                     Grid.ColumnSpan="3">
-                    
+                    <i:Interaction.Triggers>
+                      <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding ProviderSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
+                          <i:InvokeCommandAction.EventArgsConverterParameter>
+                            <MultiBinding Converter="{StaticResource MultiParameter}">
+                              <Binding RelativeSource="{RelativeSource Mode=FindAncestor , AncestorType={x:Type vm:ArticleViewModel}}"/>
+                            </MultiBinding>
+                          </i:InvokeCommandAction.EventArgsConverterParameter>
+                        </i:InvokeCommandAction>
+                      </i:EventTrigger>
+                    </i:Interaction.Triggers>
+                    <ListView.ItemTemplate>
+                      <DataTemplate>
+                        <StackPanel>
+                          <TextBlock Text="{Binding ProviderName}"/>
+                          <TextBlock Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor}}" Tag="{Binding HaveURl}">
+                            <TextBlock.Style>
+                              <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                  </DataTrigger>
+                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </TextBlock.Style>
+                          </TextBlock>
+                          <TextBlock Text="{Binding HaveXpath , Converter={StaticResource BooleanToTextConvertor}}" Tag="{Binding HaveXpath}">
+                            <TextBlock.Style>
+                              <Style TargetType="{x:Type TextBlock}">
+                                <Style.Triggers>
+                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
+                                    <Setter Property="Foreground" Value="Red"/>
+                                  </DataTrigger>
+                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
+                                    <Setter Property="Foreground" Value="Green"/>
+                                  </DataTrigger>
+                                </Style.Triggers>
+                              </Style>
+                            </TextBlock.Style>
+                          </TextBlock>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ListView.ItemTemplate>
                   </ListView>
                   <Button 
                         Content="تامین کننده ها"
@@ -149,9 +202,20 @@
                   </Grid.RowDefinitions>
                   <TextBlock Text="لیست کالاهای تعریف شده" Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold"/>
                   <ListView 
-                  ItemsSource="{Binding ListofArticles}"
-                    SelectedItem="{Binding SelectedArticle , Mode=TwoWay}"
-                  Grid.Row="1">
+                    ItemsSource="{Binding ListofArticles}"
+                    SelectedItem="{Binding SelectedArticle , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                    Grid.Row="1">
+                    <i:Interaction.Triggers>
+                      <i:EventTrigger EventName="SelectionChanged">
+                        <i:InvokeCommandAction Command="{Binding ArticleSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
+                          <i:InvokeCommandAction.EventArgsConverterParameter>
+                            <MultiBinding Converter="{StaticResource MultiParameter}">
+                              <Binding RelativeSource="{RelativeSource Mode=FindAncestor , AncestorType={x:Type vm:ArticleViewModel}}"/>
+                            </MultiBinding>
+                          </i:InvokeCommandAction.EventArgsConverterParameter>
+                        </i:InvokeCommandAction>
+                      </i:EventTrigger>
+                    </i:Interaction.Triggers>
                     <ListView.ItemTemplate>
                       <DataTemplate>
                         <TextBlock Text="{Binding Name}"/>

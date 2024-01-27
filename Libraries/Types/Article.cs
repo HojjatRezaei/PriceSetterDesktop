@@ -2,20 +2,36 @@
 {
     using PriceSetterDesktop.Libraries.Statics;
     using System;
+    using System.ComponentModel;
+    using System.Runtime.CompilerServices;
     using System.Xml;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
     using WPFCollection.Data.List;
 
     [XmlMarker(nameof(Article))]
-    public partial class Article : IGeneratable, IXmlItem
+    public partial class Article : IGeneratable, IXmlItem, INotifyPropertyChanged
     {
         public Article()
         {
-            
+            Name = "";
         }
+        public Article(string name, int seed)
+        {
+            ElementSeed = seed;
+            Name = name;
+        }
+
         [XmlItem(nameof(Name), "string")]
-        public string Name { get; set; }
+        public string Name
+        { 
+            get => _name;
+            set 
+            { 
+                _name = value;
+                PropertyCall(); 
+            }
+        }
         public IEnumerable<Prices> Prices
         {
             get
@@ -67,5 +83,16 @@
         {
             return $"{Name}";
         }
+
+        private string _name = "";
+        #region propertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void PropertyCall([CallerMemberName] string name = "")
+        {
+            PropertyChanged?.Invoke(this, new(name));
+        }
+        #endregion
+        #region static operation
+        #endregion
     }
 }

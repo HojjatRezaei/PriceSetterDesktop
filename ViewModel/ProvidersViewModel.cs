@@ -15,15 +15,20 @@
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             UpdateProviderList();
-            ChildExit += ProvidersViewModel_ChildExit;
+            Closed += ProvidersViewModel_ChildExit;
         }
 
         private void ProvidersViewModel_ChildExit(bool CloseState = true)
         {
+            CompleteTheTask(null);
         }
 
         public Provider CurrentProvider
         { get => _currentProvider; set { _currentProvider = value; PropertyCall(); } }
+
+        private Provider _selectedProvider;
+        public Provider SelectedProvider
+        { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
         public ViewCollection<Provider> ProvidersList
         { get => _providersList; set { _providersList = value; PropertyCall(); } }
 
@@ -60,9 +65,7 @@
         }
         private void UpdateProviderInfoCommandHandler()
         {
-            //check if any provider have been selected 
-            var selectedProvider = ProvidersList.CurrentItemWithType;
-            if(selectedProvider == null)
+            if(SelectedProvider == null)
             {
                 //promt user that no provider have been selected for updating operation 
                 MessageBox.Show("تامین کننده ای جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -74,14 +77,14 @@
                 return;
             var newItem = CurrentProvider;
 
-            _providerTable.Update(selectedProvider.ElementSeed, newItem);
-
+            _providerTable.Update(SelectedProvider.ElementSeed, newItem);
+            UpdateProviderList();
+            CurrentProvider = new();
+            MessageBox.Show("عملیات بروزرسانی با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
         }
         private void RemoveProviderInfoCommandHandler()
         {
-            //check if any provider have been selected 
-            var selectedProvider = ProvidersList.CurrentItemWithType;
-            if (selectedProvider == null)
+            if (SelectedProvider == null)
             {
                 //promt user that no provider have been selected for removing operation 
                 MessageBox.Show("تامین کننده ای جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -92,7 +95,8 @@
             var result = MessageBox.Show("ایا از حذف اطلاعات اطمینان دارید ؟", "سوال", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.No)
                 return;
-            _providerTable.Remove(selectedProvider.ElementSeed);
+            _providerTable.Remove(SelectedProvider.ElementSeed);
+            UpdateProviderList();
             MessageBox.Show("عملیات حذف با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
         }
         private void UpdateProviderList()

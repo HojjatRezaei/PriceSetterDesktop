@@ -1,6 +1,7 @@
 ﻿<Application x:Class="PriceSetterDesktop.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vc="clr-namespace:WPFCollection.Data.Converters.View;assembly=WPFCollection"
              StartupUri="PeekWindow.xaml">
   <Application.Resources>
     <ResourceDictionary>
@@ -8,7 +9,9 @@
         <!--Colors and custom styles-->
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Colors.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Styles.xaml"/>
-        
+        <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Fonts.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Convertors.xaml"/>
+
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/ResourceBridge.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/WPFCollection;component/ResourceCollector.xaml"/>
       </ResourceDictionary.MergedDictionaries>
