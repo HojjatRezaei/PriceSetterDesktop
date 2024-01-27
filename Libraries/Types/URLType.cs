@@ -1,15 +1,15 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types
 {
-    using PriceSetterDesktop.Libraries.Types.Base;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using System.Xml;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
     [XmlMarker(nameof(URLType))]
-    public class URLType : BaseFileType<URLType> , IXmlItem
+    public partial class URLType : IGeneratable, IXmlItem
     {
         public URLType()
         {
@@ -23,5 +23,49 @@
         public int ProviderID { get; set; }
         [XmlItem(nameof(ArticleID), "int")]
         public int ArticleID { get; set; }
+        public int ElementSeed { get; set; }
+
+        public IXmlItem CreateObject()
+        {
+            return (IXmlItem)this;
+        }
+
+        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
+        {
+            var newObject = new URLType();
+            foreach (XmlNode node in nodeList)
+            {
+                var searchProperty = newObject.GetType().GetProperty(node.Name);
+                if (searchProperty != null)
+                {
+                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
+                    searchProperty.SetValue(newObject, newVal);
+                }
+            }
+            ElementSeed = seed;
+            return newObject;
+        }
+        public string GenerateIdentifier()
+        {
+            //propertyHash;
+            return "";
+        }
+        public override bool Equals(object? obj)
+        {
+            return obj is URLType newObject &&
+                   URL == newObject.URL &&
+                   XPath == newObject.XPath &&
+                   ProviderID == newObject.ProviderID &&
+                   ArticleID == newObject.ArticleID;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(URL, XPath, ProviderID, ArticleID);
+        }
+        public override string ToString()
+        {
+            return $"{URL} ==> {XPath}";
+        }
     }
 }

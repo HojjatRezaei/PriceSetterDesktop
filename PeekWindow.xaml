@@ -11,6 +11,6 @@
         Height="450"
         Width="800">
     <Grid>
-    <vm:ArticleViewModel/>
+    <vm:DashboardViewModel/>
   </Grid>
 </Window>

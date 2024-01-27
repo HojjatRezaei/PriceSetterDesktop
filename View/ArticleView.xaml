@@ -40,7 +40,7 @@
                   </Grid.ColumnDefinitions>
 
                   <!--Article Name Details-->
-                  <TextBlock 
+                  <TextBlock
                     Text="نام کالا : "
                     Grid.Row="0"
                     Grid.Column="0"/>
@@ -48,8 +48,14 @@
                     Text="{Binding CurrentArticle.Name , Mode=TwoWay}"
                     Grid.Row="0"
                     Grid.Column="1" 
-                    Grid.ColumnSpan="2" 
                     Margin="0,0,0,0"/>
+                  <Button 
+                      Content="ثبت"
+                      Grid.Row="0"
+                      Grid.Column="2"
+                      Command="{Binding SubmitArticleInfoCommand}"
+                      CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                    />
                   <!--Provider / URL / XPath Part-->
                   <Border 
                     Grid.Row="1"
@@ -96,6 +102,7 @@
                     Grid.Row="3" 
                     Grid.Column="0"
                     Grid.ColumnSpan="3">
+                    
                   </ListView>
                   <Button 
                         Content="تامین کننده ها"
@@ -109,27 +116,21 @@
                     Grid.ColumnSpan="3"
                     Grid.Row="4">
                     <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="*"/>
-                      <ColumnDefinition Width="2*"/>
+                      <ColumnDefinition Width="3*"/>
                       <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Button 
-                      Content="ثبت"
-                      Grid.Column="0"
-                      Command="{Binding SubmitArticleInfoCommand}"
-                      CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
-                    />
+
                     <Button 
                       Content="به روزرسانی" 
                       VerticalAlignment="Bottom" 
-                      Grid.Column="1"
+                      Grid.Column="0"
                       Command="{Binding UpdateArticleInfoCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
                     />
                     <Button 
                       Content="حذف" 
                       VerticalAlignment="Bottom" 
-                      Grid.Column="2"
+                      Grid.Column="1"
                       Command="{Binding RemoveArticleCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
                     />
@@ -149,7 +150,14 @@
                   <TextBlock Text="لیست کالاهای تعریف شده" Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold"/>
                   <ListView 
                   ItemsSource="{Binding ListofArticles}"
-                  Grid.Row="1"/>
+                    SelectedItem="{Binding SelectedArticle , Mode=TwoWay}"
+                  Grid.Row="1">
+                    <ListView.ItemTemplate>
+                      <DataTemplate>
+                        <TextBlock Text="{Binding Name}"/>
+                      </DataTemplate>
+                    </ListView.ItemTemplate>
+                  </ListView>
                 </Grid>
               </Border>
             </Grid>

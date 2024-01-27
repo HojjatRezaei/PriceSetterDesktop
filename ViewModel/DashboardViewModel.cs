@@ -10,12 +10,12 @@
         
         public DashboardViewModel()
         {
-            CurrentContent = new ArticleViewModel();
             var db = DataHolder.XMLData.CreateDataBase(DataHolder.XMLDataBaseName);
             db.CreateTable<Article>(nameof(Article));
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<Provider>(nameof(Provider));
             db.CreateTable<Prices>(nameof(Prices));
+            CurrentContent = new ArticleViewModel();
         }
         private object _currentContent;
         

@@ -27,4 +27,8 @@
     <ProjectReference Include="..\FinalProjects\Libraries\WPF Libraries\WPFCollection\WPFCollection.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Libraries\Types\Base\" />
+  </ItemGroup>
+
 </Project>

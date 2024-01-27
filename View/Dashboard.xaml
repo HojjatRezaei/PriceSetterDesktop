@@ -25,9 +25,11 @@
               <!--Side Menu-->
               <StackPanel Grid.Column="1" Grid.Row="0">
                 <Button Content="تعریف کالا" 
-          Command="{Binding GotoCreateArticlePage}"/>
+                        Command="{Binding GotoCreateArticlePage}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
                 <Button Content="گزارش گیری"
-          Command="{Binding GotoReportPage}"/>
+                        Command="{Binding GotoReportPage}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
               </StackPanel>
               <!--Actual Content-->
               <Border Padding="5" Grid.Row="0" Grid.Column="0">

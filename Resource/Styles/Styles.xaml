@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:WPFCollection.Style.Model;assembly=WPFCollection">
   <Style TargetType="{x:Type TextBox}">
     <Setter Property="Foreground" Value="White" />
     <Setter Property="Background" Value="Transparent"/>
@@ -54,6 +55,9 @@
     <Setter Property="BorderThickness" Value="1"/>
   </Style>
   <Style TargetType="{x:Type Window}" x:Key="WindowDefaultStyle">
+    <Setter Property="Background" Value="{StaticResource OffBlackBrush}"/>
+  </Style>
+  <Style TargetType="{x:Type vm:DialogHost}">
     <Setter Property="Background" Value="{StaticResource OffBlackBrush}"/>
   </Style>
 </ResourceDictionary>
