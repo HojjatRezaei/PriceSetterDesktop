@@ -11,9 +11,9 @@
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Styles.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Fonts.xaml"/>
         <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/Styles/Convertors.xaml"/>
-
-        <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/ResourceBridge.xaml"/>
+        <!--Import Convertors and styles from WPFCollection Library-->
         <ResourceDictionary Source="pack://application:,,,/WPFCollection;component/ResourceCollector.xaml"/>
+        <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/Resource/ResourceBridge.xaml"/>
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Application.Resources>
