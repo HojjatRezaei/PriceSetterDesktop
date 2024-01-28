@@ -142,6 +142,7 @@
             }
             //check if any value have changed
             CurrentURL = new();
+            UpdateProviderList();
             MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         /// <summary>
@@ -199,11 +200,13 @@
                 {
                     string url="";
                     string xpath = "";
+                    string clickPath = "";
                     var selectedURl = urlList.FirstOrDefault(y => y.ProviderID == providerIns.ElementSeed);
                     if(selectedURl != null)
                     {
                         url = selectedURl.URL;
                         xpath = selectedURl.XPath;
+                        clickPath = selectedURl.ClickPath;
                     }
 
                     return new ProviderView()
@@ -212,6 +215,7 @@
                         ProviderName = providerIns.Name,
                         URL = url,
                         XPath = xpath,
+                        ClickPath = clickPath,
                     };
                 });
                 ListOfProviders = list.ToList();
@@ -242,6 +246,7 @@
                         ProviderID = selectedItem.ElementSeed,
                         URL = searchResult.URL,
                         XPath = searchResult.XPath,
+                        ClickPath = searchResult.ClickPath,
                         ElementSeed = searchResult.ElementSeed
                     };
                 }
@@ -268,6 +273,7 @@
             public string ProviderName { get; set; } = "";
             public string URL { get; set; } = "";
             public string XPath { get; set; } = "";
+            public string ClickPath { get; set; } = "";
             public bool HaveURl { get { return URL != string.Empty; } }
             public bool HaveXpath { get { return XPath != string.Empty; } }
         }

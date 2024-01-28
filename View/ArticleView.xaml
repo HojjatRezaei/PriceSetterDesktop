@@ -5,7 +5,7 @@
                     xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
                     xmlns:vc="clr-namespace:PriceSetterDesktop.Libraries.Convertors"
                     xmlns:types="clr-namespace:PriceSetterDesktop.Libraries.Types">
-
+  
   <Style TargetType="{x:Type vm:ArticleViewModel}">
     <Setter Property="Template">
       <Setter.Value>
@@ -17,99 +17,110 @@
             <!--Main Container-->
             <Grid>
               <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="2*"/>
                 <ColumnDefinition Width="*"/>
               </Grid.ColumnDefinitions>
               <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
               </Grid.RowDefinitions>
               <!--Editor Part-->
-              <Border 
+              <Grid 
                 Grid.Row="0" 
                 Grid.Column="0"
-                Padding="10">
-                <Grid>
-                  <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                  </Grid.RowDefinitions>
+                Margin="0,0,10,0">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="*"/>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="Auto"/>
+                  <ColumnDefinition Width="*"/>
+                  <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <!--Article Name Details-->
+                <TextBlock
+                  Text="نام کالا : "
+                  Grid.Row="0"
+                  Grid.Column="0"/>
+                <TextBox
+                  Text="{Binding CurrentArticle.Name , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                  Grid.Row="0"
+                  Grid.Column="1" 
+                  Margin="0,0,0,0"/>
+                <Button 
+                    Content="ثبت"
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Command="{Binding SubmitArticleInfoCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                  />
+                <!--Provider / URL / XPath / Click Path -->
+                <Grid
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3" Margin="0,5,0,0">
                   <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                   </Grid.ColumnDefinitions>
-
-                  <!--Article Name Details-->
-                  <TextBlock
-                    Text="نام کالا : "
-                    Grid.Row="0"
-                    Grid.Column="0"/>
-                  <TextBox
-                    Text="{Binding CurrentArticle.Name ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
-                    Grid.Row="0"
-                    Grid.Column="1" 
-                    Margin="0,0,0,0"/>
-                  <Button 
-                      Content="ثبت"
-                      Grid.Row="0"
-                      Grid.Column="2"
-                      Command="{Binding SubmitArticleInfoCommand}"
-                      CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
-                    />
-                  <!--Provider / URL / XPath Part-->
-                  <Border 
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="3"
-                    Padding="5"
-                    Margin="5">
-                    <Grid>
-                      <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                      </Grid.ColumnDefinitions>
-                      <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                      </Grid.RowDefinitions>
-
-                      <TextBlock 
-                        Text="آدرس سایت : "
-                        Grid.Row="1" 
-                        Grid.Column="0"/>
-                      <TextBox 
-                        Text="{Binding CurrentURL.URL}"
-                        Grid.Row="1" 
-                        Grid.Column="1" 
-                        Grid.ColumnSpan="3"
-                        TextWrapping="Wrap"
-                        FlowDirection="LeftToRight"/>
-                      <TextBlock 
-                        Text="آدرس منبع : " 
-                        Grid.Row="2"
-                        Grid.Column="0"/>
-                      <TextBox 
-                        Text="{Binding CurrentURL.XPath}" 
-                        Grid.Row="2" 
-                        Grid.Column="1" 
-                        Grid.ColumnSpan="3"
-                        TextWrapping="Wrap"
-                        FlowDirection="LeftToRight"/>
-                    </Grid>
-                  </Border>
-                  <!--Provider Lists-->
-                  <ListView 
-                    ItemsSource="{Binding ListOfProviders}" 
-                    SelectedItem="{Binding SelectedProvider}"
-                    Grid.Row="3" 
-                    Grid.Column="0"
-                    Grid.ColumnSpan="3">
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                  </Grid.RowDefinitions>
+                  <TextBlock 
+                      Text="آدرس سایت : "
+                      Grid.Row="1" 
+                      Grid.Column="0"
+                    Margin="0,0,10,0"/>
+                  <TextBox 
+                      Text="{Binding CurrentURL.URL , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                      Grid.Row="1" 
+                      Grid.Column="1" 
+                      Grid.ColumnSpan="3"
+                      TextWrapping="Wrap"
+                      FlowDirection="LeftToRight"/>
+                  <TextBlock 
+                      Text="آدرس منبع : " 
+                      Grid.Row="2"
+                      Grid.Column="0"
+                    Margin="0,5,10,0"/>
+                  <TextBox 
+                      Text="{Binding CurrentURL.XPath , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+                      Grid.Row="2" 
+                      Grid.Column="1" 
+                      Grid.ColumnSpan="3"
+                      TextWrapping="Wrap"
+                      FlowDirection="LeftToRight"
+                    Margin="0,5,0,0"/>
+                  <TextBlock 
+                      Text="آدرس کلیک :" 
+                      Grid.Row="3" 
+                      Grid.Column="0"
+                    Margin="0,5,10,0"/>
+                  <TextBox 
+                      Text="{Binding CurrentURL.ClickPath , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+                      Grid.Row="3" 
+                      Grid.Column="1"
+                    Margin="0,5,0,0"
+                    TextWrapping="Wrap"
+                    FlowDirection="LeftToRight"/>
+                </Grid>
+                <!--Provider Lists-->
+                <ComboBox 
+                  ItemsSource="{Binding ListOfProviders , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItem="{Binding SelectedProvider , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                  Grid.Row="3"
+                  Grid.Column="0"
+                  Grid.ColumnSpan="2"
+                  Margin="0,10,0,0"
+                  >
                     <i:Interaction.Triggers>
                       <i:EventTrigger EventName="SelectionChanged">
                         <i:InvokeCommandAction Command="{Binding ProviderSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
@@ -121,109 +132,114 @@
                         </i:InvokeCommandAction>
                       </i:EventTrigger>
                     </i:Interaction.Triggers>
-                    <ListView.ItemTemplate>
+                    <ComboBox.ItemTemplate>
                       <DataTemplate>
-                        <StackPanel>
-                          <TextBlock Text="{Binding ProviderName}"/>
-                          <TextBlock Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor}}" Tag="{Binding HaveURl}">
-                            <TextBlock.Style>
-                              <Style TargetType="{x:Type TextBlock}">
-                                <Style.Triggers>
-                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
-                                    <Setter Property="Foreground" Value="Red"/>
-                                  </DataTrigger>
-                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
-                                    <Setter Property="Foreground" Value="Green"/>
-                                  </DataTrigger>
-                                </Style.Triggers>
-                              </Style>
-                            </TextBlock.Style>
-                          </TextBlock>
-                          <TextBlock Text="{Binding HaveXpath , Converter={StaticResource BooleanToTextConvertor}}" Tag="{Binding HaveXpath}">
-                            <TextBlock.Style>
-                              <Style TargetType="{x:Type TextBlock}">
-                                <Style.Triggers>
-                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
-                                    <Setter Property="Foreground" Value="Red"/>
-                                  </DataTrigger>
-                                  <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
-                                    <Setter Property="Foreground" Value="Green"/>
-                                  </DataTrigger>
-                                </Style.Triggers>
-                              </Style>
-                            </TextBlock.Style>
-                          </TextBlock>
-                        </StackPanel>
-                      </DataTemplate>
-                    </ListView.ItemTemplate>
-                  </ListView>
-                  <Button 
-                        Content="تامین کننده ها"
-                        Grid.Row="2"
-                        Grid.Column="0"
-                        Grid.ColumnSpan="3"
-                        Command="{Binding GotoPrivdersPageCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
-                  <Grid
-                    Grid.Column="0"
-                    Grid.ColumnSpan="3"
-                    Grid.Row="4">
-                    <Grid.ColumnDefinitions>
-                      <ColumnDefinition Width="3*"/>
-                      <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
+                        <Border Padding="5" Margin="5" BorderBrush="Transparent">
+                          <StackPanel>
+                            <TextBlock 
+                          Text="{Binding ProviderName}"/>
+                            <TextBlock 
+                          Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='URL'}" 
+                          Tag="{Binding HaveURl}">
+                              <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                  <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
+                                      <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
+                                      <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </TextBlock.Style>
+                            </TextBlock>
+                            <TextBlock 
+                          Text="{Binding HaveXpath , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='XPath'}" 
+                          Tag="{Binding HaveXpath}">
+                              <TextBlock.Style>
+                                <Style TargetType="{x:Type TextBlock}">
+                                  <Style.Triggers>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
+                                      <Setter Property="Foreground" Value="Red"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
+                                      <Setter Property="Foreground" Value="Green"/>
+                                    </DataTrigger>
+                                  </Style.Triggers>
+                                </Style>
+                              </TextBlock.Style>
+                            </TextBlock>
+                          </StackPanel>
+                        </Border>
 
-                    <Button 
-                      Content="به روزرسانی" 
-                      VerticalAlignment="Bottom" 
-                      Grid.Column="0"
-                      Command="{Binding UpdateArticleInfoCommand}"
+                      </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                  </ComboBox>
+                <Button 
+                      Content="تامین کننده ها"
+                      Grid.Row="3"
+                      Grid.Column="2"
+                      Command="{Binding GotoPrivdersPageCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
-                    />
-                    <Button 
-                      Content="حذف" 
-                      VerticalAlignment="Bottom" 
-                      Grid.Column="1"
-                      Command="{Binding RemoveArticleCommand}"
-                      CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
-                    />
-                  </Grid>
+                  Margin="0,10,0,0"/>
+
+                <Grid
+                  Grid.Column="0"
+                  Grid.ColumnSpan="3"
+                  Grid.Row="4">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3*"/>
+                    <ColumnDefinition Width="*"/>
+                  </Grid.ColumnDefinitions>
+
+                  <Button 
+                    Content="به روزرسانی" 
+                    VerticalAlignment="Bottom" 
+                    Grid.Column="0"
+                    Command="{Binding UpdateArticleInfoCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                  />
+                  <Button 
+                    Content="حذف" 
+                    VerticalAlignment="Bottom" 
+                    Grid.Column="1"
+                    Command="{Binding RemoveArticleCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                  />
                 </Grid>
-              </Border>
+              </Grid>
               <!--View List of articles-->
-              <Border
-                Grid.Row="0"
-                Grid.Column="1"
-                Padding="5">
-                <Grid>
-                  <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                  </Grid.RowDefinitions>
-                  <TextBlock Text="لیست کالاهای تعریف شده" Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold"/>
-                  <ListView 
-                    ItemsSource="{Binding ListofArticles}"
+              <Grid 
+                  Grid.Row="0"
+                  Grid.Column="1">
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                  <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="لیست کالاهای تعریف شده" Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold"/>
+                <ListView 
+                    ItemsSource="{Binding ListofArticles, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
                     SelectedItem="{Binding SelectedArticle , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
                     Grid.Row="1">
-                    <i:Interaction.Triggers>
-                      <i:EventTrigger EventName="SelectionChanged">
-                        <i:InvokeCommandAction Command="{Binding ArticleSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
-                          <i:InvokeCommandAction.EventArgsConverterParameter>
-                            <MultiBinding Converter="{StaticResource MultiParameter}">
-                              <Binding RelativeSource="{RelativeSource Mode=FindAncestor , AncestorType={x:Type vm:ArticleViewModel}}"/>
-                            </MultiBinding>
-                          </i:InvokeCommandAction.EventArgsConverterParameter>
-                        </i:InvokeCommandAction>
-                      </i:EventTrigger>
-                    </i:Interaction.Triggers>
-                    <ListView.ItemTemplate>
-                      <DataTemplate>
-                        <TextBlock Text="{Binding Name}"/>
-                      </DataTemplate>
-                    </ListView.ItemTemplate>
-                  </ListView>
-                </Grid>
-              </Border>
+                  <i:Interaction.Triggers>
+                    <i:EventTrigger EventName="SelectionChanged">
+                      <i:InvokeCommandAction Command="{Binding ArticleSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
+                        <i:InvokeCommandAction.EventArgsConverterParameter>
+                          <MultiBinding Converter="{StaticResource MultiParameter}">
+                            <Binding RelativeSource="{RelativeSource Mode=FindAncestor , AncestorType={x:Type vm:ArticleViewModel}}"/>
+                          </MultiBinding>
+                        </i:InvokeCommandAction.EventArgsConverterParameter>
+                      </i:InvokeCommandAction>
+                    </i:EventTrigger>
+                  </i:Interaction.Triggers>
+                  <ListView.ItemTemplate>
+                    <DataTemplate>
+                      <TextBlock Text="{Binding Name , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"/>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
+              </Grid>
             </Grid>
           </Border>
         </ControlTemplate>

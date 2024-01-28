@@ -6,6 +6,9 @@
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:ReportViewModel}">
           <Border Padding="5">
+            <Border.DataContext>
+              <vm:ReportViewModel/>
+            </Border.DataContext>
             <Grid FlowDirection="RightToLeft">
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -19,8 +22,30 @@
               <Border Grid.Column="0"
                       Grid.ColumnSpan="3"
                       Grid.Row="0"
-                      Padding="5">
-                <ListView ItemsSource="{Binding PriceList}"/>
+                      Padding="5"
+                      BorderBrush="Transparent">
+                <ListView ItemsSource="{Binding PriceList}">
+                  <ListView.ItemTemplate>
+                    <DataTemplate>
+                      <Border Padding="5"
+                              BorderBrush="Transparent">
+                        <StackPanel>
+                          <TextBlock Text="{Binding ArticleName}"/>
+                          <ListView ItemsSource="{Binding Providers}" BorderBrush="Transparent">
+                            <ListView.ItemTemplate>
+                              <DataTemplate>
+                                <StackPanel>
+                                  <TextBlock Text="{Binding ProviderName}"/>
+                                  <TextBlock Text="{Binding ProviderPrice , StringFormat='###,0'}"/>
+                                </StackPanel>
+                              </DataTemplate>
+                            </ListView.ItemTemplate>
+                          </ListView>
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ListView.ItemTemplate>
+                </ListView>
               </Border>
               <Button Content="خروجی اکسل" 
                       Grid.Row="1" 

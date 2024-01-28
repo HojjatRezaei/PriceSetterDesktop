@@ -16,20 +16,65 @@
             var val = (bool)value;
             if (val)
             {
-                return "آدرس سایت ثبت شده";
+                var txt = (string)parameter;
+                if(txt != null && txt == "URL")
+                {
+                    return "آدرس سایت ثبت شده";
+                }
+                else if (txt != null && txt == "XPath")
+                {
+                    return "آدرس منبع ثبت شده";
+                }
+                else
+                {
+                    return "";
+                }
             }
             else
             {
-                return "آدرس سایت ثبت نشده";
+                var txt = (string)parameter;
+                if (txt != null && txt == "URL")
+                {
+                    return "آدرس سایت مشخص نشده";
+                }
+                else if (txt != null && txt == "XPath")
+                {
+                    return "آدرس منبع جهت استخراج مشخص نشده";
+                }
+                else
+                {
+                    return "";
+                }
             }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             string val = (string)value;
-            if(val == "آدرس سایت ثبت شده")
+            var txt = (string)parameter;
+            if(txt!= null && txt == "URL")
             {
-                return true;
+                if (val == "آدرس سایت ثبت شده")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
+            }
+            else if (txt != null && txt == "XPath")
+            {
+                if (val == "آدرس منبع ثبت شده")
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+
             }
             else
             {
