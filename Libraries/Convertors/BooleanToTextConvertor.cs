@@ -17,13 +17,13 @@
             if (val)
             {
                 var txt = (string)parameter;
-                if(txt != null && txt == "URL")
+                if (txt is not null and "URL")
                 {
                     return "آدرس سایت ثبت شده";
                 }
-                else if (txt != null && txt == "XPath")
+                else if (txt is not null and "XPath")
                 {
-                    return "آدرس منبع ثبت شده";
+                    return "آدرس منابع ثبت شده";
                 }
                 else
                 {
@@ -33,11 +33,11 @@
             else
             {
                 var txt = (string)parameter;
-                if (txt != null && txt == "URL")
+                if (txt is not null and "URL")
                 {
                     return "آدرس سایت مشخص نشده";
                 }
-                else if (txt != null && txt == "XPath")
+                else if (txt is not null and "XPath")
                 {
                     return "آدرس منبع جهت استخراج مشخص نشده";
                 }
@@ -52,7 +52,7 @@
         {
             string val = (string)value;
             var txt = (string)parameter;
-            if(txt!= null && txt == "URL")
+            if (txt is not null and "URL")
             {
                 if (val == "آدرس سایت ثبت شده")
                 {
@@ -64,9 +64,9 @@
                 }
 
             }
-            else if (txt != null && txt == "XPath")
+            else if (txt is not null and "XPath")
             {
-                if (val == "آدرس منبع ثبت شده")
+                if (val == "آدرس منابع ثبت شده")
                 {
                     return true;
                 }

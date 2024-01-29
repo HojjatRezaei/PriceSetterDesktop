@@ -10,6 +10,6 @@
         Height="450"
         Width="800">
     <Grid>
-    <vm:DashboardViewModel/>
+    <vm:XPathCollectionViewModel/>
   </Grid>
 </Window>

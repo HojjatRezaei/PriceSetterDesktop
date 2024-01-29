@@ -7,10 +7,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:ArticleViewModel}">
-          <Border Padding="10" FlowDirection="RightToLeft">
-            <Border.DataContext>
-              <vm:ArticleViewModel x:Name="ArticleViewModel"/>
-            </Border.DataContext>
+          <Border Padding="10" FlowDirection="RightToLeft" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
             <!--Main Container-->
             <Grid>
               <Grid.ColumnDefinitions>
@@ -54,7 +51,7 @@
                    Grid.Row="0"
                    Grid.Column="2"
                    Command="{Binding SubmitArticleInfoCommand}"
-                   CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                  />
                 <!--Provider / URL / XPath / Click Path -->
                 
@@ -83,26 +80,14 @@
                      Grid.Row="1" 
                      Grid.Column="1" 
                      Grid.ColumnSpan="3"
-                     TextWrapping="Wrap"
+                     TextWrapping="NoWrap"
                      FlowDirection="LeftToRight"/>
                   <Button Content="منابع قابل استخراج" 
                          Grid.Row="2" 
                          Grid.Column="0" 
                          Grid.ColumnSpan="3"
                          Command="{Binding GotoXPathCollection}"
-                         CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
-                  <TextBlock 
-                     Text="آدرس رنگ های موجود : " 
-                     Grid.Row="3" 
-                     Grid.Column="0"
-                   Margin="0,5,10,0"/>
-                  <TextBox 
-                     Text="{Binding CurrentURL.ColorContainerXPath}" 
-                     Grid.Row="3" 
-                     Grid.Column="1"
-                   Margin="0,5,0,0"
-                   TextWrapping="Wrap"
-                   FlowDirection="LeftToRight"/>
+                         CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 </Grid>
                 
                 <!--Provider Lists-->
@@ -120,7 +105,7 @@
                       <i:InvokeCommandAction Command="{Binding ProviderSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
                         <i:InvokeCommandAction.EventArgsConverterParameter>
                           <MultiBinding Converter="{StaticResource MultiParameter}">
-                            <Binding Source="{x:Reference ArticleViewModel}"/>
+                            <Binding RelativeSource="{RelativeSource TemplatedParent}"/>
                           </MultiBinding>
                         </i:InvokeCommandAction.EventArgsConverterParameter>
                       </i:InvokeCommandAction>
@@ -149,8 +134,8 @@
                             </TextBlock.Style>
                           </TextBlock>
                           <TextBlock 
-                         Text="{Binding HaveXpath , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='XPath'}" 
-                         Tag="{Binding HaveXpath}">
+                         Text="{Binding HaveXPathCollection , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='XPath'}" 
+                         Tag="{Binding HaveXPathCollection}">
                             <TextBlock.Style>
                               <Style TargetType="{x:Type TextBlock}">
                                 <Style.Triggers>
@@ -166,7 +151,6 @@
                           </TextBlock>
                         </StackPanel>
                       </Border>
-
                     </DataTemplate>
                   </ComboBox.ItemTemplate>
                 </ComboBox>
@@ -175,7 +159,7 @@
                      Grid.Row="3"
                      Grid.Column="2"
                      Command="{Binding GotoPrivdersPageCommand}"
-                     CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                     CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                  Margin="0,10,0,0"/>
                 <ListView 
                  ItemsSource="{Binding UnSetterProvider}" 
@@ -203,14 +187,14 @@
                    VerticalAlignment="Bottom" 
                    Grid.Column="0"
                    Command="{Binding UpdateArticleInfoCommand}"
-                   CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                  />
                   <Button 
                    Content="حذف" 
                    VerticalAlignment="Bottom" 
                    Grid.Column="1"
                    Command="{Binding RemoveArticleCommand}"
-                   CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"
+                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                  />
                 </Grid>
                 
@@ -238,7 +222,7 @@
                       <i:InvokeCommandAction Command="{Binding ArticleSelectionChanged}" PassEventArgsToCommand="True" EventArgsConverter="{StaticResource EventParameterMerge}">
                         <i:InvokeCommandAction.EventArgsConverterParameter>
                           <MultiBinding Converter="{StaticResource MultiParameter}">
-                            <Binding Source="{x:Reference ArticleViewModel}"/>
+                            <Binding RelativeSource="{RelativeSource TemplatedParent}"/>
                           </MultiBinding>
                         </i:InvokeCommandAction.EventArgsConverterParameter>
                       </i:InvokeCommandAction>

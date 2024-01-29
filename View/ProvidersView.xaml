@@ -5,13 +5,12 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:ProvidersViewModel}">
-          <Border Padding="10">
-            <Border.DataContext>
-              <vm:ProvidersViewModel/>
-            </Border.DataContext>
+          <Border Padding="10" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
             <Grid>
               <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
               </Grid.ColumnDefinitions>
               <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
@@ -19,9 +18,18 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
               </Grid.RowDefinitions>
-              <TextBlock Text="نام تامین کننده" Grid.Row="0"/>
+              <TextBlock Text="نام تامین کننده" Grid.Row="0" Grid.Column="0"/>
               <TextBox Text="{Binding CurrentProvider.Name}"
-                       Grid.Row="1" Margin="0,5"/>
+                       Grid.Row="0" 
+                       Margin="0,5"
+                       Grid.Column="1"/>
+              <Button Content="اضافه کردن" 
+                      Grid.Row="0"
+                      Grid.Column="2"
+                      Command="{Binding SubmitNewProviderCommand}"
+                      CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+                
+              </Button>
               <Grid Grid.Row="2" FlowDirection="RightToLeft">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*"/>
@@ -31,15 +39,15 @@
                 <Button Content="ثبت" 
                         Grid.Column="0"
                         Command="{Binding SubmitProviderInfoCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 <Button Content="به روزرسانی" 
                         Grid.Column="1"
                         Command="{Binding UpdateProviderInfoCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 <Button Content="حذف" 
                         Grid.Column="2"
                         Command="{Binding RemoveProviderInfoCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
               </Grid>
               <Border Grid.Row="3"
                       Padding="0,10,0,0">

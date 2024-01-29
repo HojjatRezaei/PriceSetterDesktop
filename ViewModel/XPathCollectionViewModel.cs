@@ -1,11 +1,11 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types;
+    using PriceSetterDesktop.Libraries.Types.Data;
+    using PriceSetterDesktop.Libraries.Types.Interaction;
     using System.Windows;
     using System.Windows.Input;
     using WPFCollection.Data.List;
-    using WPFCollection.Data.Types;
     using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
 
@@ -51,9 +51,7 @@
                 MessageBox.Show("کد کالا/تامین کننده منبع خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<XPathItem>(nameof(XPathItem));
-            tb.Add(CurrentXPath);
+            _xPathTable.Add(CurrentXPath);
             UpdateList();
             CurrentXPath.XpathType = string.Empty;
             CurrentXPath.XPath = string.Empty;
@@ -71,9 +69,7 @@
                 MessageBox.Show("منبعی جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<XPathItem>(nameof(XPathItem));
-            tb.Update(XPathSelection.ElementSeed,CurrentXPath);
+            _xPathTable.Update(XPathSelection.ElementSeed,CurrentXPath);
             CurrentXPath.XpathType = string.Empty;
             CurrentXPath.XPath = string.Empty;
             UpdateList();
@@ -86,17 +82,13 @@
                 MessageBox.Show("آدرسی برای حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<XPathItem>(nameof(XPathItem));
-            tb.Remove(XPathSelection.ElementSeed);
+            _xPathTable.Remove(XPathSelection.ElementSeed);
             UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdateList()
         {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<XPathItem>(nameof(XPathItem));
-            XPathCollectionList = tb.List.Where(x=> x.ArticleID == CurrentXPath.ArticleID).ToList();
+            XPathCollectionList = _xPathTable.List.Where(x=> x.ArticleID == CurrentXPath.ArticleID && x.ProviderID == CurrentXPath.ProviderID).ToList();
         }
 
         private XPathItem _xPathSelection=new();

@@ -1,7 +1,8 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types;
+    using PriceSetterDesktop.Libraries.Types.Data;
+    using PriceSetterDesktop.Libraries.Types.Interaction;
     using System.Diagnostics.Eventing.Reader;
     using System.Reflection;
     using System.Windows;
@@ -140,7 +141,7 @@
                 }
                 else
                 {
-                    if(CurrentURL.XPathCollection != null || CurrentURL.URL != string.Empty)
+                    if(CurrentURL.URL != string.Empty)
                     {
                         //add information for xpath and url to the table
                         var newURL = CurrentURL;
@@ -218,8 +219,6 @@
                 if(selectedURl != null)
                 {
                     url = selectedURl.URL;
-                    xpathCollection = selectedURl.XPathCollection;
-                    clickPath = selectedURl.ColorContainerXPath;
                 }
 
                 return new ProviderView()
@@ -276,8 +275,6 @@
                     ArticleID = SelectedArticle.ElementSeed,
                     ProviderID = selection.ElementSeed,
                     URL = searchResult.URL,
-                    XPathCollection = searchResult.XPathCollection,
-                    ColorContainerXPath = searchResult.ColorContainerXPath,
                     ElementSeed = searchResult.ElementSeed
                 };
             }

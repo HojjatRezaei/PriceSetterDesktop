@@ -7,10 +7,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:DashboardViewModel}">
-          <Border Padding="0,5,0,0">
-            <Border.DataContext>
-              <vm:DashboardViewModel/>
-            </Border.DataContext>
+          <Border Padding="0,5,0,0" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -23,10 +20,10 @@
               <StackPanel Grid.Column="1" Grid.Row="0">
                 <Button Content="تعریف کالا" 
                         Command="{Binding GotoCreateArticlePage}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 <Button Content="گزارش گیری"
                         Command="{Binding GotoReportPage}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource Self} , Path=DataContext}"/>
+                        CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
               </StackPanel>
               <!--Actual Content-->
               <Border Padding="5" Grid.Row="0" Grid.Column="0">

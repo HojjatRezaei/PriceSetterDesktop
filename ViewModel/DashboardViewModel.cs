@@ -1,7 +1,7 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types;
+    using PriceSetterDesktop.Libraries.Types.Data;
     using System.Windows.Input;
     using WPFCollection.Style.Base;
 
@@ -15,7 +15,6 @@
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<Provider>(nameof(Provider));
             db.CreateTable<Prices>(nameof(Prices));
-            db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
         }
         private object _currentContent;

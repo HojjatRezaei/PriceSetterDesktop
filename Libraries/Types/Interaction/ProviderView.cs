@@ -1,6 +1,7 @@
-﻿namespace PriceSetterDesktop.Libraries.Types
+﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
     using System.Collections.Generic;
+    using PriceSetterDesktop.Libraries.Types.Data;
 
     public class ProviderView
     {

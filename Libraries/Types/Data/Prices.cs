@@ -1,39 +1,38 @@
-﻿namespace PriceSetterDesktop.Libraries.Types
+﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
-    using PriceSetterDesktop.Libraries.Statics;
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
     using System.Xml;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
-
-    [XmlMarker(nameof(Provider))]
-    public partial class Provider : IGeneratable, IXmlItem
+    [XmlMarker(nameof(Prices))]
+    public partial class Prices : IGeneratable, IXmlItem
     {
-        public Provider()
+        public Prices()
         {
-            
+
         }
-        [XmlItem(nameof(Name), "string")]
-        public string Name { get; set; } = "";
-        public IEnumerable<Prices> Prices
-        {
-            get
-            {
-                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<Prices>(nameof(Prices));
-                return tb.List.Where(x => x.ProviderID == ElementSeed);
-            }
-        }
+        [XmlItem(nameof(Date), "DateTime")]
+        public DateTime Date { get; set; }
+        [XmlItem(nameof(Price), "double")]
+        public double Price { get; set; }
+        [XmlItem(nameof(ProviderID), "int")]
+        public int ProviderID { get; set; }
+        [XmlItem(nameof(ArticleID), "int")]
+        public int ArticleID { get; set; }
         public int ElementSeed { get; set; }
 
         public IXmlItem CreateObject()
         {
-            return (IXmlItem)this;
+            return this;
         }
 
         public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
         {
-            var newObject = new Provider();
+            var newObject = new Prices();
             foreach (XmlNode node in nodeList)
             {
                 var searchProperty = newObject.GetType().GetProperty(node.Name);
@@ -53,19 +52,22 @@
         }
         public override bool Equals(object? obj)
         {
-            var CompareObject = obj as Provider;
+            var CompareObject = obj as Prices;
             if (CompareObject == null)
                 return false;
-            return Name == CompareObject.Name;
+            return Date == CompareObject.Date &&
+                   Price == CompareObject.Price &&
+                   ProviderID == CompareObject.ProviderID &&
+                   ArticleID == CompareObject.ArticleID;
         }
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name);
+            return HashCode.Combine(Date, Price, ProviderID, ArticleID);
         }
         public override string ToString()
         {
-            return $"{Name}";
+            return $"{Date} / {Price}";
         }
     }
 }

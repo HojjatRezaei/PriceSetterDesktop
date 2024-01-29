@@ -1,4 +1,4 @@
-﻿namespace PriceSetterDesktop.Libraries.Types
+﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using PriceSetterDesktop.Libraries.Statics;
     using System;
@@ -24,12 +24,12 @@
 
         [XmlItem(nameof(Name), "string")]
         public string Name
-        { 
+        {
             get => _name;
-            set 
-            { 
+            set
+            {
                 _name = value;
-                PropertyCall(); 
+                PropertyCall();
             }
         }
         public IEnumerable<Prices> Prices

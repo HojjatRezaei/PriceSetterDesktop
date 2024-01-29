@@ -1,7 +1,7 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types;
+    using PriceSetterDesktop.Libraries.Types.Data;
     using System.Windows;
     using System.Windows.Input;
     using WPFCollection.Data.List;
@@ -15,6 +15,7 @@
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             UpdateProviderList();
+            Closed += ProvidersViewModel_ChildExit;
         }
 
         private void ProvidersViewModel_ChildExit(bool CloseState = true)

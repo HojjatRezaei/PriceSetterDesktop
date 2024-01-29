@@ -1,10 +1,11 @@
-﻿namespace PriceSetterDesktop.Libraries.Types
+﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
+    using PriceSetterDesktop.Libraries.Types.Enum;
     using System;
 
     public class ColorCollection
     {
-        private readonly string[] colorNameCollection = 
+        private readonly string[] colorNameCollection =
             [
                 "مشکی",
                 "سیاه",
@@ -27,16 +28,16 @@
                 if (item != null && item.Contains(articleName))
                     searchResult = articleName;
             }
-            ColorCollection? ins=default;
-            switch (searchResult) 
+            ColorCollection? ins = default;
+            switch (searchResult)
             {
-                case "مشکی"or "سیاه"or "Black":
+                case "مشکی" or "سیاه" or "Black":
                     ins = new ColorCollection(ColorList.Black);
                     ColorNames = ins.ColorNames;
                     ColorRGBs = ins.ColorRGBs;
                     ColorHEXs = ins.ColorHEXs;
                     break;
-                case "صورتی"or "Pink":
+                case "صورتی" or "Pink":
                     ins = new ColorCollection(ColorList.Pink);
                     ColorNames = ins.ColorNames;
                     ColorRGBs = ins.ColorRGBs;
@@ -78,7 +79,7 @@
             switch (colorEnum)
             {
                 case ColorList.Black:
-                    ColorNames = ["مشکی" , "سیاه" , "Black"];
+                    ColorNames = ["مشکی", "سیاه", "Black"];
                     ColorRGBs = ["rgb(33, 33, 33)", "rgb(26, 26, 26)"];
                     ColorHEXs = [""];
                     break;
@@ -89,7 +90,7 @@
                     break;
                 case ColorList.Blue:
                     ColorNames = ["ابی", "آبی", "Blue"];
-                    ColorRGBs = ["rgb(0, 108, 240)" , "rgb(33, 150, 243)"];
+                    ColorRGBs = ["rgb(0, 108, 240)", "rgb(33, 150, 243)"];
                     ColorHEXs = [""];
                     break;
                 case ColorList.Green:
@@ -118,13 +119,5 @@
         public string[] ColorRGBs { get; set; }
         public string[] ColorHEXs { get; set; }
     }
-    public enum ColorList
-    {
-        Black = 0 ,
-        Pink = 1 , 
-        Blue = 2 ,
-        Green = 3 ,
-        Yellow = 4 , 
-        White = 5,
-    }
+
 }

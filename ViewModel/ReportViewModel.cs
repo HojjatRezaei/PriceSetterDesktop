@@ -11,6 +11,7 @@
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.UI;
     using WPFCollection.Network.Error;
+    using PriceSetterDesktop.Libraries.Types.Data;
 
     public class ReportViewModel : BaseControl
     {
@@ -21,74 +22,74 @@
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             _urlTypeTable = _dataBase.GetTable<URLType>(nameof(URLType));
             //create visual elements for debugging
-//#if DEBUG
-//            PriceList =
-//            [
-//                new CollectionView() 
-//                {
-//                    ArticleName = "گوشی ایفون مدل اپل برای تست",
-//                    Providers =
-//                    [
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "مشکل در پیدا کردن قیمت",
-//                            IsValid = true,
-//                            ProviderName = "دیجی کالا",
-//                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-//                        },
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "این یه ارور نیست",
-//                            IsValid = false,
-//                            ProviderName = "ایرانسل",
-//                            ProviderPrice = "34,555,999"
-//                        },
-//                    ]
-//                },
-//                new CollectionView()
-//                {
-//                    ArticleName = "گوشی ایفون مدل اپل برای تست2",
-//                    Providers =
-//                    [
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "مشکل در پیدا کردن قیمت",
-//                            IsValid = true,
-//                            ProviderName = "دیجی کالا",
-//                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-//                        },
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "این یه ارور نیست",
-//                            IsValid = false,
-//                            ProviderName = "ایرانسل",
-//                            ProviderPrice = "34,555,999"
-//                        },
-//                    ]
-//                },
-//                new CollectionView()
-//                {
-//                    ArticleName = "گوشی ایفون مدل اپل برای تست3",
-//                    Providers =
-//                    [
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "مشکل در پیدا کردن قیمت",
-//                            IsValid = true,
-//                            ProviderName = "دیجی کالا",
-//                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-//                        },
-//                        new ProviderView()
-//                        {
-//                            ErrorText = "این یه ارور نیست",
-//                            IsValid = false,
-//                            ProviderName = "ایرانسل",
-//                            ProviderPrice = "34,555,999"
-//                        },
-//                    ]
-//                },
-//            ];
-//#endif
+            //#if DEBUG
+            //            PriceList =
+            //            [
+            //                new CollectionView() 
+            //                {
+            //                    ArticleName = "گوشی ایفون مدل اپل برای تست",
+            //                    Providers =
+            //                    [
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "مشکل در پیدا کردن قیمت",
+            //                            IsValid = true,
+            //                            ProviderName = "دیجی کالا",
+            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
+            //                        },
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "این یه ارور نیست",
+            //                            IsValid = false,
+            //                            ProviderName = "ایرانسل",
+            //                            ProviderPrice = "34,555,999"
+            //                        },
+            //                    ]
+            //                },
+            //                new CollectionView()
+            //                {
+            //                    ArticleName = "گوشی ایفون مدل اپل برای تست2",
+            //                    Providers =
+            //                    [
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "مشکل در پیدا کردن قیمت",
+            //                            IsValid = true,
+            //                            ProviderName = "دیجی کالا",
+            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
+            //                        },
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "این یه ارور نیست",
+            //                            IsValid = false,
+            //                            ProviderName = "ایرانسل",
+            //                            ProviderPrice = "34,555,999"
+            //                        },
+            //                    ]
+            //                },
+            //                new CollectionView()
+            //                {
+            //                    ArticleName = "گوشی ایفون مدل اپل برای تست3",
+            //                    Providers =
+            //                    [
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "مشکل در پیدا کردن قیمت",
+            //                            IsValid = true,
+            //                            ProviderName = "دیجی کالا",
+            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
+            //                        },
+            //                        new ProviderView()
+            //                        {
+            //                            ErrorText = "این یه ارور نیست",
+            //                            IsValid = false,
+            //                            ProviderName = "ایرانسل",
+            //                            ProviderPrice = "34,555,999"
+            //                        },
+            //                    ]
+            //                },
+            //            ];
+            //#endif
         }
 
         public ViewCollection<CollectionView> PriceList
@@ -98,26 +99,26 @@
         public ICommand UpdatePricesCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.UpdatePricesCommandHandler(); }, (object parameter) => { return true; });
         public ICommand RetryScrap { get; set; } = new FastCommand
-            ((object parameter) => 
+            ((object parameter) =>
             {
                 object[] pars = (object[])parameter;
                 ReportViewModel model = (ReportViewModel)pars[0];
                 var prop = pars[1].GetType().GetProperty("DataContext");
-                model.RetryScrapHandler((ProviderView)pars[1] , model);
+                model.RetryScrapHandler((ProviderView)pars[1], model);
             }, (object parameter) => { return true; });
 
-        private void RetryScrapHandler(ProviderView provider , ReportViewModel vm)
+        private void RetryScrapHandler(ProviderView provider, ReportViewModel vm)
         {
             //import pricelist to local variable
             List<CollectionView> importedList = PriceList.ToList();
             //search for editable object in PriceList
             var collectionViewSearchResult = PriceList.FirstOrDefault(x => x.ArticleID == provider.ArticleID);
-            if(collectionViewSearchResult != null)
+            if (collectionViewSearchResult != null)
             {
                 var collectionViewIndex = PriceList.IndexOf(collectionViewSearchResult);
                 //search for provider object in articleSearchResult ProviderList
                 var providerSearchResult = collectionViewSearchResult.Providers.FirstOrDefault(y => y.ProviderID == provider.ProviderID);
-                if(providerSearchResult != null)
+                if (providerSearchResult != null)
                 {
                     var providerIndex = collectionViewSearchResult.Providers.IndexOf(providerSearchResult);
                     //try to scrap again
@@ -139,7 +140,7 @@
         {
 
         }
-        
+
         private void UpdatePricesCommandHandler()
         {
             ChromeOptions chromeOption = new();
@@ -152,7 +153,7 @@
                 {
                     ArticleName = x.Name,
                     ArticleID = x.ElementSeed,
-                    Providers = _urlTypeTable.List.Where(y => y.ArticleID == x.ElementSeed).Select((i) => 
+                    Providers = _urlTypeTable.List.Where(y => y.ArticleID == x.ElementSeed).Select((i) =>
                     {
                         return CreateProvider(i, chromeDrive);
                     }).ToList(),
@@ -161,10 +162,10 @@
             PriceList = priceList;
             chromeDrive.Quit();
         }
-        private ProviderView CreateProvider(URLType urlObject , WebDriver? drive = null)
+        private ProviderView CreateProvider(URLType urlObject, WebDriver? drive = null)
         {
             WebDriver chromeDrive;
-            if(drive == null)
+            if (drive == null)
             {
                 ChromeOptions chromeOption = new();
                 chromeOption.AddArgument("--start-maximized");
