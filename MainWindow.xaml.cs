@@ -17,9 +17,9 @@
     /// <summary>
     /// Interaction logic for PeekWindow.xaml
     /// </summary>
-    public partial class PeekWindow : Window
+    public partial class MainWindow : Window
     {
-        public PeekWindow()
+        public MainWindow()
         {
             InitializeComponent();
         }

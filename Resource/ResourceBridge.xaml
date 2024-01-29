@@ -6,5 +6,6 @@
     <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/View/Dashboard.xaml"/>
     <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/View/ProvidersView.xaml"/>
     <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/View/ReportView.xaml"/>
+    <ResourceDictionary Source="pack://application:,,,/PriceSetterDesktop;component/View/XPathCollectionView.xaml"/>
   </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

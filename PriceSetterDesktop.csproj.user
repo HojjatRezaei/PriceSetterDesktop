@@ -7,12 +7,12 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="PeekWindow.xaml.cs">
+    <Compile Update="MainWindow.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="PeekWindow.xaml">
+    <Page Update="MainWindow.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Resource\ResourceBridge.xaml">
@@ -40,6 +40,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="View\ReportView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\XPathCollectionView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

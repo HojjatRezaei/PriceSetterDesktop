@@ -27,23 +27,22 @@
             
         }
         [XmlItem(nameof(URL), "string")]
-        public string URL { get; set; }
-        [XmlItem(nameof(XPath), "string")]
-        public string XPath { get; set; }
-        [XmlItem(nameof(ClickPath) , "string")]
-        public string ClickPath { get; set; }
+        public string URL { get; set; } = "";
+        [XmlItem(nameof(ColorContainerXPath), "string")]
+        public string ColorContainerXPath { get; set; } = "";
         [XmlItem(nameof(ProviderID), "int")]
-        public int ProviderID { get; set; }
+        public int ProviderID { get; set; } = -1;
         [XmlItem(nameof(ArticleID), "int")]
-        public int ArticleID { get; set; }
-        public int ElementSeed { get; set; }
+        public int ArticleID { get; set; } = -1;
+        public List<XPathItem> XPathCollection { get; set; } = [];
+        public int ElementSeed { get; set; } = -1;
 
-        public double GetPriceFromWeb(WebDriver driver)
+        public string GetPriceFromWeb(WebDriver driver)
         {
-            if (URL == string.Empty || XPath == string.Empty)
-                return 0;
+            if (URL == string.Empty || XPathCollection == null)
+                return "عدم اطلاعات کافی";
             IWebElement? clickElement=null;
-            IWebElement? price=null;
+            IWebElement? resourceElement=null;
             driver.Navigate().GoToUrl(URL);
             //section of waiting for DOM TO load currectly 
             WebDriverWait wait = new(driver, new(0, 0, 20));
@@ -51,45 +50,67 @@
             IJavaScriptExecutor scripter = driver;
             try
             {
-                _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{XPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
+                _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{XPathCollection[0].XPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
             }
             catch (Exception e)
             {
                 ErrorManager.SendError(e);
-                return -1;
-                throw;
+                return $"مشکل در سایت {GetProviderName()}";
             }
-            if (!string.IsNullOrEmpty(ClickPath))
+            if (!string.IsNullOrEmpty(ColorContainerXPath))
             {
-                _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
-            }
-            try
-            {
-                if(!string.IsNullOrEmpty(ClickPath))
-                    clickElement = driver.FindElement(By.XPath(ClickPath));
-                if (!string.IsNullOrEmpty(XPath))
-                    price = driver.FindElement(By.XPath(XPath));
-            }
-            catch (Exception e)
-            {
-                ErrorManager.SendError(e);
-                return -1;
+
+                try
+                {
+                    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ColorContainerXPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
+                    ////try to find color from article name
+                    //var articleName = GetArticleName();
+                    //var articleColor = GetArticleColorFromName();
+                    //if (string.IsNullOrEmpty(articleName))
+                    //{
+                    //    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
+                    //}
+                    //else
+                    //{
+                    //    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
+                    //    //مشکی ، سفید ، صورتی ، سبز ، آبی
+                    //    //extract button color
+                    //    var colorCode = scripter.ExecuteScript($"document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.style['background-color']");
+                    //    if(colorCode == null)
+                    //    {
+                    //        return "مشکل در پیدا کردن رنگ مربوطه";
+                    //    }
+                    //    else
+                    //    {
+                    //        //detect color
+
+                    //    }
+                    //}
+
+                }
+                catch (Exception e)
+                {
+                    ErrorManager.SendError(e);
+                    return "مشکل در پیدا کردن رنگ مربوطه";
+                }
+
             }
             clickElement?.Click();
             Thread.Sleep(1000);
             try
             {
-                if (price == null)
-                    return -1;
+
+                if (resourceElement == null)
+                    return "مشکل در پیدا کردن منبع قیمت";
                 //replace persian number with english numbers
-                var ConvertableTxt = price.Text.CorrectPersianNumber().RemoveWords();
+                var ConvertableTxt = resourceElement.Text.CorrectPersianNumber().RemoveWords();
                 _ = double.TryParse(ConvertableTxt, out double foundedPrice);
-                return foundedPrice;
+                return $"{foundedPrice}";
             }
             catch (Exception e)
             {
                 ErrorManager.SendError(e);
-                return -1;
+                return "مشکل در پیدا کردن قیمت در سایت";
             }
         }
         public string GetProviderName()
@@ -101,11 +122,25 @@
                 return "";
             return result.Name;
         }
+        public string GetArticleName()
+        {
+            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
+            var tb = db.GetTable<Article>(nameof(Article));
+            var result = tb.List.FirstOrDefault(x => x.ElementSeed == ArticleID);
+            if (result == null)
+                return "";
+            return result.Name;
+        }
+        public ColorCollection GetArticleColorFromName()
+        {
+            var name = GetArticleName();
+            ColorCollection colorIns = new ColorCollection(name);
+            return colorIns;
+        }
         public IXmlItem CreateObject()
         {
             return (IXmlItem)this;
         }
-
         public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
         {
             var newObject = new URLType();
@@ -130,18 +165,18 @@
         {
             return obj is URLType newObject &&
                    URL == newObject.URL &&
-                   XPath == newObject.XPath &&
+                   XPathCollection == newObject.XPathCollection &&
                    ProviderID == newObject.ProviderID &&
-                   ArticleID == newObject.ArticleID;
+                   ArticleID == newObject.ArticleID &&
+                   ColorContainerXPath == newObject.ColorContainerXPath;
         }
-
         public override int GetHashCode()
         {
-            return HashCode.Combine(URL, XPath, ProviderID, ArticleID);
+            return HashCode.Combine(URL, XPathCollection, ProviderID, ArticleID , ColorContainerXPath);
         }
         public override string ToString()
         {
-            return $"{URL} ==> {XPath}";
+            return $"{URL}";
         }
     }
 }

@@ -15,6 +15,7 @@
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<Provider>(nameof(Provider));
             db.CreateTable<Prices>(nameof(Prices));
+            db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
         }
         private object _currentContent;

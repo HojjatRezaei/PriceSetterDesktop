@@ -15,7 +15,6 @@
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             UpdateProviderList();
-            Closed += ProvidersViewModel_ChildExit;
         }
 
         private void ProvidersViewModel_ChildExit(bool CloseState = true)

@@ -5,7 +5,5 @@
     {
         public static XmlManager XMLData { get; set; } = new();
         public static string XMLDataBaseName { get; set; } = "appDataXML";
-
-
     }
 }

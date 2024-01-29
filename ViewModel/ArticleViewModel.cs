@@ -2,6 +2,7 @@
 {
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types;
+    using System.Diagnostics.Eventing.Reader;
     using System.Reflection;
     using System.Windows;
     using System.Windows.Controls;
@@ -24,6 +25,12 @@
             UpdateProviderList();
         }
 
+
+        private string _currentXPath;
+        public string CurrentXPath
+        { get => _currentXPath; set { _currentXPath = value; PropertyCall(); } }
+        public ViewCollection<ProviderView> UnSetterProvider
+        { get => _unSetterProvider; set { _unSetterProvider = value; PropertyCall(); } }
         public Article CurrentArticle
         { 
             get => _currentArticle; 
@@ -58,10 +65,19 @@
                 ArticleViewModel model = (ArticleViewModel)((object[])parameter)[1];
                 model.ArticleSelectionChangedHandler((SelectionChangedEventArgs)((object[])parameter)[0]);
             }, (object parameter) => { return true; });
+        public ICommand GotoXPathCollection { get; set; } = new FastCommand
+            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.GotoXPathCollectionHandler(); }, (object parameter) => { return true; });
 
-        /// <summary>
-        /// add new article to the list
-        /// </summary>
+        private async void GotoXPathCollectionHandler()
+        {
+            if (SelectedArticle == null || SelectedProvider == null)
+            {
+                MessageBox.Show("کالا/تامین انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            var dialog = new XPathCollectionViewModel(SelectedArticle , SelectedProvider);
+            _ = await dialog.LoadDialog(dialog);
+        }
         private void SubmitArticleInfoCommandHandler()
         {
             var newItem = CurrentArticle;
@@ -71,18 +87,12 @@
             UpdateArticleList();
             CurrentArticle = new();
         }
-        /// <summary>
-        /// 
-        /// </summary>
         private async void GotoProvidersPageCommandHandler()
         {
             var dialog = new ProvidersViewModel();
             _ = await dialog.LoadDialog(dialog);
             UpdateProviderList();
         }
-        /// <summary>
-        /// 
-        /// </summary>
         private void UpdateArticleInfoCommandHandler()
         {
             if (SelectedArticle == null)
@@ -130,7 +140,7 @@
                 }
                 else
                 {
-                    if(CurrentURL.XPath != string.Empty || CurrentURL.URL != string.Empty)
+                    if(CurrentURL.XPathCollection != null || CurrentURL.URL != string.Empty)
                     {
                         //add information for xpath and url to the table
                         var newURL = CurrentURL;
@@ -142,12 +152,9 @@
             }
             //check if any value have changed
             CurrentURL = new();
-            UpdateProviderList();
+            UpdateProviderList(SelectedArticle);
             MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        /// <summary>
-        /// 
-        /// </summary>
         private void RemoveArticleCommandHandler()
         {
             //check if any article is selected
@@ -176,50 +183,56 @@
             }
             UpdateArticleList();
         }
-        /// <summary>
-        /// Update <see cref="ListofArticles"/>
-        /// </summary>
         private void UpdateArticleList()
         {
             ListofArticles = _articleTable.List;
         }
-        /// <summary>
-        /// Update <see cref="ListOfProviders"/>
-        /// </summary>
+        private void UpdateUnSetterProviderList()
+        {
+            UnSetterProvider = ListOfProviders.Where(x => !x.HaveURl && !x.HaveXPathCollection).ToList();
+        }
         private void UpdateProviderList(Article? art = null)
         {
-            if (SelectedArticle == null || art == null)
+            Article ArticleSelection;
+            if(art != null)
             {
-                ListOfProviders = _providerTable.List.Select(x=> new ProviderView() {ProviderName = x.Name , ElementSeed = x.ElementSeed}).ToList();
+                ArticleSelection = art;
+            }
+            else if(SelectedArticle != null)
+            {
+                ArticleSelection = SelectedArticle;
             }
             else
             {
-                Article ArticleSelection = art ?? SelectedArticle;
-                var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ElementSeed);
-                var list = _providerTable.List.Select((providerIns) => 
-                {
-                    string url="";
-                    string xpath = "";
-                    string clickPath = "";
-                    var selectedURl = urlList.FirstOrDefault(y => y.ProviderID == providerIns.ElementSeed);
-                    if(selectedURl != null)
-                    {
-                        url = selectedURl.URL;
-                        xpath = selectedURl.XPath;
-                        clickPath = selectedURl.ClickPath;
-                    }
-
-                    return new ProviderView()
-                    {
-                        ElementSeed = providerIns.ElementSeed,
-                        ProviderName = providerIns.Name,
-                        URL = url,
-                        XPath = xpath,
-                        ClickPath = clickPath,
-                    };
-                });
-                ListOfProviders = list.ToList();
+                ListOfProviders = _providerTable.List.Select(x => new ProviderView() { ProviderName = x.Name, ElementSeed = x.ElementSeed }).ToList();
+                return;
             }
+
+            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ElementSeed);
+            var list = _providerTable.List.Select((providerIns) => 
+            {
+                string url="";
+                List<XPathItem>? xpathCollection=null;
+                string clickPath = "";
+                var selectedURl = urlList.FirstOrDefault(y => y.ProviderID == providerIns.ElementSeed);
+                if(selectedURl != null)
+                {
+                    url = selectedURl.URL;
+                    xpathCollection = selectedURl.XPathCollection;
+                    clickPath = selectedURl.ColorContainerXPath;
+                }
+
+                return new ProviderView()
+                {
+                    ElementSeed = providerIns.ElementSeed,
+                    ProviderName = providerIns.Name,
+                    URL = url,
+                    XPathCollection = xpathCollection ?? [],
+                    ClickPath = clickPath,
+                };
+            });
+            ListOfProviders = list.ToList();
+            UpdateUnSetterProviderList();
         }
         private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
         {
@@ -229,33 +242,50 @@
                 castedModel.CurrentArticle.Name = selectedItem.Name;
                 castedModel.CurrentArticle.ElementSeed = selectedItem.ElementSeed;
                 castedModel.CurrentURL = new();
+                castedModel.UpdateProviderList(selectedItem);
+                if (castedModel.SelectedProvider != null)
+                    castedModel.UpdateURLInfo();
             }
-
         }
         private void ProviderSelectionChangedHandler(SelectionChangedEventArgs e)
         {
             if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 &&e.AddedItems[0] is ProviderView selectedItem && castedModel.SelectedArticle != null)
             {
-                var searchResult = castedModel._urlTypeTable.List.FirstOrDefault(x => x.ArticleID == castedModel.SelectedArticle.ElementSeed && x.ProviderID == selectedItem.ElementSeed);
-                if (searchResult != null)
-                {
-
-                    castedModel.CurrentURL = new URLType() 
-                    { 
-                        ArticleID = castedModel.SelectedArticle.ElementSeed,
-                        ProviderID = selectedItem.ElementSeed,
-                        URL = searchResult.URL,
-                        XPath = searchResult.XPath,
-                        ClickPath = searchResult.ClickPath,
-                        ElementSeed = searchResult.ElementSeed
-                    };
-                }
-                else
-                {
-                    castedModel.CurrentURL = new();
-                }
+                castedModel.UpdateURLInfo(selectedItem);
                 e.Handled = true;
             }
+        }
+        private void UpdateURLInfo(ProviderView? providerSelection = null)
+        {
+            ProviderView selection;
+            if (providerSelection == null)
+            {
+                selection = SelectedProvider;
+            }
+            else
+            {
+                selection = providerSelection;
+            }
+            
+            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ElementSeed && x.ProviderID == selection.ElementSeed);
+            if (searchResult != null)
+            {
+
+                CurrentURL = new URLType()
+                {
+                    ArticleID = SelectedArticle.ElementSeed,
+                    ProviderID = selection.ElementSeed,
+                    URL = searchResult.URL,
+                    XPathCollection = searchResult.XPathCollection,
+                    ColorContainerXPath = searchResult.ColorContainerXPath,
+                    ElementSeed = searchResult.ElementSeed
+                };
+            }
+            else
+            {
+                CurrentURL = new();
+            }
+            UpdateUnSetterProviderList();
         }
         private Article _currentArticle=new();
         private URLType _currentURL=new();
@@ -263,19 +293,10 @@
         private Article _selectedArticle;
         private ViewCollection<ProviderView> _listOfProviders;
         private ViewCollection<Article> _listofArticles;
+        private ViewCollection<ProviderView> _unSetterProvider;
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Article> _articleTable;
         private readonly XMLTable<Provider> _providerTable;
         private readonly XMLTable<URLType> _urlTypeTable;
-        public class ProviderView
-        {
-            public int ElementSeed { get; set; } = -1;
-            public string ProviderName { get; set; } = "";
-            public string URL { get; set; } = "";
-            public string XPath { get; set; } = "";
-            public string ClickPath { get; set; } = "";
-            public bool HaveURl { get { return URL != string.Empty; } }
-            public bool HaveXpath { get { return XPath != string.Empty; } }
-        }
     }
 }
