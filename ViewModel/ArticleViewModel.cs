@@ -66,19 +66,7 @@
                 ArticleViewModel model = (ArticleViewModel)((object[])parameter)[1];
                 model.ArticleSelectionChangedHandler((SelectionChangedEventArgs)((object[])parameter)[0]);
             }, (object parameter) => { return true; });
-        public ICommand GotoXPathCollection { get; set; } = new FastCommand
-            ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.GotoXPathCollectionHandler(); }, (object parameter) => { return true; });
 
-        private async void GotoXPathCollectionHandler()
-        {
-            if (SelectedArticle == null || SelectedProvider == null)
-            {
-                MessageBox.Show("کالا/تامین انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            var dialog = new XPathCollectionViewModel(SelectedArticle , SelectedProvider);
-            _ = await dialog.LoadDialog(dialog);
-        }
         private void SubmitArticleInfoCommandHandler()
         {
             var newItem = CurrentArticle;

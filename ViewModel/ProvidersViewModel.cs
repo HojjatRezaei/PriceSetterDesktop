@@ -15,18 +15,10 @@
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             UpdateProviderList();
-            Closed += ProvidersViewModel_ChildExit;
-        }
-
-        private void ProvidersViewModel_ChildExit(bool CloseState = true)
-        {
-            CompleteTheTask(null);
         }
 
         public Provider CurrentProvider
         { get => _currentProvider; set { _currentProvider = value; PropertyCall(); } }
-
-        private Provider _selectedProvider;
         public Provider SelectedProvider
         { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
         public ViewCollection<Provider> ProvidersList
@@ -38,7 +30,20 @@
             ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.UpdateProviderInfoCommandHandler(); }, (object parameter) => { return true; });
         public ICommand RemoveProviderInfoCommand { get; set; } = new FastCommand
             ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.RemoveProviderInfoCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand GotoXPathCollection { get; set; } = new FastCommand
+            ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.GotoContainerDefinitionPageCommand(); }, (object parameter) => { return true; });
 
+        private async void GotoContainerDefinitionPageCommand()
+        {
+            if (SelectedProvider == null)
+            {
+                MessageBox.Show("تامین انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            var dialog = new XPathCollectionViewModel(SelectedProvider);
+            _ = await dialog.LoadDialog(dialog);
+            UpdateProviderList();
+        }
         private void SubmitProviderInfoCommandHandler()
         {
             //get provider name 
@@ -107,6 +112,7 @@
         {
             //do nothing
         }
+        private Provider _selectedProvider=new();
         private Provider _currentProvider = new();
         private ViewCollection<Provider> _providersList = [];
 

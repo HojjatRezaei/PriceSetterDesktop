@@ -2,6 +2,7 @@
 {
     using System;
     using System.Xml;
+    using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Enum;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
@@ -14,7 +15,15 @@
         public string ContainerPath { get; set; } = "";
         [XmlItem(nameof(ContainerType), "int")]
         public ContainerType ContainerType { get; set; } = 0;
-        public List<XPathItem> PathItems { get; set; } = [];
+        public List<XPathItem> PathItems
+        {
+            get
+            {
+                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
+                var tb = db.GetTable<XPathItem>(nameof(XPathItem));
+                return tb.List.Where(x => x.ContainerID == ElementSeed).ToList();
+            }
+        }
         public int ElementSeed { get; set; }
 
         public IXmlItem CreateObject()
@@ -23,7 +32,7 @@
         }
         public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
         {
-            var newObject = new Provider();
+            var newObject = this;
             foreach (XmlNode node in nodeList)
             {
                 var searchProperty = newObject.GetType().GetProperty(node.Name);

@@ -1,6 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using PriceSetterDesktop.Libraries.Statics;
+    using PriceSetterDesktop.Libraries.Types.Enum;
     using System;
     using System.Xml;
     using WPFCollection.Data.Attributes;
@@ -14,6 +15,8 @@
         }
         [XmlItem(nameof(Name), "string")]
         public string Name { get; set; } = "";
+        [XmlItem(nameof(Extraction) , "int")]
+        public ExtractionTypes Extraction { get; set; } = 0;
         public List<ContainerXPath> Containers { get; set; } = [];
         public IEnumerable<Prices> Prices
         {
@@ -31,21 +34,6 @@
             return this;
         }
 
-        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
-        {
-            var newObject = new Provider();
-            foreach (XmlNode node in nodeList)
-            {
-                var searchProperty = newObject.GetType().GetProperty(node.Name);
-                if (searchProperty != null)
-                {
-                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
-                    searchProperty.SetValue(newObject, newVal);
-                }
-            }
-            ElementSeed = seed;
-            return newObject;
-        }
         public string GenerateIdentifier()
         {
             //propertyHash;
@@ -66,6 +54,22 @@
         public override string ToString()
         {
             return $"{Name}";
+        }
+
+        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
+        {
+            var newObject = this;
+            foreach (XmlNode node in nodeList)
+            {
+                var searchProperty = newObject.GetType().GetProperty(node.Name);
+                if (searchProperty != null)
+                {
+                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
+                    searchProperty.SetValue(newObject, newVal);
+                }
+            }
+            ElementSeed = seed;
+            return newObject;
         }
     }
 }

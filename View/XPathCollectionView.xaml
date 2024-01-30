@@ -14,12 +14,9 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:XPathCollectionViewModel}">
-          <Border Padding="5" 
+          <Border Padding="10" 
                   FlowDirection="RightToLeft"
                   DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
-            <Border.Resources>
-              <proxy:BindingProxy Data="{Binding}" x:Key="DataContextBridge"/>
-            </Border.Resources>
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -29,27 +26,98 @@
               <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
               </Grid.RowDefinitions>
-              <TextBlock Text="آدرس منبع : " Grid.Row="0" Grid.Column="0"/>
-              <TextBox Text="{Binding CurrentXPath.XPath}" 
-                     Grid.Row="0" 
-                     Grid.Column="1"
-                     Margin="5,0,0,5"/>
-              <TextBlock Text="نوع منبع :" Grid.Row="1" Grid.Column="0"/>
-              <TextBox Text="{Binding CurrentXPath.XpathType}"
-                     Grid.Row="1"
-                     Grid.Column="1"
-                     Margin="5,0,0,5"/>
-              <ListView ItemsSource="{Binding XPathCollectionList}"
-                      SelectedItem="{Binding XPathSelection}"
-                      Grid.Row="2"
+              <!--Container Parts-->
+              <TextBlock Text="آدرس ظرف : " 
+                         Grid.Row="0"
+                         Grid.Column="0"/>
+              <TextBox Text="{Binding CurrentContainer.ContainerPath , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+                       Grid.Row="0"
+                       Grid.Column="1"/>
+              <TextBlock Text="نوع ظرف : " 
+                         Grid.Row="1"
+                         Grid.Column="0"/>
+              <ComboBox SelectedIndex="{Binding CurrentContainer.ContainerType , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                        Grid.Row="1"
+                        Grid.Column="1"
+                        Grid.ColumnSpan="3">
+                <ComboBoxItem Content="کلیک و استخراج"/>
+                <ComboBoxItem Content="لیست"/>
+              </ComboBox>
+              <!--XPath Order Part-->
+              <Border Grid.Row="2"
                       Grid.Column="0"
-                      Grid.ColumnSpan="2"/>
+                      Grid.ColumnSpan="2"
+                      Padding="10">
+                <Grid >
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                  </Grid.ColumnDefinitions>
+                  <TextBlock Text="آدرس منبع : "
+                             Grid.Row="0"
+                             Grid.Column="0"/>
+                  <TextBox Text="{Binding CurrentXPathItem.XPath}"
+                           Grid.Row="0"
+                           Grid.Column="1"/>
+                  <TextBlock Text="تگ منبع : "
+             Grid.Row="1"
+             Grid.Column="0"/>
+                  <TextBox Text="{Binding CurrentXPathItem.XPathTag}"
+           Grid.Row="1"
+           Grid.Column="1"/>
+
+                  <Grid Grid.Row="2"
+        Grid.Column="0"
+        Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Button Content="ثبت" 
+            Grid.Column="0"
+            Command="{Binding SubmitPathItemCommand}"
+            CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+                    <Button Content="بروزرسانی" 
+            Grid.Column="1"
+            Command="{Binding UpdatePathItemCommand}"
+            CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+                    <Button Content="حذف" 
+            Grid.Column="2"
+            Command="{Binding RemovePathItemCommand}"
+            CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+                  </Grid>
+                  <ListView Grid.Row="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            ItemsSource="{Binding CurrentContainer.PathItems , Mode=OneWay , UpdateSourceTrigger=PropertyChanged}"
+            SelectedItem="{Binding PathItemSelection , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}">
+                    <ListView.ItemTemplate>
+                      <DataTemplate>
+                        <StackPanel FlowDirection="LeftToRight">
+                          <TextBlock Text="{Binding XPathTag}"/>
+                          <TextBlock Text="{Binding XPath}"/>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ListView.ItemTemplate>
+                  </ListView>
+                </Grid>
+              </Border>
+              
               <Grid Grid.Row="3" 
                         Grid.Column="0"
-                        Grid.ColumnSpan="3">
+                        Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*"/>
                   <ColumnDefinition Width="*"/>
@@ -57,17 +125,31 @@
                 </Grid.ColumnDefinitions>
                 <Button Content="ثبت" 
                       Grid.Column="0"
-                      Command="{Binding SubmitCommand}"
+                      Command="{Binding SubmitContainerCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 <Button Content="بروزرسانی" 
                       Grid.Column="1"
-                      Command="{Binding UpdateCommand}"
+                      Command="{Binding UpdateContainerCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 <Button Content="حذف" 
                       Grid.Column="2"
-                      Command="{Binding RemoveCommand}"
+                      Command="{Binding RemoveContainerCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
               </Grid>
+              <ListView Grid.Row="4"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        ItemsSource="{Binding ContainerList , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+                        SelectedItem="{Binding SelectedContainer, Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}">
+                <ListView.ItemTemplate>
+                  <DataTemplate>
+                    <StackPanel FlowDirection="LeftToRight">
+                      <TextBlock Text="{Binding ContainerPath}"/>
+                      <TextBlock Text="{Binding ContainerType}"/>
+                    </StackPanel>
+                  </DataTemplate>
+                </ListView.ItemTemplate>
+              </ListView>
             </Grid>
           </Border>
         </ControlTemplate>

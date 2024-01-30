@@ -12,9 +12,11 @@
         {
             var db = DataHolder.XMLData.CreateDataBase(DataHolder.XMLDataBaseName);
             db.CreateTable<Article>(nameof(Article));
-            db.CreateTable<URLType>(nameof(URLType));
-            db.CreateTable<Provider>(nameof(Provider));
+            db.CreateTable<ContainerXPath>(nameof(ContainerXPath));
             db.CreateTable<Prices>(nameof(Prices));
+            db.CreateTable<Provider>(nameof(Provider));
+            db.CreateTable<URLType>(nameof(URLType));
+            db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
         }
         private object _currentContent;

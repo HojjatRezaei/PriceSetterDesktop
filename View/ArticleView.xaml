@@ -82,12 +82,6 @@
                      Grid.ColumnSpan="3"
                      TextWrapping="NoWrap"
                      FlowDirection="LeftToRight"/>
-                  <Button Content="منابع قابل استخراج" 
-                         Grid.Row="2" 
-                         Grid.Column="0" 
-                         Grid.ColumnSpan="3"
-                         Command="{Binding GotoXPathCollection}"
-                         CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
                 </Grid>
                 
                 <!--Provider Lists-->

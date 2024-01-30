@@ -26,7 +26,7 @@
         }
         public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
         {
-            var newObject = new URLType();
+            var newObject = this;
             foreach (XmlNode node in nodeList)
             {
                 var searchProperty = newObject.GetType().GetProperty(node.Name);

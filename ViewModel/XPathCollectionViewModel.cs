@@ -2,7 +2,6 @@
 {
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Data;
-    using PriceSetterDesktop.Libraries.Types.Interaction;
     using System.Windows;
     using System.Windows.Input;
     using WPFCollection.Data.List;
@@ -15,86 +14,157 @@
         {
             var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _xPathTable = db.GetTable<XPathItem>(nameof(XPathItem));
+            _containerXPathTable = db.GetTable<ContainerXPath>(nameof(ContainerXPath));
         }
-        public XPathCollectionViewModel(Article articleSelection , ProviderView providerSelection)
+        public XPathCollectionViewModel(Provider providerSelection)
         {
             var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _xPathTable = db.GetTable<XPathItem>(nameof(XPathItem));
-            CurrentXPath.ArticleID = articleSelection.ElementSeed;
-            CurrentXPath.ProviderID = providerSelection.ElementSeed;
+            _containerXPathTable = db.GetTable<ContainerXPath>(nameof(ContainerXPath));
+            CurrentContainer.ProviderID = providerSelection.ElementSeed;
             UpdateList();
         }
 
-        public XPathItem XPathSelection
-        { get => _xPathSelection; set { _xPathSelection = value; PropertyCall(); } }
-        public XPathItem CurrentXPath
-        { get => _currentXPath; set { _currentXPath = value; PropertyCall(); } }
-        public ViewCollection<XPathItem> XPathCollectionList
-        { get => _xPathCollectionList; set { _xPathCollectionList = value; PropertyCall(); } }
+        public ContainerXPath SelectedContainer
+        { get => _selectedContainer; set { _selectedContainer = value; PropertyCall(); } }
+        public ContainerXPath CurrentContainer
+        { get => _currentContainer; set { _currentContainer = value; PropertyCall(); } }
+        public XPathItem CurrentXPathItem
+        { get => _currentXPathItem; set { _currentXPathItem = value; PropertyCall(); } }
+        public XPathItem PathItemSelection
+        { get => _pathItemSelection; set { _pathItemSelection = value; PropertyCall(); } }
+        public ViewCollection<ContainerXPath> ContainerList
+        { get => _containerList; set { _containerList = value; PropertyCall(); } }
 
-        public ICommand SubmitCommand { get; set; } = new FastCommand
-            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.SubmitCommandHandler(); }, (object parameter) => { return true; });
-        public ICommand UpdateCommand { get; set; } = new FastCommand
-            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.UpdateCommandHandler(); }, (object parameter) => { return true; });
-        public ICommand RemoveCommand { get; set; } = new FastCommand
-            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.RemoveCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand SubmitContainerCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.SubmitContainerCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand UpdateContainerCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.UpdateContainerCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand RemoveContainerCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.RemoveContainerCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand SubmitPathItemCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.SubmitPathItemCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand UpdatePathItemCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.UpdatePathItemCommandHandler(); }, (object parameter) => { return true; });
+        public ICommand RemovePathItemCommand { get; set; } = new FastCommand
+            ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.RemovePathItemCommandHandler(); }, (object parameter) => { return true; });
 
-        private void SubmitCommandHandler()
+        private void SubmitPathItemCommandHandler()
         {
-            if (string.IsNullOrEmpty(CurrentXPath.XPath) || string.IsNullOrEmpty(CurrentXPath.XpathType))
+            if(string.IsNullOrEmpty(CurrentXPathItem.XPath) || string.IsNullOrEmpty(CurrentXPathItem.XPathTag))
             {
-                MessageBox.Show("آدرس/نوع منبع خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("آدرس منبع/تگ مشخص نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if (CurrentXPath.ArticleID == -1 || CurrentXPath.ProviderID == -1)
+            if(SelectedContainer == null)
             {
-                MessageBox.Show("کد کالا/تامین کننده منبع خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("ظرفی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _xPathTable.Add(CurrentXPath);
-            UpdateList();
-            CurrentXPath.XpathType = string.Empty;
-            CurrentXPath.XPath = string.Empty;
+            _xPathTable.Add(CurrentXPathItem);
+            CurrentXPathItem = new();
+            PropertyCall(nameof(CurrentContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        private void UpdateCommandHandler()
+        private void UpdatePathItemCommandHandler()
         {
-            if (string.IsNullOrEmpty(CurrentXPath.XPath) || string.IsNullOrEmpty(CurrentXPath.XpathType))
+            if (string.IsNullOrEmpty(CurrentXPathItem.XPath) || string.IsNullOrEmpty(CurrentXPathItem.XPathTag))
             {
-                MessageBox.Show("آدرس/نوع منبع خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("آدرس منبع/تگ مشخص نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            if(XPathSelection == null)
+            if (PathItemSelection == null || SelectedContainer == null)
             {
-                MessageBox.Show("منبعی جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("منبع/ظرفی جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _xPathTable.Update(XPathSelection.ElementSeed,CurrentXPath);
-            CurrentXPath.XpathType = string.Empty;
-            CurrentXPath.XPath = string.Empty;
+            CurrentXPathItem.ContainerID = SelectedContainer.ElementSeed; 
+            _xPathTable.Update(PathItemSelection.ElementSeed, CurrentXPathItem);
+            CurrentXPathItem = new();
+            MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        private void RemovePathItemCommandHandler()
+        {
+            if (PathItemSelection == null)
+            {
+                MessageBox.Show("آدرس منبعی جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            _xPathTable.Remove(PathItemSelection.ElementSeed);
+            MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        private void SubmitContainerCommandHandler()
+        {
+            if (string.IsNullOrEmpty(CurrentContainer.ContainerPath))
+            {
+                MessageBox.Show("آدرس/نوع ظرف خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (CurrentContainer.ProviderID == - 1)
+            {
+                MessageBox.Show("کد تامین کننده ثبت نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            _containerXPathTable.Add(CurrentContainer);
+            var seed = CurrentContainer.ProviderID;
+            CurrentContainer = new() {ProviderID = seed };
             UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        private void RemoveCommandHandler()
+        private void UpdateContainerCommandHandler()
         {
-            if (string.IsNullOrEmpty(CurrentXPath.XPath))
+            if (string.IsNullOrEmpty(CurrentContainer.ContainerPath))
             {
-                MessageBox.Show("آدرسی برای حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("آدرس/نوع ظرف خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _xPathTable.Remove(XPathSelection.ElementSeed);
+            if (CurrentContainer.ProviderID == -1)
+            {
+                MessageBox.Show("کد تامین کننده ثبت نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (SelectedContainer == null)
+            {
+                MessageBox.Show("ظرفی جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            _containerXPathTable.Update(SelectedContainer.ElementSeed, CurrentContainer);
+            var seed = CurrentContainer.ProviderID;
+            CurrentContainer = new() { ProviderID = seed };
+            UpdateList();
+            MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        private void RemoveContainerCommandHandler()
+        {
+            if (SelectedContainer == null)
+            {
+                MessageBox.Show("ظرفی جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            var result = _xPathTable.List.Where(x => x.ContainerID == SelectedContainer.ElementSeed);
+            foreach (var item in result)
+            {
+                _xPathTable.Remove(item.ElementSeed);
+            }
+            _containerXPathTable.Remove(SelectedContainer.ElementSeed);
+            //remove every related xpath to this container
+            var seed = CurrentContainer.ProviderID;
+            CurrentContainer = new() { ProviderID = seed };
             UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdateList()
         {
-            XPathCollectionList = _xPathTable.List.Where(x=> x.ArticleID == CurrentXPath.ArticleID && x.ProviderID == CurrentXPath.ProviderID).ToList();
+            _containerList = _containerXPathTable.List.Where(x => x.ProviderID == CurrentContainer.ProviderID).ToList();
         }
 
-        private XPathItem _xPathSelection=new();
-        private XPathItem _currentXPath=new();
-        private ViewCollection<XPathItem> _xPathCollectionList = [];
+        private XPathItem _currentXPathItem = new();
+        private XPathItem _pathItemSelection = new();
+        private ContainerXPath _selectedContainer=new();
+        private ContainerXPath _currentContainer = new();
+        private ViewCollection<ContainerXPath> _containerList = [];
         private readonly XMLTable<XPathItem> _xPathTable;
+        private readonly XMLTable<ContainerXPath> _containerXPathTable;
         public override void FocusOnStartupObject()
         {
             //do nothing

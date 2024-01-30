@@ -5,7 +5,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate TargetType="{x:Type vm:ProvidersViewModel}">
-          <Border Padding="10" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}">
+          <Border Padding="10" DataContext="{Binding RelativeSource={RelativeSource TemplatedParent}}" FlowDirection="RightToLeft">
             <Grid>
               <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -17,25 +17,70 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
               </Grid.RowDefinitions>
-              <TextBlock Text="نام تامین کننده" Grid.Row="0" Grid.Column="0"/>
+              <TextBlock Text="نام تامین کننده : " Grid.Row="0" Grid.Column="0"/>
               <TextBox Text="{Binding CurrentProvider.Name}"
                        Grid.Row="0" 
                        Margin="0,5"
-                       Grid.Column="1"/>
-              <Button Content="اضافه کردن" 
-                      Grid.Row="0"
-                      Grid.Column="2"
-                      Command="{Binding SubmitNewProviderCommand}"
-                      CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}">
-                
-              </Button>
-              <Grid Grid.Row="2" FlowDirection="RightToLeft">
+                       Grid.Column="1"
+                       Grid.ColumnSpan="2"/>
+              <TextBlock Text="نوع استخراج : "
+                         Grid.Row="1"
+                         Grid.Column="0"/>
+              <ComboBox SelectedIndex="{Binding CurrentProvider.Extraction}" 
+                        Grid.Row="1" 
+                        Grid.Column="1"
+                        Grid.ColumnSpan="2">
+                <ComboBoxItem Content="استخراج"/>
+                <ComboBoxItem Content="اکسل"/>
+                <ComboBoxItem Content="عکس"/>
+              </ComboBox>
+              <Button Content="استخراج"
+                      Command="{Binding GotoXPathCollection}"
+                      CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
+                      Grid.Row="2"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Margin="0,5,0,5"/>
+
+              <Border Grid.Row="3"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="3"
+                      Padding="0,10,0,0">
+                <Grid>
+                  <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                  </Grid.RowDefinitions>
+                  <TextBlock Grid.Row="0" 
+                             Text="تامین کننده های تعریف شده" 
+                             FontWeight="Bold"
+                             HorizontalAlignment="Center"/>
+                  <ListView ItemsSource="{Binding ProvidersList}" Grid.Row="1" SelectedItem="{Binding SelectedProvider}">
+                    <ListView.ItemTemplate>
+                      <DataTemplate>
+                        <StackPanel FlowDirection="LeftToRight">
+                          <TextBlock Text="{Binding Name}"/>
+                          <TextBlock Text="{Binding Extraction}"/>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ListView.ItemTemplate>
+                  </ListView>
+                </Grid>
+
+              </Border>
+              <Grid Grid.Row="4" FlowDirection="RightToLeft"
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="*"/>
-                  <ColumnDefinition Width="2*"/>
+                  <ColumnDefinition Width="*"/>
                   <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                  <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
                 <Button Content="ثبت" 
                         Grid.Column="0"
                         Command="{Binding SubmitProviderInfoCommand}"
@@ -49,22 +94,6 @@
                         Command="{Binding RemoveProviderInfoCommand}"
                         CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
               </Grid>
-              <Border Grid.Row="3"
-                      Padding="0,10,0,0">
-                <Grid>
-                  <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                  </Grid.RowDefinitions>
-                  <TextBlock Grid.Row="0" 
-                             Text="تامین کننده های تعریف شده" 
-                             FontWeight="Bold"
-                             HorizontalAlignment="Center"/>
-                  <ListView ItemsSource="{Binding ProvidersList}" Grid.Row="1" SelectedItem="{Binding SelectedProvider}"/>
-                </Grid>
-
-              </Border>
-              
             </Grid>
           </Border>
         </ControlTemplate>
