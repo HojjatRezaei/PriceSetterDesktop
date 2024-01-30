@@ -35,7 +35,7 @@
         { get => _pathItemSelection; set { _pathItemSelection = value; PropertyCall(); } }
         public ViewCollection<ContainerXPath> ContainerList
         { get => _containerList; set { _containerList = value; PropertyCall(); } }
-
+        
         public ICommand SubmitContainerCommand { get; set; } = new FastCommand
             ((object parameter) => { XPathCollectionViewModel model = (XPathCollectionViewModel)parameter; model.SubmitContainerCommandHandler(); }, (object parameter) => { return true; });
         public ICommand UpdateContainerCommand { get; set; } = new FastCommand
@@ -61,9 +61,10 @@
                 MessageBox.Show("ظرفی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            CurrentXPathItem.ContainerID = SelectedContainer.ElementSeed;
             _xPathTable.Add(CurrentXPathItem);
             CurrentXPathItem = new();
-            PropertyCall(nameof(CurrentContainer));
+            PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdatePathItemCommandHandler()
@@ -81,6 +82,7 @@
             CurrentXPathItem.ContainerID = SelectedContainer.ElementSeed; 
             _xPathTable.Update(PathItemSelection.ElementSeed, CurrentXPathItem);
             CurrentXPathItem = new();
+            PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void RemovePathItemCommandHandler()
@@ -91,6 +93,7 @@
                 return;
             }
             _xPathTable.Remove(PathItemSelection.ElementSeed);
+            PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void SubmitContainerCommandHandler()
@@ -106,9 +109,9 @@
                 return;
             }
             _containerXPathTable.Add(CurrentContainer);
+            UpdateList();
             var seed = CurrentContainer.ProviderID;
             CurrentContainer = new() {ProviderID = seed };
-            UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdateContainerCommandHandler()
@@ -129,9 +132,9 @@
                 return;
             }
             _containerXPathTable.Update(SelectedContainer.ElementSeed, CurrentContainer);
+            UpdateList();
             var seed = CurrentContainer.ProviderID;
             CurrentContainer = new() { ProviderID = seed };
-            UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void RemoveContainerCommandHandler()
@@ -142,20 +145,17 @@
                 return;
             }
             var result = _xPathTable.List.Where(x => x.ContainerID == SelectedContainer.ElementSeed);
-            foreach (var item in result)
-            {
-                _xPathTable.Remove(item.ElementSeed);
-            }
+            _xPathTable.Remove(result);
             _containerXPathTable.Remove(SelectedContainer.ElementSeed);
             //remove every related xpath to this container
+            UpdateList();
             var seed = CurrentContainer.ProviderID;
             CurrentContainer = new() { ProviderID = seed };
-            UpdateList();
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void UpdateList()
         {
-            _containerList = _containerXPathTable.List.Where(x => x.ProviderID == CurrentContainer.ProviderID).ToList();
+            ContainerList = _containerXPathTable.List.Where(x => x.ProviderID == CurrentContainer.ProviderID).ToList();
         }
 
         private XPathItem _currentXPathItem = new();

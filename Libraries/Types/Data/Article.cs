@@ -48,21 +48,6 @@
             return this;
         }
 
-        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
-        {
-            var newObject = this;
-            foreach (XmlNode node in nodeList)
-            {
-                var searchProperty = newObject.GetType().GetProperty(node.Name);
-                if (searchProperty != null)
-                {
-                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
-                    searchProperty.SetValue(newObject, newVal);
-                }
-            }
-            ElementSeed = seed;
-            return newObject;
-        }
         public string GenerateIdentifier()
         {
             //propertyHash;

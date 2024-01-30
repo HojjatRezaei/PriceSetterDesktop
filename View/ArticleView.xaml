@@ -110,10 +110,9 @@
                       <Border Padding="5" Margin="5" BorderBrush="Transparent">
                         <StackPanel>
                           <TextBlock 
-                         Text="{Binding ProviderName}"/>
-                          <TextBlock 
-                         Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='URL'}" 
-                         Tag="{Binding HaveURl}">
+                            Text="{Binding Name}"/>
+                          <TextBlock Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='URL'}" 
+                                     Tag="{Binding HaveURl}">
                             <TextBlock.Style>
                               <Style TargetType="{x:Type TextBlock}">
                                 <Style.Triggers>

@@ -17,7 +17,17 @@
         public string Name { get; set; } = "";
         [XmlItem(nameof(Extraction) , "int")]
         public ExtractionTypes Extraction { get; set; } = 0;
-        public List<ContainerXPath> Containers { get; set; } = [];
+        public List<ContainerXPath> Containers 
+        {
+            get
+            {
+                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
+                var tb = db.GetTable<ContainerXPath>(nameof(ContainerXPath));
+                return tb.List.Where(x => x.ProviderID == ElementSeed).ToList();
+
+            }
+        
+        }
         public IEnumerable<Prices> Prices
         {
             get
@@ -54,22 +64,6 @@
         public override string ToString()
         {
             return $"{Name}";
-        }
-
-        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
-        {
-            var newObject = this;
-            foreach (XmlNode node in nodeList)
-            {
-                var searchProperty = newObject.GetType().GetProperty(node.Name);
-                if (searchProperty != null)
-                {
-                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
-                    searchProperty.SetValue(newObject, newVal);
-                }
-            }
-            ElementSeed = seed;
-            return newObject;
         }
     }
 }

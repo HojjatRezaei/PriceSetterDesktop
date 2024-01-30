@@ -30,7 +30,7 @@
         private string _currentXPath;
         public string CurrentXPath
         { get => _currentXPath; set { _currentXPath = value; PropertyCall(); } }
-        public ViewCollection<ProviderView> UnSetterProvider
+        public ViewCollection<Provider> UnSetterProvider
         { get => _unSetterProvider; set { _unSetterProvider = value; PropertyCall(); } }
         public Article CurrentArticle
         { 
@@ -42,11 +42,11 @@
         }
         public URLType CurrentURL
         { get => _currentURL; set { _currentURL = value; PropertyCall(); } }
-        public ProviderView SelectedProvider
+        public Provider SelectedProvider
         { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
         public Article SelectedArticle
         { get => _selectedArticle; set { _selectedArticle = value; PropertyCall(); } }
-        public ViewCollection<ProviderView> ListOfProviders
+        public ViewCollection<Provider> ListOfProviders
         { get => _listOfProviders; set { _listOfProviders = value; PropertyCall(); } }
         public ViewCollection<Article> ListofArticles
         { get => _listofArticles; set { _listofArticles = value; PropertyCall(); } }
@@ -98,11 +98,6 @@
                 MessageBox.Show("تامین کننده ای انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.None, MessageBoxOptions.ServiceNotification);
                 return;
             }
-            //promt user to confirm update action
-            //if user said no , exit function
-            string message = "آیا از بروزرسانی اطلاعات اطمینان دارید ؟";
-            if (MessageBox.Show(message,"اطلاعات", MessageBoxButton.YesNo, MessageBoxImage.Information) == MessageBoxResult.No)
-                return;
 
             var newItem = CurrentArticle;
             var oldItem = _articleTable.List.FirstOrDefault(x=> x.ElementSeed == SelectedArticle.ElementSeed);
@@ -138,11 +133,17 @@
                         _urlTypeTable.Add(newURL);
                     }
                 }
+                //check if any value have changed
+                CurrentURL = new();
+                UpdateProviderList(SelectedArticle);
+                MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
             }
-            //check if any value have changed
-            CurrentURL = new();
-            UpdateProviderList(SelectedArticle);
-            MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
+            else
+            {
+                MessageBox.Show("مشکل در بروزرسانی کالا ، کالای قبلی در محل ذخیره سازی پیدا نشد ، دوباره تلاش کنید", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
         }
         private void RemoveArticleCommandHandler()
         {
@@ -176,10 +177,6 @@
         {
             ListofArticles = _articleTable.List;
         }
-        private void UpdateUnSetterProviderList()
-        {
-            UnSetterProvider = ListOfProviders.Where(x => !x.HaveURl && !x.HaveXPathCollection).ToList();
-        }
         private void UpdateProviderList(Article? art = null)
         {
             Article ArticleSelection;
@@ -193,33 +190,13 @@
             }
             else
             {
-                ListOfProviders = _providerTable.List.Select(x => new ProviderView() { ProviderName = x.Name, ElementSeed = x.ElementSeed }).ToList();
+                ListOfProviders = _providerTable.List;
                 return;
             }
 
             var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ElementSeed);
-            var list = _providerTable.List.Select((providerIns) => 
-            {
-                string url="";
-                List<XPathItem>? xpathCollection=null;
-                string clickPath = "";
-                var selectedURl = urlList.FirstOrDefault(y => y.ProviderID == providerIns.ElementSeed);
-                if(selectedURl != null)
-                {
-                    url = selectedURl.URL;
-                }
-
-                return new ProviderView()
-                {
-                    ElementSeed = providerIns.ElementSeed,
-                    ProviderName = providerIns.Name,
-                    URL = url,
-                    XPathCollection = xpathCollection ?? [],
-                    ClickPath = clickPath,
-                };
-            });
+            var list = _providerTable.List;
             ListOfProviders = list.ToList();
-            UpdateUnSetterProviderList();
         }
         private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
         {
@@ -236,15 +213,15 @@
         }
         private void ProviderSelectionChangedHandler(SelectionChangedEventArgs e)
         {
-            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 &&e.AddedItems[0] is ProviderView selectedItem && castedModel.SelectedArticle != null)
+            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 &&e.AddedItems[0] is Provider selectedItem && castedModel.SelectedArticle != null)
             {
                 castedModel.UpdateURLInfo(selectedItem);
                 e.Handled = true;
             }
         }
-        private void UpdateURLInfo(ProviderView? providerSelection = null)
+        private void UpdateURLInfo(Provider? providerSelection = null)
         {
-            ProviderView selection;
+            Provider selection;
             if (providerSelection == null)
             {
                 selection = SelectedProvider;
@@ -270,15 +247,14 @@
             {
                 CurrentURL = new();
             }
-            UpdateUnSetterProviderList();
         }
         private Article _currentArticle=new();
         private URLType _currentURL=new();
-        private ProviderView _selectedProvider;
+        private Provider _selectedProvider;
         private Article _selectedArticle;
-        private ViewCollection<ProviderView> _listOfProviders;
+        private ViewCollection<Provider> _listOfProviders;
         private ViewCollection<Article> _listofArticles;
-        private ViewCollection<ProviderView> _unSetterProvider;
+        private ViewCollection<Provider> _unSetterProvider;
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Article> _articleTable;
         private readonly XMLTable<Provider> _providerTable;

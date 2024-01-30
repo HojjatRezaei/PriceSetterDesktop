@@ -1,24 +1,14 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium.Support.UI;
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Interaction;
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading.Tasks;
-    using System.Windows.Forms;
-    using System.Xml;
-    using System.Xml.Serialization;
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
-    using WPFCollection.Data.Statics;
-    using WPFCollection.Network.Error;
 
     [XmlMarker(nameof(URLType))]
     public partial class URLType : IGeneratable, IXmlItem
@@ -35,82 +25,225 @@
         public int ArticleID { get; set; } = -1;
         public int ElementSeed { get; set; } = -1;
 
-        public string GetPriceFromWeb(WebDriver driver)
+        private List<PriceView> ScrapWeb(WebDriver driver, Provider provider, string articleName)
         {
+            //navigate to the url
+            try
+            {
+                driver.Navigate().GoToUrl(URL);
+            }
+            catch (Exception e)
+            {
+                return ReturnError("InternetProblem", driver);
+            }
+            WebDriverWait waiter = new(driver, new(0, 0, 10));
+            //create new instance for javascript
+            IJavaScriptExecutor scripter = driver;
+            //try to find click and extract containers
+            var clickAndExtractContainers = provider.Containers.Where(x => x.ContainerType == Types.Enum.ContainerType.ClickAndExtract);
+            //try to find list containers
+            var listContainers = provider.Containers.Where(x => x.ContainerType == Types.Enum.ContainerType.List);
+            if (clickAndExtractContainers != null && clickAndExtractContainers.Any())
+            {
+                var priceViewList = new List<PriceView>();
+                //loop trough click containers and click on each one of them
+                foreach (ContainerXPath clickContainer in clickAndExtractContainers)
+                {
+
+                    // if clickContainer is null , go to next click container
+                    if (clickContainer == null)
+                        return ReturnError("ظرف خالی میباشد", driver);
+                    //wait for DOM to load completely
+                    try
+                    {
+                        waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
+                    }
+                    catch (Exception e)
+                    {
+                        //if couldn't find element , goto the next container
+                        ReturnError("خطا در پیدا کردن ظرف", driver);
+                    }
+                    var clickElementContainer = driver.FindElement(By.XPath(clickContainer.ContainerPath));
+                    var clickElements = clickElementContainer.FindElements(By.XPath("*"));
+                    foreach (IWebElement clickElement in clickElements)
+                    {
+                        PriceView newPriceView = new()
+                        {
+                            ArticleName = articleName,
+                            ProviderName = provider.Name,
+                            Color = ""
+                        };
+                        if (clickElement == null)
+                            continue;
+                        //click on element 
+                        clickElement.Click();
+                        //wait 1 second to give html page some times to load AJAX
+                        Thread.Sleep(1000);
+                        //extract resources using xpath
+                        foreach (XPathItem pathItem in clickContainer.PathItems)
+                        {
+                            //collection resources with straight xpath 
+                            var extractionResult = driver.FindElement(By.XPath(pathItem.XPath)).Text;
+                            //check if extractionResult have any definition of color ,
+                            //if it does , set the extraction result as PriceView Color
+                            if (extractionResult.Contains("رنگ") || pathItem.XPathTag == "رنگ")
+                            {
+                                newPriceView.Color = extractionResult;
+                            }
+                            //create tagView object and add it to the tagList
+                            else
+                            {
+                                TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = extractionResult };
+                                newPriceView.Tags.Add(newTag);
+                            }
+
+                        }
+                        //check if click container should collect any list containers
+                        if (listContainers != null && listContainers.Any())
+                        {
+                            //loop throught each row of the list and collect resources
+                            foreach (ContainerXPath listContainer in listContainers)
+                            {
+                                if (listContainer == null || listContainer.PathItems.Count == 0)
+                                    continue;
+                                //extract container elements
+                                //check if containerpath is valid
+                                var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                                //check if CheckResult is Valid
+                                if (checkResult is not IWebElement)
+                                    continue;
+                                //get rows from ListContainer Object
+                                var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
+                                //loop through each row
+                                foreach (IWebElement scrapElement in scrapResultElements)
+                                {
+                                    //open up xpathitems book
+                                    foreach (XPathItem pathItem in listContainer.PathItems)
+                                    {
+                                        //extract value from scrapResultElements
+                                        try
+                                        {
+                                            //try to find element inside a row 
+                                            var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
+                                            //if element founded
+                                            if (listScrapResult != null)
+                                            {
+                                                //create new tag and add it to the collection
+                                                TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
+                                                newPriceView.Tags.Add(newTag);
+                                            }
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            //if any error occured , skip error and go for next item
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        //return collected result
+                        priceViewList.Add(newPriceView);
+                    }
+
+
+                }
+                //return scrap result collection
+                return priceViewList;
+            }
+            //collection resources based on List Container Type
+            else if (listContainers != null && listContainers.Any())
+            {
+                var priceViewList = new List<PriceView>();
+                //if url doesn't have click container , continue with list containers
+                if (listContainers != null && listContainers.Any())
+                {
+                    foreach (ContainerXPath listContainer in listContainers)
+                    {
+                        if (listContainer == null || listContainer.PathItems.Count == 0)
+                            continue;
+                        //extract container elements
+                        //check if containerpath is valid
+                        var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                        if (checkResult is not IWebElement)
+                            continue;
+                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
+                        foreach (IWebElement scrapElement in scrapResultElements)
+                        {
+                            PriceView priceView = new()
+                            {
+                                ArticleName = articleName,
+                                ProviderName = provider.Name,
+                                Color = "",
+                            };
+                            foreach (XPathItem pathItem in listContainer.PathItems)
+                            {
+                                //extract value from scrapResultElements
+                                try
+                                {
+                                    var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
+                                    if (listScrapResult.Text.Contains("رنگ") || pathItem.XPathTag == "رنگ")
+                                    {
+                                        priceView.Color = listScrapResult.Text;
+                                    }
+                                    //create tagView object and add it to the tagList
+                                    else
+                                    {
+                                        TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
+                                        priceView.Tags.Add(newTag);
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    continue;
+                                }
+                            }
+                            priceViewList.Add(priceView);
+                        }
+                    }
+                }
+                else
+                {
+                    // if page doesn't have containers , check for straight xpath
+                    return ReturnError("مشکل در پیدا کردن ظروف", driver);
+                }
+                return priceViewList;
+            }
+            // if code reach here , it didn't find any source to collect
+            //return with error instance
+            return ReturnError("اطلاعاتی از منابع پیدا نشد", driver);
+
+        }
+        private List<PriceView> ScrapExcel(Provider provider)
+        {
+            //create new priceView Object for valid return value
+            PriceView priceViewObject = new();
             throw new NotImplementedException();
-            //if (URL == string.Empty || XPathCollection == null)
-            //    return "عدم اطلاعات کافی";
-            //IWebElement? clickElement=null;
-            //IWebElement? resourceElement=null;
-            //driver.Navigate().GoToUrl(URL);
-            ////section of waiting for DOM TO load currectly 
-            //WebDriverWait wait = new(driver, new(0, 0, 20));
+        }
+        private List<PriceView> ScrapImage(Provider provider)
+        {
+            //create new priceView Object for valid return value
+            PriceView priceViewObject = new();
+            throw new NotImplementedException();
+        }
+        private List<PriceView> ReturnError(string errMessage, WebDriver driver)
+        {
+            return [new PriceView() { IsError = true, ErrorDescription = errMessage }];
+        }
+        public List<PriceView> Scrap(WebDriver driver, string articleName)
+        {
+            //try to get provider object
+            Provider? providerObject = GetProvider();
+            // if couldn't find provider object , return with error
+            if (providerObject == null) return ReturnError("مشکل در پیدا کردن تامین کننده مربوط به کالا", driver);
 
-            //IJavaScriptExecutor scripter = driver;
-            //try
-            //{
-            //    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{XPathCollection[0].XPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
-            //}
-            //catch (Exception e)
-            //{
-            //    ErrorManager.SendError(e);
-            //    return $"مشکل در سایت {GetProviderName()}";
-            //}
-            //if (!string.IsNullOrEmpty(ColorContainerXPath))
-            //{
-
-            //    try
-            //    {
-            //        _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ColorContainerXPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
-            //        ////try to find color from article name
-            //        //var articleName = GetArticleName();
-            //        //var articleColor = GetArticleColorFromName();
-            //        //if (string.IsNullOrEmpty(articleName))
-            //        //{
-            //        //    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
-            //        //}
-            //        //else
-            //        //{
-            //        //    _ = wait.Until(x => scripter.ExecuteScript($"return document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null);
-            //        //    //مشکی ، سفید ، صورتی ، سبز ، آبی
-            //        //    //extract button color
-            //        //    var colorCode = scripter.ExecuteScript($"document.evaluate(\"{ClickPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue.style['background-color']");
-            //        //    if(colorCode == null)
-            //        //    {
-            //        //        return "مشکل در پیدا کردن رنگ مربوطه";
-            //        //    }
-            //        //    else
-            //        //    {
-            //        //        //detect color
-
-            //        //    }
-            //        //}
-
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        ErrorManager.SendError(e);
-            //        return "مشکل در پیدا کردن رنگ مربوطه";
-            //    }
-
-            //}
-            //clickElement?.Click();
-            //Thread.Sleep(1000);
-            //try
-            //{
-
-            //    if (resourceElement == null)
-            //        return "مشکل در پیدا کردن منبع قیمت";
-            //    //replace persian number with english numbers
-            //    var ConvertableTxt = resourceElement.Text.CorrectPersianNumber().RemoveWords();
-            //    _ = double.TryParse(ConvertableTxt, out double foundedPrice);
-            //    return $"{foundedPrice}";
-            //}
-            //catch (Exception e)
-            //{
-            //    ErrorManager.SendError(e);
-            //    return "مشکل در پیدا کردن قیمت در سایت";
-            //}
+            return providerObject.Extraction switch
+            {
+                Types.Enum.ExtractionTypes.Scrap => ScrapWeb(driver, providerObject, articleName),
+                Types.Enum.ExtractionTypes.Excel => ScrapExcel(providerObject),
+                Types.Enum.ExtractionTypes.Image => ScrapImage(providerObject),
+                _ => ReturnError("مشکل در تشخیص نوع استخراج", driver),
+            };
         }
         public string GetProviderName()
         {
@@ -120,6 +253,15 @@
             if (result == null)
                 return "";
             return result.Name;
+        }
+        public Provider? GetProvider()
+        {
+            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
+            var tb = db.GetTable<Provider>(nameof(Provider));
+            var result = tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
+            if (result == null)
+                return null;
+            return result;
         }
         public string GetArticleName()
         {
@@ -139,21 +281,6 @@
         public IXmlItem CreateObject()
         {
             return this;
-        }
-        public IXmlItem CreateObjectFromNode(XmlNodeList nodeList, int seed)
-        {
-            var newObject = this;
-            foreach (XmlNode node in nodeList)
-            {
-                var searchProperty = newObject.GetType().GetProperty(node.Name);
-                if (searchProperty != null)
-                {
-                    var newVal = Convert.ChangeType(node.InnerText, searchProperty.PropertyType);
-                    searchProperty.SetValue(newObject, newVal);
-                }
-            }
-            ElementSeed = seed;
-            return newObject;
         }
         public string GenerateIdentifier()
         {

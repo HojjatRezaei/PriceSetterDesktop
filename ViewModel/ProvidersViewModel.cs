@@ -113,7 +113,7 @@
             //do nothing
         }
         private Provider _selectedProvider=new();
-        private Provider _currentProvider = new();
+        private Provider _currentProvider=new();
         private ViewCollection<Provider> _providersList = [];
 
         private readonly XMLTable<Provider> _providerTable;
