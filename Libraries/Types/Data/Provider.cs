@@ -37,6 +37,14 @@
                 return tb.List.Where(x => x.ProviderID == ElementSeed);
             }
         }
+        public bool HaveURL { get; set; } = false;
+        public bool HaveData 
+        { 
+            get 
+            {
+                return Containers.Count != 0;
+            }
+        }
         public int ElementSeed { get; set; } = -1;
 
         public IXmlItem CreateObject()

@@ -44,7 +44,6 @@
                       Grid.Column="0"
                       Grid.ColumnSpan="2"
                       Margin="0,5,0,5"/>
-
               <Border Grid.Row="3"
                       Grid.Column="0"
                       Grid.ColumnSpan="3"
@@ -69,7 +68,6 @@
                     </ListView.ItemTemplate>
                   </ListView>
                 </Grid>
-
               </Border>
               <Grid Grid.Row="2" 
                     FlowDirection="RightToLeft"

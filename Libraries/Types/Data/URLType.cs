@@ -25,7 +25,7 @@
         public int ArticleID { get; set; } = -1;
         public int ElementSeed { get; set; } = -1;
 
-        private List<PriceView> ScrapWeb(WebDriver driver, Provider provider, string articleName)
+        private List<ArticleDetails> ScrapWeb(WebDriver driver, Provider provider)
         {
             //navigate to the url
             try
@@ -45,7 +45,7 @@
             var listContainers = provider.Containers.Where(x => x.ContainerType == Types.Enum.ContainerType.List);
             if (clickAndExtractContainers != null && clickAndExtractContainers.Any())
             {
-                var priceViewList = new List<PriceView>();
+                var priceViewList = new List<ArticleDetails>();
                 //loop trough click containers and click on each one of them
                 foreach (ContainerXPath clickContainer in clickAndExtractContainers)
                 {
@@ -67,16 +67,16 @@
                     var clickElements = clickElementContainer.FindElements(By.XPath("*"));
                     foreach (IWebElement clickElement in clickElements)
                     {
-                        PriceView newPriceView = new()
+                        ArticleDetails newPriceView = new()
                         {
-                            ArticleName = articleName,
-                            ProviderName = provider.Name,
+                            Provider = provider,
                             Color = ""
                         };
                         if (clickElement == null)
                             continue;
                         //click on element 
                         clickElement.Click();
+                        
                         //wait 1 second to give html page some times to load AJAX
                         Thread.Sleep(1000);
                         //extract resources using xpath
@@ -96,7 +96,6 @@
                                 TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = extractionResult };
                                 newPriceView.Tags.Add(newTag);
                             }
-
                         }
                         //check if click container should collect any list containers
                         if (listContainers != null && listContainers.Any())
@@ -145,8 +144,6 @@
                         //return collected result
                         priceViewList.Add(newPriceView);
                     }
-
-
                 }
                 //return scrap result collection
                 return priceViewList;
@@ -154,7 +151,7 @@
             //collection resources based on List Container Type
             else if (listContainers != null && listContainers.Any())
             {
-                var priceViewList = new List<PriceView>();
+                var priceViewList = new List<ArticleDetails>();
                 //if url doesn't have click container , continue with list containers
                 if (listContainers != null && listContainers.Any())
                 {
@@ -170,10 +167,9 @@
                         var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
                         foreach (IWebElement scrapElement in scrapResultElements)
                         {
-                            PriceView priceView = new()
+                            ArticleDetails articleDetails = new()
                             {
-                                ArticleName = articleName,
-                                ProviderName = provider.Name,
+                                Provider = provider,
                                 Color = "",
                             };
                             foreach (XPathItem pathItem in listContainer.PathItems)
@@ -184,13 +180,13 @@
                                     var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
                                     if (listScrapResult.Text.Contains("رنگ") || pathItem.XPathTag == "رنگ")
                                     {
-                                        priceView.Color = listScrapResult.Text;
+                                        articleDetails.Color = listScrapResult.Text;
                                     }
                                     //create tagView object and add it to the tagList
                                     else
                                     {
                                         TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
-                                        priceView.Tags.Add(newTag);
+                                        articleDetails.Tags.Add(newTag);
                                     }
                                 }
                                 catch (Exception e)
@@ -198,7 +194,7 @@
                                     continue;
                                 }
                             }
-                            priceViewList.Add(priceView);
+                            priceViewList.Add(articleDetails);
                         }
                     }
                 }
@@ -212,25 +208,24 @@
             // if code reach here , it didn't find any source to collect
             //return with error instance
             return ReturnError("اطلاعاتی از منابع پیدا نشد", driver);
-
         }
-        private List<PriceView> ScrapExcel(Provider provider)
+        private List<ArticleDetails> ScrapExcel(Provider provider)
         {
             //create new priceView Object for valid return value
-            PriceView priceViewObject = new();
+            ArticleDetails priceViewObject = new();
             throw new NotImplementedException();
         }
-        private List<PriceView> ScrapImage(Provider provider)
+        private List<ArticleDetails> ScrapImage(Provider provider)
         {
             //create new priceView Object for valid return value
-            PriceView priceViewObject = new();
+            ArticleDetails priceViewObject = new();
             throw new NotImplementedException();
         }
-        private List<PriceView> ReturnError(string errMessage, WebDriver driver)
+        private List<ArticleDetails> ReturnError(string errMessage, WebDriver driver)
         {
-            return [new PriceView() { IsError = true, ErrorDescription = errMessage }];
+            return [new ArticleDetails() { IsError = true, ErrorDescription = errMessage }];
         }
-        public List<PriceView> Scrap(WebDriver driver, string articleName)
+        public List<ArticleDetails> Scrap(WebDriver driver)
         {
             //try to get provider object
             Provider? providerObject = GetProvider();
@@ -239,7 +234,7 @@
 
             return providerObject.Extraction switch
             {
-                Types.Enum.ExtractionTypes.Scrap => ScrapWeb(driver, providerObject, articleName),
+                Types.Enum.ExtractionTypes.Scrap => ScrapWeb(driver, providerObject),
                 Types.Enum.ExtractionTypes.Excel => ScrapExcel(providerObject),
                 Types.Enum.ExtractionTypes.Image => ScrapImage(providerObject),
                 _ => ReturnError("مشکل در تشخیص نوع استخراج", driver),
@@ -258,10 +253,13 @@
         {
             var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             var tb = db.GetTable<Provider>(nameof(Provider));
-            var result = tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
-            if (result == null)
-                return null;
-            return result;
+            return tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
+        }
+        public Article? GetArticle()
+        {
+            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
+            var tb = db.GetTable<Article>(nameof(Article));
+            return tb.List.FirstOrDefault(x => x.ElementSeed == ArticleID);
         }
         public string GetArticleName()
         {

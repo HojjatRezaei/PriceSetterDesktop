@@ -108,7 +108,7 @@
                 if (!oldItem.Equals(newItem))
                 {
                     _articleTable.Update(SelectedArticle.ElementSeed, newItem);
-                    UpdateArticleList();
+                    
                 }
                 //update values in other tables 
                 //update url and xpath
@@ -136,6 +136,7 @@
                 //check if any value have changed
                 CurrentURL = new();
                 UpdateProviderList(SelectedArticle);
+                UpdateArticleList();
                 MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             else
@@ -190,21 +191,25 @@
             }
             else
             {
-                ListOfProviders = _providerTable.List;
+                ListOfProviders =[];
                 return;
             }
 
             var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ElementSeed);
-            var list = _providerTable.List;
-            ListOfProviders = list.ToList();
+            var providerList = _providerTable.List;
+            foreach (var provider in providerList)
+            {
+                provider.HaveURL = urlList.FirstOrDefault(x => x.ProviderID == provider.ElementSeed) != null;
+            }
+            ListOfProviders = providerList.ToList();
+            UnSetterProvider = providerList.Where(x => !x.HaveURL).ToList();
         }
         private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
         {
             if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is Article selectedItem)
             {
                 castedModel.UpdateProviderList(selectedItem);
-                castedModel.CurrentArticle.Name = selectedItem.Name;
-                castedModel.CurrentArticle.ElementSeed = selectedItem.ElementSeed;
+                castedModel.CurrentArticle = new() {Name = selectedItem.Name , ElementSeed=selectedItem.ElementSeed };
                 castedModel.CurrentURL = new();
                 castedModel.UpdateProviderList(selectedItem);
                 if (castedModel.SelectedProvider != null)

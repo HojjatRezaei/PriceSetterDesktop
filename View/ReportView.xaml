@@ -29,12 +29,12 @@
                       Padding="5"
                       BorderBrush="Transparent"
                       >
-                <ListView ItemsSource="{Binding PriceList}" 
-                          ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}">
+                <ListView ItemsSource="{Binding ArticleList}" 
+                          ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}"
+                          ScrollViewer.VerticalScrollBarVisibility="Visible">
                   <ListView.ItemTemplate>
                     <DataTemplate>
-                      <Border Padding="5"
-                              BorderBrush="Red">
+                      <Border Padding="5">
                         <Grid>
                           <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -43,64 +43,46 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                           </Grid.RowDefinitions>
-                          <TextBlock Text="{Binding ArticleName}" 
+                          <TextBlock Text="{Binding Name}" 
                                      Grid.Row="0" 
                                      Grid.Column="0" 
-                                     Style="{StaticResource PersianTextBlockLeft}"
-                                     Margin="0,0,0,10"/>
-                          <ListView ItemsSource="{Binding Providers}" 
+                                     Style="{StaticResource PersianTextBlockLeft}"/>
+                          <ListView ItemsSource="{Binding ArticleDetails}" 
                                     Grid.Row="1" 
                                     Grid.Column="0"
                                     ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}">
                             <ListView.ItemTemplate>
                               <DataTemplate>
-                                <Grid>
-                                  <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                    <RowDefinition Height="Auto"/>
-                                  </Grid.RowDefinitions>
-                                  <TextBlock Text="{Binding ProviderName}" Grid.Row="0" Style="{StaticResource PersianTextBlockLeft}"/>
-                                  <TextBlock Text="{Binding ProviderPrice}" Grid.Row="1" Tag="{Binding IsValid}">
-                                    <TextBlock.Style>
-                                      <Style TargetType="{x:Type TextBlock}" BasedOn="{StaticResource PersianTextBlockLeft}">
-                                        <Style.Triggers>
-                                          <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                          </DataTrigger>
-                                          <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                        </Style.Triggers>
-                                      </Style>
-                                    </TextBlock.Style>
-                                  </TextBlock>
-                                  <Button 
-                                    Content="{Binding ErrorText}" 
-                                    Grid.Row="2"
-                                    Tag="{Binding IsValid}"
-                                    Command="{Binding RetryScrap , Source={StaticResource DataContextBridge}}"
-                                    >
-                                    <Button.CommandParameter>
-                                      <MultiBinding Converter="{StaticResource MultiParameter}">
-                                        <Binding Source="{StaticResource DataContextBridge}"/>
-                                        <Binding RelativeSource="{RelativeSource Self}" Path="DataContext"/>
-                                      </MultiBinding>
-                                    </Button.CommandParameter>
-                                    <Button.Style>
-                                      <Style TargetType="{x:Type Button}" BasedOn="{StaticResource {x:Type Button}}">
-                                        <Style.Triggers>
-                                          <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="True">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                          </DataTrigger>
-                                          <DataTrigger Binding="{Binding RelativeSource={RelativeSource Self} , Path=Tag}" Value="False">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                          </DataTrigger>
-                                        </Style.Triggers>
-                                      </Style>
-                                    </Button.Style>
-                                  </Button>
-                                </Grid>
+                                <Border>
+                                  <Grid>
+                                    <Grid.ColumnDefinitions>
+                                      <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                      <RowDefinition Height="Auto"/>
+                                      <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Grid.Column="0" Grid.Row="0">
+                                      <TextBlock Text="{Binding Provider.Name}" Style="{StaticResource PersianTextBlockLeft}"/>
+                                      <TextBlock Text="{Binding Color}" Style="{StaticResource PersianTextBlockLeft}"/>
+                                    </StackPanel>
+                                    <ListView ItemsSource="{Binding Tags}" Grid.Column="0" Grid.Row="1">
+                                      <ListView.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                          <StackPanel Orientation="Horizontal"></StackPanel>
+                                        </ItemsPanelTemplate>
+                                      </ListView.ItemsPanel>
+                                      <ListView.ItemTemplate>
+                                        <DataTemplate>
+                                          <StackPanel Orientation="Vertical">
+                                            <TextBlock Text="{Binding TagName}"/>
+                                            <TextBlock Text="{Binding TagValue}"/>
+                                          </StackPanel>
+                                        </DataTemplate>
+                                      </ListView.ItemTemplate>
+                                    </ListView>
+                                  </Grid>
+                                </Border>
                               </DataTemplate>
                             </ListView.ItemTemplate>
                           </ListView>

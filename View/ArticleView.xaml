@@ -111,8 +111,8 @@
                         <StackPanel>
                           <TextBlock 
                             Text="{Binding Name}"/>
-                          <TextBlock Text="{Binding HaveURl , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='URL'}" 
-                                     Tag="{Binding HaveURl}">
+                          <TextBlock Text="{Binding HaveURL , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='URL'}" 
+                                     Tag="{Binding HaveURL}">
                             <TextBlock.Style>
                               <Style TargetType="{x:Type TextBlock}">
                                 <Style.Triggers>
@@ -126,9 +126,8 @@
                               </Style>
                             </TextBlock.Style>
                           </TextBlock>
-                          <TextBlock 
-                         Text="{Binding HaveXPathCollection , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='XPath'}" 
-                         Tag="{Binding HaveXPathCollection}">
+                          <TextBlock Text="{Binding HaveData , Converter={StaticResource BooleanToTextConvertor},ConverterParameter='Data'}" 
+                                     Tag="{Binding HaveData}">
                             <TextBlock.Style>
                               <Style TargetType="{x:Type TextBlock}">
                                 <Style.Triggers>
@@ -162,7 +161,7 @@
                  SnapsToDevicePixels="False">
                   <ListView.ItemTemplate>
                     <DataTemplate>
-                      <TextBlock Text="{Binding ProviderName}"/>
+                      <TextBlock Text="{Binding Name}"/>
                     </DataTemplate>
                   </ListView.ItemTemplate>
                 </ListView>

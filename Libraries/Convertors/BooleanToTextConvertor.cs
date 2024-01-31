@@ -21,9 +21,9 @@
                 {
                     return "آدرس سایت ثبت شده";
                 }
-                else if (txt is not null and "XPath")
+                else if (txt is not null and "Data")
                 {
-                    return "آدرس منابع ثبت شده";
+                    return "داده ای برای تامین کننده تعریف نشده";
                 }
                 else
                 {
@@ -37,9 +37,9 @@
                 {
                     return "آدرس سایت مشخص نشده";
                 }
-                else if (txt is not null and "XPath")
+                else if (txt is not null and "Data")
                 {
-                    return "آدرس منبع جهت استخراج مشخص نشده";
+                    return "داده ای برای تامین کننده تعریف نشده";
                 }
                 else
                 {

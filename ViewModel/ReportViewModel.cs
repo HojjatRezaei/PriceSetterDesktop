@@ -9,12 +9,9 @@
     using WPFCollection.Data.List;
     using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.UI;
-    using WPFCollection.Network.Error;
     using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
-    using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-    using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+    using WPFCollection.Data.Statics;
 
     public class ReportViewModel : BaseControl
     {
@@ -95,6 +92,9 @@
             //#endif
         }
 
+        private ViewCollection<ArticleView> _articleList;
+        public ViewCollection<ArticleView> ArticleList
+        { get => _articleList; set { _articleList = value; PropertyCall(); } }
         public ICommand ExcelOutputCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.ExcelOutputCommandHandler(); }, (object parameter) => { return true; });
         public ICommand UpdatePricesCommand { get; set; } = new FastCommand
@@ -102,7 +102,9 @@
 
         private void ExcelOutputCommandHandler()
         {
-
+            
+            //UpdatePricesCommandHandler();
+            //ExcelFile.WriteFile(new() { new(ArticleList , "newExtractedData") });
         }
         private void UpdatePricesCommandHandler()
         {
@@ -111,20 +113,24 @@
             WebDriver chromeDrive = new ChromeDriver(chromeOption);
             chromeDrive.Manage().Window.Minimize();
             //create priceViewList
-            var priceViewList = new List<PriceView>();
+            var articleViewList = new List<ArticleView>();
             //get a list of urls
             var urlList = _urlTable.List.ToList();
             foreach (URLType url in urlList)
             {
-                //get scrapResult
-                string providerName = url.GetProviderName();
-                string articleName = url.GetArticleName();
-                List<PriceView> scrapedPriceViewList = url.Scrap(chromeDrive , articleName);
-                foreach (PriceView priceView in scrapedPriceViewList)
+                var articleName = url.GetArticleName();
+                ArticleView articleView = new()
                 {
-                    priceViewList.Add(priceView);
+                    Name = articleName,
+                };
+                List<ArticleDetails> scrappedArticleViewList = url.Scrap(chromeDrive);
+                foreach (var scrappedItem in scrappedArticleViewList)
+                {
+                    articleView.ArticleDetails.Add(scrappedItem);
                 }
+                articleViewList.Add(articleView);
             }
+            ArticleList = articleViewList;
             chromeDrive.Quit();
         }
 
