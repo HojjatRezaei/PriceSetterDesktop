@@ -43,16 +43,22 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                           </Grid.RowDefinitions>
-                          <TextBlock Text="{Binding Name}" 
+                          <TextBlock Text="{Binding ArticleDispaly}" 
                                      Grid.Row="0" 
                                      Grid.Column="0" 
                                      Style="{StaticResource PersianTextBlockLeft}"/>
-                          <ListView ItemsSource="{Binding ArticleDetails}" 
+                          <ListView ItemsSource="{Binding Providers}" 
                                     Grid.Row="1" 
                                     Grid.Column="0"
                                     ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}">
+                            <ListView.ItemsPanel>
+                              <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal"></StackPanel>
+                              </ItemsPanelTemplate>
+                            </ListView.ItemsPanel>
                             <ListView.ItemTemplate>
-                              <DataTemplate>
+                            
+                            <DataTemplate>
                                 <Border>
                                   <Grid>
                                     <Grid.ColumnDefinitions>
@@ -63,15 +69,9 @@
                                       <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
                                     <StackPanel Grid.Column="0" Grid.Row="0">
-                                      <TextBlock Text="{Binding Provider.Name}" Style="{StaticResource PersianTextBlockLeft}"/>
-                                      <TextBlock Text="{Binding Color}" Style="{StaticResource PersianTextBlockLeft}"/>
+                                      <TextBlock Text="{Binding ProviderName}" Style="{StaticResource PersianTextBlockLeft}"/>
                                     </StackPanel>
-                                    <ListView ItemsSource="{Binding Tags}" Grid.Column="0" Grid.Row="1">
-                                      <ListView.ItemsPanel>
-                                        <ItemsPanelTemplate>
-                                          <StackPanel Orientation="Horizontal"></StackPanel>
-                                        </ItemsPanelTemplate>
-                                      </ListView.ItemsPanel>
+                                    <ListView ItemsSource="{Binding ScrappedData}" Grid.Column="0" Grid.Row="1">
                                       <ListView.ItemTemplate>
                                         <DataTemplate>
                                           <StackPanel Orientation="Vertical">
