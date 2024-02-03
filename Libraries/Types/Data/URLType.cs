@@ -32,7 +32,7 @@
             {
                 driver.Navigate().GoToUrl(URL);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return ReturnError("InternetProblem", driver);
             }
@@ -47,104 +47,107 @@
             {
                 var priceViewList = new List<ArticleDetails>();
                 //loop trough click containers and click on each one of them
-                foreach (ContainerXPath clickContainer in clickAndExtractContainers)
+                var clickContainer = clickAndExtractContainers.First();
+                // if clickContainer is null , go to next click container
+                if (clickContainer == null)
+                    return ReturnError("ظرف خالی میباشد", driver);
+                //wait for DOM to load completely
+                try
                 {
+                    waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
+                }
+                catch (Exception)
+                {
+                    //if couldn't find element , goto the next container
+                    ReturnError("خطا در پیدا کردن ظرف", driver);
+                }
+                var clickElementContainer = driver.FindElement(By.XPath(clickContainer.ContainerPath));
+                var clickElements = clickElementContainer.FindElements(By.XPath("*"));
+                foreach (IWebElement clickElement in clickElements)
+                {
+                    ArticleDetails newPriceView = new()
+                    {
+                        Provider = provider,
+                        Color = ""
+                    };
+                    if (clickElement == null)
+                        continue;
+                    //click on element 
+                    clickElement.Click();
+                    //find next click element and loop through it 
+                    var clickContainerCounter = clickAndExtractContainers.Count();
+                    if(clickContainerCounter > 1)
+                    {
 
-                    // if clickContainer is null , go to next click container
-                    if (clickContainer == null)
-                        return ReturnError("ظرف خالی میباشد", driver);
-                    //wait for DOM to load completely
-                    try
-                    {
-                        waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
                     }
-                    catch (Exception e)
+                    //wait 1 second to give html page some times to load AJAX
+                    Thread.Sleep(1000);
+                    //extract resources using xpath
+                    foreach (XPathItem pathItem in clickContainer.PathItems)
                     {
-                        //if couldn't find element , goto the next container
-                        ReturnError("خطا در پیدا کردن ظرف", driver);
-                    }
-                    var clickElementContainer = driver.FindElement(By.XPath(clickContainer.ContainerPath));
-                    var clickElements = clickElementContainer.FindElements(By.XPath("*"));
-                    foreach (IWebElement clickElement in clickElements)
-                    {
-                        ArticleDetails newPriceView = new()
+                        //collection resources with straight xpath 
+                        var extractionResult = driver.FindElement(By.XPath(pathItem.XPath)).Text;
+                        //check if extractionResult have any definition of color ,
+                        //if it does , set the extraction result as PriceView Color
+                        if (extractionResult.Contains("رنگ") || pathItem.XPathTag == "رنگ")
                         {
-                            Provider = provider,
-                            Color = ""
-                        };
-                        if (clickElement == null)
-                            continue;
-                        //click on element 
-                        clickElement.Click();
-                        
-                        //wait 1 second to give html page some times to load AJAX
-                        Thread.Sleep(1000);
-                        //extract resources using xpath
-                        foreach (XPathItem pathItem in clickContainer.PathItems)
-                        {
-                            //collection resources with straight xpath 
-                            var extractionResult = driver.FindElement(By.XPath(pathItem.XPath)).Text;
-                            //check if extractionResult have any definition of color ,
-                            //if it does , set the extraction result as PriceView Color
-                            if (extractionResult.Contains("رنگ") || pathItem.XPathTag == "رنگ")
-                            {
-                                newPriceView.Color = extractionResult;
-                            }
-                            //create tagView object and add it to the tagList
-                            else
-                            {
-                                TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = extractionResult };
-                                newPriceView.Tags.Add(newTag);
-                            }
+                            newPriceView.Color = extractionResult;
                         }
-                        //check if click container should collect any list containers
-                        if (listContainers != null && listContainers.Any())
+                        //create tagView object and add it to the tagList
+                        else
                         {
-                            //loop throught each row of the list and collect resources
-                            foreach (ContainerXPath listContainer in listContainers)
+                            TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = extractionResult };
+                            newPriceView.Tags.Add(newTag);
+                        }
+                    }
+                    //check if click container should collect any list containers
+                    if (listContainers != null && listContainers.Any())
+                    {
+                        //loop throught each row of the list and collect resources
+                        foreach (ContainerXPath listContainer in listContainers)
+                        {
+                            if (listContainer == null || listContainer.PathItems.Count == 0)
+                                continue;
+                            //extract container elements
+                            //check if containerpath is valid
+                            var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                            //check if CheckResult is Valid
+                            if (checkResult is not IWebElement)
+                                continue;
+                            //get rows from ListContainer Object
+                            var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
+                            //loop through each row
+                            foreach (IWebElement scrapElement in scrapResultElements)
                             {
-                                if (listContainer == null || listContainer.PathItems.Count == 0)
-                                    continue;
-                                //extract container elements
-                                //check if containerpath is valid
-                                var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
-                                //check if CheckResult is Valid
-                                if (checkResult is not IWebElement)
-                                    continue;
-                                //get rows from ListContainer Object
-                                var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
-                                //loop through each row
-                                foreach (IWebElement scrapElement in scrapResultElements)
+                                //open up xpathitems book
+                                foreach (XPathItem pathItem in listContainer.PathItems)
                                 {
-                                    //open up xpathitems book
-                                    foreach (XPathItem pathItem in listContainer.PathItems)
+                                    //extract value from scrapResultElements
+                                    try
                                     {
-                                        //extract value from scrapResultElements
-                                        try
+                                        //try to find element inside a row 
+                                        var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
+                                        //if element founded
+                                        if (listScrapResult != null)
                                         {
-                                            //try to find element inside a row 
-                                            var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
-                                            //if element founded
-                                            if (listScrapResult != null)
-                                            {
-                                                //create new tag and add it to the collection
-                                                TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
-                                                newPriceView.Tags.Add(newTag);
-                                            }
+                                            //create new tag and add it to the collection
+                                            TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
+                                            newPriceView.Tags.Add(newTag);
                                         }
-                                        catch (Exception e)
-                                        {
-                                            //if any error occured , skip error and go for next item
-                                            continue;
-                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+                                        //if any error occured , skip error and go for next item
+                                        continue;
                                     }
                                 }
                             }
                         }
-                        //return collected result
-                        priceViewList.Add(newPriceView);
                     }
+                    //return collected result
+                    priceViewList.Add(newPriceView);
                 }
+                
                 //return scrap result collection
                 return priceViewList;
             }
@@ -189,7 +192,7 @@
                                         articleDetails.Tags.Add(newTag);
                                     }
                                 }
-                                catch (Exception e)
+                                catch (Exception)
                                 {
                                     continue;
                                 }
