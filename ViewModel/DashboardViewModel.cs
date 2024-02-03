@@ -7,6 +7,7 @@
     using System.Windows.Input;
     using WPFCollection.Data.Statics;
     using WPFCollection.Data.Types;
+    using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
 
     public class DashboardViewModel : BasePage
@@ -21,6 +22,15 @@
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
+            //generate articleView Class test
+            var testList = new List<ArticleView>();
+            Generator<ArticleView> gn = new();
+            for (int x = 0; x < 10; x++)
+            {
+                testList.Add(gn.GenerateFromScrath());
+            }
+            var excelIns = new ExcelFile();
+            excelIns.WriteFile(testList);
         }
         private object _currentContent;
         

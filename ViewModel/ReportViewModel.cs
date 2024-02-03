@@ -171,7 +171,7 @@
                     ArticleColor = details.Color,
                     ArticleName = articleName,
                 };
-               
+
 
                 ProviderView newProviderView;
                 //check if provider object is not null
@@ -200,7 +200,7 @@
                 }
                 //check if article with the specified name and color exist in list
                 var searchResult = _finalList.FirstOrDefault(x => x.ArticleName == newArticleView.ArticleName && x.ArticleColor == newArticleView.ArticleColor);
-                if(searchResult == null)
+                if (searchResult == null)
                 {
                     //add new specified provider to new Created Article 
                     newArticleView.Providers.Add(newProviderView);

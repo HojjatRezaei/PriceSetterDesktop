@@ -7,7 +7,7 @@
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
     [XmlMarker(nameof(ContainerXPath))]
-    public class ContainerXPath : IGeneratable, IXmlItem
+    public class ContainerXPath : IXmlItem
     {
         [XmlItem(nameof(ProviderID), "int")]
         public int ProviderID { get; set; } = -1;

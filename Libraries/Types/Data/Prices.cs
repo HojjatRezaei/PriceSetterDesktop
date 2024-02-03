@@ -9,7 +9,7 @@
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
     [XmlMarker(nameof(Prices))]
-    public partial class Prices : IGeneratable, IXmlItem
+    public partial class Prices : IXmlItem
     {
         public Prices()
         {

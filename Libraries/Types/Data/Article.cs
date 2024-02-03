@@ -10,7 +10,7 @@
     using WPFCollection.Data.List;
 
     [XmlMarker(nameof(Article))]
-    public partial class Article : IGeneratable, IXmlItem, INotifyPropertyChanged
+    public partial class Article : IXmlItem, INotifyPropertyChanged
     {
         public Article()
         {

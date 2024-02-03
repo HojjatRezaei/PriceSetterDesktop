@@ -8,7 +8,7 @@
     using WPFCollection.Data.Interface;
 
     [XmlMarker(nameof(Provider))]
-    public partial class Provider : IGeneratable, IXmlItem
+    public partial class Provider : IXmlItem
     {
         public Provider()
         {

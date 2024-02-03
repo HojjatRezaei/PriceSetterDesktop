@@ -1,5 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
+    using WPFCollection.Data.Interface;
+
     public class ArticleView
     {
         public string ArticleName { get; set; } = string.Empty;

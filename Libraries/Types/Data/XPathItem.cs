@@ -6,7 +6,7 @@
     using WPFCollection.Data.Attributes;
     using WPFCollection.Data.Interface;
     [XmlMarker(nameof(XPathItem))]
-    public class XPathItem : IGeneratable, IXmlItem
+    public class XPathItem : IXmlItem
     {
         public XPathItem()
         {
