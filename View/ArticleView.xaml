@@ -42,17 +42,12 @@
                  Grid.Row="0"
                  Grid.Column="0"/>
                 <TextBox
-                 Text="{Binding CurrentArticle.Name}"
+                 Text="{Binding SelectedArticle.ArticleName}"
                  Grid.Row="0"
                  Grid.Column="1" 
-                 Margin="0,0,0,0"/>
-                <Button 
-                   Content="ثبت"
-                   Grid.Row="0"
-                   Grid.Column="2"
-                   Command="{Binding SubmitArticleInfoCommand}"
-                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                 />
+                 Grid.ColumnSpan="2"
+                 Margin="0,0,0,0"
+                IsReadOnly="True"/>
                 <!--Provider / URL / XPath / Click Path -->
                 
                 <Grid
@@ -181,13 +176,6 @@
                    Command="{Binding UpdateArticleInfoCommand}"
                    CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                  />
-                  <Button 
-                   Content="حذف" 
-                   VerticalAlignment="Bottom" 
-                   Grid.Column="1"
-                   Command="{Binding RemoveArticleCommand}"
-                   CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
-                 />
                 </Grid>
                 
               </Grid>
@@ -222,7 +210,7 @@
                   </i:Interaction.Triggers>
                   <ListView.ItemTemplate>
                     <DataTemplate>
-                      <TextBlock Text="{Binding Name}" TextWrapping="Wrap" MinHeight="50"/>
+                      <TextBlock Text="{Binding ArticleName}" TextWrapping="Wrap" MinHeight="50"/>
                     </DataTemplate>
                   </ListView.ItemTemplate>
                 </ListView>

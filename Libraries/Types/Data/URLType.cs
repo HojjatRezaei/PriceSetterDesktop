@@ -258,26 +258,12 @@
             var tb = db.GetTable<Provider>(nameof(Provider));
             return tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
         }
-        public Article? GetArticle()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Article>(nameof(Article));
-            return tb.List.FirstOrDefault(x => x.ElementSeed == ArticleID);
-        }
         public string GetArticleName()
         {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Article>(nameof(Article));
-            var result = tb.List.FirstOrDefault(x => x.ElementSeed == ArticleID);
+            var result = DataHolder.Articles.FirstOrDefault(x => x.ID == ArticleID);
             if (result == null)
                 return "";
-            return result.Name;
-        }
-        public ColorCollection GetArticleColorFromName()
-        {
-            var name = GetArticleName();
-            ColorCollection colorIns = new ColorCollection(name);
-            return colorIns;
+            return result.ArticleName;
         }
         public IXmlItem CreateObject()
         {

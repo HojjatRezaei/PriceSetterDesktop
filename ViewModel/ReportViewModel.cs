@@ -20,78 +20,8 @@
         public ReportViewModel()
         {
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _articleTable = _dataBase.GetTable<Article>(nameof(Article));
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             _urlTable = _dataBase.GetTable<URLType>(nameof(URLType));
-            //create visual elements for debugging
-            //#if DEBUG
-            //            PriceList =
-            //            [
-            //                new CollectionView() 
-            //                {
-            //                    ArticleName = "گوشی ایفون مدل اپل برای تست",
-            //                    Providers =
-            //                    [
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "مشکل در پیدا کردن قیمت",
-            //                            IsValid = true,
-            //                            ProviderName = "دیجی کالا",
-            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-            //                        },
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "این یه ارور نیست",
-            //                            IsValid = false,
-            //                            ProviderName = "ایرانسل",
-            //                            ProviderPrice = "34,555,999"
-            //                        },
-            //                    ]
-            //                },
-            //                new CollectionView()
-            //                {
-            //                    ArticleName = "گوشی ایفون مدل اپل برای تست2",
-            //                    Providers =
-            //                    [
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "مشکل در پیدا کردن قیمت",
-            //                            IsValid = true,
-            //                            ProviderName = "دیجی کالا",
-            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-            //                        },
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "این یه ارور نیست",
-            //                            IsValid = false,
-            //                            ProviderName = "ایرانسل",
-            //                            ProviderPrice = "34,555,999"
-            //                        },
-            //                    ]
-            //                },
-            //                new CollectionView()
-            //                {
-            //                    ArticleName = "گوشی ایفون مدل اپل برای تست3",
-            //                    Providers =
-            //                    [
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "مشکل در پیدا کردن قیمت",
-            //                            IsValid = true,
-            //                            ProviderName = "دیجی کالا",
-            //                            ProviderPrice = "مشکل در پیدا کردن قیمت",
-            //                        },
-            //                        new ProviderView()
-            //                        {
-            //                            ErrorText = "این یه ارور نیست",
-            //                            IsValid = false,
-            //                            ProviderName = "ایرانسل",
-            //                            ProviderPrice = "34,555,999"
-            //                        },
-            //                    ]
-            //                },
-            //            ];
-            //#endif
         }
 
         public ViewCollection<ArticleView> ArticleList
@@ -139,6 +69,20 @@
                 //loop through scrapped items from web
                 foreach (var scrappedArticleDetails in scrappedArticleDetailsList)
                 {
+                    //check extracted colors , if found any match , remove other colors and set the main color for article
+                    foreach (var tag in scrappedArticleDetails.Tags)
+                    {
+                        if(tag.TagName == "رنگ")
+                        {
+                            if (Name.Contains(tag.TagValue))
+                            {
+                                //سفید
+                                //سفید
+                                //بنفش
+                                //
+                            }
+                        }
+                    }
                     //gather scrapped resoucres 
                     scrappedArticles.ArticleDetails.Add(scrappedArticleDetails);
                 }
@@ -217,7 +161,6 @@
         }
         private List<ArticleView> _finalList = [];
         private readonly XMLDataBase _dataBase;
-        private readonly XMLTable<Article> _articleTable;
         private readonly XMLTable<Provider> _providerTable;
         private readonly XMLTable<URLType> _urlTable;
         private ViewCollection<ArticleView> _articleList;

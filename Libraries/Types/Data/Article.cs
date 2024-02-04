@@ -1,83 +1,35 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
-    using PriceSetterDesktop.Libraries.Statics;
-    using System;
-    using System.ComponentModel;
-    using System.Runtime.CompilerServices;
-    using System.Xml;
-    using WPFCollection.Data.Attributes;
-    using WPFCollection.Data.Interface;
-    using WPFCollection.Data.List;
+    using Newtonsoft.Json.Linq;
+    using WPFCollection.Data.Interface.Generic;
 
-    [XmlMarker(nameof(Article))]
-    public partial class Article : IXmlItem, INotifyPropertyChanged
+    public partial class Article : IJsonConverter<Article>
     {
         public Article()
         {
-            Name = "";
+            
         }
-        public Article(string name, int seed)
-        {
-            ElementSeed = seed;
-            Name = name;
-        }
+        public int ID { get; set; }
+        public string ArticleName { get; set; }
 
-        [XmlItem(nameof(Name), "string")]
-        public string Name
+        public Article ConvertFromJson(JToken jObjectItem)
         {
-            get => _name;
-            set
+            if (jObjectItem == null)
+                return this;
+            //extract values from passed jobjectitem
+            try
             {
-                _name = value;
-                PropertyCall();
+                ID = jObjectItem.Value<int>("ID");
             }
-        }
-        public IEnumerable<Prices> Prices
-        {
-            get
+            catch (Exception){}
+            try
             {
-                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<Prices>(nameof(Prices));
-                return tb.List.Where(x => x.ArticleID == ElementSeed);
+                var artName = jObjectItem.Value<string>("post_title");
+                if (artName != null)
+                    ArticleName = artName;
             }
-        }
-        public int ElementSeed { get; set; }
-
-        public IXmlItem CreateObject()
-        {
+            catch (Exception){}
             return this;
         }
-
-        public string GenerateIdentifier()
-        {
-            //propertyHash;
-            return "";
-        }
-        public override bool Equals(object? obj)
-        {
-            var CompareObject = obj as Article;
-            if (CompareObject == null)
-                return false;
-            return Name == CompareObject.Name;
-        }
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(Name);
-        }
-        public override string ToString()
-        {
-            return $"{Name}";
-        }
-
-        private string _name = "";
-        #region propertyChanged
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public void PropertyCall([CallerMemberName] string name = "")
-        {
-            PropertyChanged?.Invoke(this, new(name));
-        }
-        #endregion
-        #region static operation
-        #endregion
     }
 }
