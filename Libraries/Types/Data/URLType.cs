@@ -260,7 +260,7 @@
         }
         public string GetArticleName()
         {
-            var result = DataHolder.Articles.FirstOrDefault(x => x.ID == ArticleID);
+            var result = DataHolder.Articles.FirstOrDefault(x => x.ArticleID == ArticleID);
             if (result == null)
                 return "";
             return result.ArticleName;

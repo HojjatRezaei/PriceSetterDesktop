@@ -1,6 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
+    using System.Windows.Forms;
     using WPFCollection.Data.Interface.Generic;
 
     public partial class Article : IJsonConverter<Article>
@@ -9,26 +10,21 @@
         {
             
         }
-        public int ID { get; set; }
+        public int ArticleID { get; set; }
         public string ArticleName { get; set; }
+        public int ColorMetaID { get; set; }
+        public string ColorName { get; set; }
+        public int PriceMetaID { get; set; }
+        public double PriceValue { get; set; }
 
         public Article ConvertFromJson(JToken jObjectItem)
         {
-            if (jObjectItem == null)
-                return this;
-            //extract values from passed jobjectitem
-            try
-            {
-                ID = jObjectItem.Value<int>("ID");
-            }
-            catch (Exception){}
-            try
-            {
-                var artName = jObjectItem.Value<string>("post_title");
-                if (artName != null)
-                    ArticleName = artName;
-            }
-            catch (Exception){}
+            ArticleID = jObjectItem.Value<int>("ArticleID");
+            ArticleName = jObjectItem.Value<string>("ArticleName") ?? "";
+            ColorMetaID = jObjectItem.Value<int>("ColorID");
+            ColorName = jObjectItem.Value<string>("ColorName") ?? "";
+            PriceMetaID = jObjectItem.Value<int>("PriceMetaID");
+            PriceValue = double.TryParse(jObjectItem.Value<string>("PriceValue") ?? "", out double castedPrice) ? castedPrice : 0;
             return this;
         }
     }

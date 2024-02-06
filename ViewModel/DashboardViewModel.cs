@@ -27,6 +27,7 @@
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
+            DataHolder.Articles = HTTPUtility.SendGETRequest<Article>("https://vetos-mobile.com/hojjatDebugTest/api/GetArticleList");
         }
         private object _currentContent;
         

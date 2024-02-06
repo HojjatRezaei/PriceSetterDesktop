@@ -79,13 +79,13 @@
             //update values in other tables 
             //update url and xpath
             //check if any details have been entered in database related to article and provider
-            var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ElementSeed && x.ArticleID == SelectedArticle.ID);
+            var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ElementSeed && x.ArticleID == SelectedArticle.ArticleID);
             if(urlSearchResult != null)
             {
                 //update information for xpath and url in table
                 var newURL = CurrentURL;
                 newURL.ProviderID = SelectedProvider.ElementSeed;
-                newURL.ArticleID = SelectedArticle.ID;
+                newURL.ArticleID = SelectedArticle.ArticleID;
                 _urlTypeTable.Update(urlSearchResult.ElementSeed,newURL);
             }
             else
@@ -95,7 +95,7 @@
                     //add information for xpath and url to the table
                     var newURL = CurrentURL;
                     newURL.ProviderID = SelectedProvider.ElementSeed;
-                    newURL.ArticleID = SelectedArticle.ID;
+                    newURL.ArticleID = SelectedArticle.ArticleID;
                     _urlTypeTable.Add(newURL);
                 }
             }
@@ -109,7 +109,6 @@
         }
         private void UpdateArticleList()
         {
-            DataHolder.Articles = HTTPUtility.SendGETRequest<Article>("https://vetos-mobile.com/hojjatDebugTest/api/GetArticleList");
             ListofArticles = DataHolder.Articles;
         }
         private void UpdateProviderList(Article? art = null)
@@ -128,7 +127,7 @@
                 ListOfProviders = _providerTable.List;
                 return;
             }
-            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ID);
+            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ArticleID);
             var providerList = _providerTable.List;
             foreach (var provider in providerList)
             {
@@ -166,12 +165,12 @@
                 selection = providerSelection;
             }
             
-            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ID && x.ProviderID == selection.ElementSeed);
+            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ArticleID && x.ProviderID == selection.ElementSeed);
             if (searchResult != null)
             {
                 CurrentURL = new URLType()
                 {
-                    ArticleID = SelectedArticle.ID,
+                    ArticleID = SelectedArticle.ArticleID,
                     ProviderID = selection.ElementSeed,
                     URL = searchResult.URL,
                     ElementSeed = searchResult.ElementSeed
