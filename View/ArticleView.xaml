@@ -42,7 +42,7 @@
                  Grid.Row="0"
                  Grid.Column="0"/>
                 <TextBox
-                 Text="{Binding SelectedArticle.ArticleName}"
+                 Text="{Binding SelectedArticle.Name}"
                  Grid.Row="0"
                  Grid.Column="1" 
                  Grid.ColumnSpan="2"
@@ -210,7 +210,18 @@
                   </i:Interaction.Triggers>
                   <ListView.ItemTemplate>
                     <DataTemplate>
-                      <TextBlock Text="{Binding ArticleName}" TextWrapping="Wrap" MinHeight="50"/>
+                      <StackPanel>
+                        <TextBlock Text="{Binding Name}" TextWrapping="Wrap" MinHeight="50"/>
+                        <ListView ItemsSource="{Binding Colors}">
+                          <ListView.ItemTemplate>
+                            <DataTemplate>
+                              <StackPanel>
+                                <TextBlock Text="{Binding ColorName}"/>
+                              </StackPanel>
+                            </DataTemplate>
+                          </ListView.ItemTemplate>
+                        </ListView>
+                      </StackPanel>
                     </DataTemplate>
                   </ListView.ItemTemplate>
                 </ListView>

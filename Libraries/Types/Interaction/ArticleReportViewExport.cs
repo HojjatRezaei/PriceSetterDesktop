@@ -3,7 +3,7 @@
     using WPFCollection.Data.Statics;
     using WPFCollection.Data.Types.Generic;
 
-    public class ArticleView
+    public class ArticleReportViewExport
     {
         public string ArticleName { get; set; } = string.Empty;
         public string ArticleColor { get; set; } = string.Empty;

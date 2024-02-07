@@ -27,22 +27,18 @@
             db.CreateTable<URLType>(nameof(URLType));
             db.CreateTable<XPathItem>(nameof(XPathItem));
             CurrentContent = new ArticleViewModel();
-            DataHolder.Articles = HTTPUtility.SendGETRequest<Article>("https://vetos-mobile.com/hojjatDebugTest/api/GetArticleList");
+            DataHolder.UpdateArticleList();
         }
         private object _currentContent;
-        
         public object CurrentContent
         {
             get { return _currentContent; }
             set { _currentContent = value; PropertyCall(); }
         }
-
-
         public ICommand GotoReportPage { get; set; } = new FastCommand
             ((object parameter) => { DashboardViewModel model = (DashboardViewModel)parameter; model.GotoReportPageHandler(); }, (object parameter) => { return true; });
         public ICommand GotoCreateArticlePage { get; set; } = new FastCommand
             ((object parameter) => { DashboardViewModel model = (DashboardViewModel)parameter; model.GotoCreateArticlePageHandler(); }, (object parameter) => { return true; });
-
         private void GotoReportPageHandler()
         {
             CurrentContent = new ReportViewModel();

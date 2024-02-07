@@ -24,7 +24,7 @@
             _urlTable = _dataBase.GetTable<URLType>(nameof(URLType));
         }
 
-        public ViewCollection<ArticleView> ArticleList
+        public ViewCollection<ArticleReportViewExport> ArticleList
         { get => _articleList; set { _articleList = value; PropertyCall(); } }
         public ICommand ExcelOutputCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.ExcelOutputCommandHandler(); }, (object parameter) => { return true; });
@@ -110,7 +110,7 @@
             foreach (var details in item.ArticleDetails)
             {
                 //add new ArticleView object and add stored article name and founded color inside loop
-                ArticleView newArticleView = new ArticleView()
+                ArticleReportViewExport newArticleView = new ArticleReportViewExport()
                 {
                     ArticleColor = details.Color,
                     ArticleName = articleName,
@@ -159,10 +159,10 @@
                 }
             }
         }
-        private List<ArticleView> _finalList = [];
+        private List<ArticleReportViewExport> _finalList = [];
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Provider> _providerTable;
         private readonly XMLTable<URLType> _urlTable;
-        private ViewCollection<ArticleView> _articleList;
+        private ViewCollection<ArticleReportViewExport> _articleList;
     }
 }

@@ -35,11 +35,11 @@
         { get => _currentURL; set { _currentURL = value; PropertyCall(); } }
         public Provider SelectedProvider
         { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
-        public Article SelectedArticle
+        public ArticleGroupView SelectedArticle
         { get => _selectedArticle; set { _selectedArticle = value; PropertyCall(); } }
         public ViewCollection<Provider> ListOfProviders
         { get => _listOfProviders; set { _listOfProviders = value; PropertyCall(); } }
-        public ViewCollection<Article> ListofArticles
+        public ViewCollection<ArticleGroupView> ListofArticles
         { get => _listofArticles; set { _listofArticles = value; PropertyCall(); } }
         public ICommand GotoPrivdersPageCommand { get; set; } = new FastCommand
             ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.GotoProvidersPageCommandHandler(); }, (object parameter) => { return true; });
@@ -79,13 +79,13 @@
             //update values in other tables 
             //update url and xpath
             //check if any details have been entered in database related to article and provider
-            var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ElementSeed && x.ArticleID == SelectedArticle.ArticleID);
+            var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ElementSeed && x.ArticleID == SelectedArticle.ID);
             if(urlSearchResult != null)
             {
                 //update information for xpath and url in table
                 var newURL = CurrentURL;
                 newURL.ProviderID = SelectedProvider.ElementSeed;
-                newURL.ArticleID = SelectedArticle.ArticleID;
+                newURL.ArticleID = SelectedArticle.ID;
                 _urlTypeTable.Update(urlSearchResult.ElementSeed,newURL);
             }
             else
@@ -95,7 +95,7 @@
                     //add information for xpath and url to the table
                     var newURL = CurrentURL;
                     newURL.ProviderID = SelectedProvider.ElementSeed;
-                    newURL.ArticleID = SelectedArticle.ArticleID;
+                    newURL.ArticleID = SelectedArticle.ID;
                     _urlTypeTable.Add(newURL);
                 }
             }
@@ -109,11 +109,11 @@
         }
         private void UpdateArticleList()
         {
-            ListofArticles = DataHolder.Articles;
+            ListofArticles = DataHolder.ArticleGroups;
         }
-        private void UpdateProviderList(Article? art = null)
+        private void UpdateProviderList(ArticleGroupView? art = null)
         {
-            Article ArticleSelection;
+            ArticleGroupView ArticleSelection;
             if(art != null)
             {
                 ArticleSelection = art;
@@ -127,7 +127,7 @@
                 ListOfProviders = _providerTable.List;
                 return;
             }
-            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ArticleID);
+            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ID);
             var providerList = _providerTable.List;
             foreach (var provider in providerList)
             {
@@ -138,7 +138,7 @@
         }
         private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
         {
-            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is Article selectedItem)
+            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is ArticleGroupView selectedItem)
             {
                 castedModel.UpdateProviderList(selectedItem);
                 if (castedModel.SelectedProvider != null)
@@ -165,12 +165,12 @@
                 selection = providerSelection;
             }
             
-            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ArticleID && x.ProviderID == selection.ElementSeed);
+            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ID && x.ProviderID == selection.ElementSeed);
             if (searchResult != null)
             {
                 CurrentURL = new URLType()
                 {
-                    ArticleID = SelectedArticle.ArticleID,
+                    ArticleID = SelectedArticle.ID,
                     ProviderID = selection.ElementSeed,
                     URL = searchResult.URL,
                     ElementSeed = searchResult.ElementSeed
@@ -185,9 +185,9 @@
         private string _currentXPath=string.Empty;
         private URLType _currentURL=new();
         private Provider _selectedProvider;
-        private Article _selectedArticle;
+        private ArticleGroupView _selectedArticle;
         private ViewCollection<Provider> _listOfProviders;
-        private ViewCollection<Article> _listofArticles;
+        private ViewCollection<ArticleGroupView> _listofArticles;
         private ViewCollection<Provider> _unSetterProvider;
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Provider> _providerTable;
