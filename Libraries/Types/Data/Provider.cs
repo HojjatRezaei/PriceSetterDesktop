@@ -18,10 +18,7 @@
         {
             get
             {
-                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<Container>(nameof(Container));
-                return tb.List.Where(x => x.ProviderID == ID).ToList();
-
+                return APIDataStorage.ContainerManager.List.Where(x => x.ProviderID == ID).ToList();
             }
 
         }

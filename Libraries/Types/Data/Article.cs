@@ -9,16 +9,16 @@
         {
 
         }
-        public int ArticleID { get; set; }
-        public string ArticleName { get; set; }
-        public int ColorMetaID { get; set; }
-        public string ColorName { get; set; }
-        public int PriceMetaID { get; set; }
-        public double PriceValue { get; set; }
+        public int ID { get; set; } = -1;
+        public string ArticleName { get; set; } = string.Empty;
+        public int ColorMetaID { get; set; } = -1;
+        public string ColorName { get; set; } = string.Empty;
+        public int PriceMetaID { get; set; } = -1;
+        public double PriceValue { get; set; } = -1;
 
         public Article ConvertFromJson(JToken jObjectItem)
         {
-            ArticleID = jObjectItem.Value<int>("ArticleID");
+            ID = jObjectItem.Value<int>("ArticleID");
             ArticleName = jObjectItem.Value<string>("ArticleName") ?? "";
             ColorMetaID = jObjectItem.Value<int>("ColorID");
             ColorName = jObjectItem.Value<string>("ColorName") ?? "";
@@ -31,7 +31,7 @@
         {
             var jobject = new JObject
             {
-                { nameof(ArticleID), ArticleID },
+                { nameof(ID), ID },
                 { nameof(ArticleName), ArticleName },
                 { nameof(ColorMetaID), ColorMetaID },
                 { nameof(ColorName), ColorName },

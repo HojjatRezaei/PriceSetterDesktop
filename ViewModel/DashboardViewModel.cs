@@ -8,11 +8,10 @@
     {
         public DashboardViewModel()
         {
-            DataHolder.PullDataFromWeb();
             CurrentContent = new ArticleViewModel();
         }
-        private object _currentContent;
-        public object CurrentContent
+        private object? _currentContent=null;
+        public object? CurrentContent
         {
             get { return _currentContent; }
             set { _currentContent = value; PropertyCall(); }

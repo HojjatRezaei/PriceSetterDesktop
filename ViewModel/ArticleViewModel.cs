@@ -16,9 +16,6 @@
     {
         public ArticleViewModel()
         {
-            _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
-            _urlTypeTable = _dataBase.GetTable<Url>(nameof(Url));
             UpdateArticleList();
             UpdateProviderList(null);
         }
@@ -75,14 +72,14 @@
             //update values in other tables 
             //update url and xpath
             //check if any details have been entered in database related to article and provider
-            var urlSearchResult = _urlTypeTable.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ID && x.ArticleID == SelectedArticle.ID);
+            var urlSearchResult = APIDataStorage.UrlManager.List.FirstOrDefault(x => x.ProviderID == SelectedProvider.ID && x.ArticleID == SelectedArticle.ID);
             if (urlSearchResult != null)
             {
                 //update information for xpath and url in table
                 var newURL = CurrentURL;
                 newURL.ProviderID = SelectedProvider.ID;
                 newURL.ArticleID = SelectedArticle.ID;
-                _urlTypeTable.Update(urlSearchResult.ID, newURL);
+                APIDataStorage.UrlManager.Update(newURL, urlSearchResult.ID);
             }
             else
             {
@@ -92,7 +89,7 @@
                     var newURL = CurrentURL;
                     newURL.ProviderID = SelectedProvider.ID;
                     newURL.ArticleID = SelectedArticle.ID;
-                    _urlTypeTable.Add(newURL);
+                    APIDataStorage.UrlManager.Add(newURL);
                 }
             }
             //check if any value have changed
@@ -105,6 +102,7 @@
         }
         private void UpdateArticleList()
         {
+            DataHolder.PullArticleList();
             ListofArticles = DataHolder.ArticleGroups.ToList();
         }
         private void UpdateProviderList(ArticleGroupView? art = null)
@@ -120,11 +118,11 @@
             }
             else
             {
-                ListOfProviders = _providerTable.List;
+                ListOfProviders = APIDataStorage.ProviderManager.List;
                 return;
             }
-            var urlList = _urlTypeTable.List.Where(x => x.ArticleID == ArticleSelection.ID);
-            var providerList = _providerTable.List;
+            var urlList = APIDataStorage.UrlManager.List.Where(x => x.ArticleID == ArticleSelection.ID);
+            var providerList = APIDataStorage.ProviderManager.List;
             foreach (var provider in providerList)
             {
                 provider.HaveURL = urlList.FirstOrDefault(x => x.ProviderID == provider.ID) != null;
@@ -152,7 +150,7 @@
         private void UpdateURLInfo(Provider? providerSelection = null)
         {
             Provider selection = providerSelection == null ? SelectedProvider : providerSelection;
-            var searchResult = _urlTypeTable.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ID && x.ProviderID == selection.ID);
+            var searchResult = APIDataStorage.UrlManager.List.FirstOrDefault(x => x.ArticleID == SelectedArticle.ID && x.ProviderID == selection.ID);
             CurrentURL = searchResult != null
                 ? new Url()
                 {
@@ -171,8 +169,5 @@
         private ViewCollection<Provider> _listOfProviders;
         private ViewCollection<ArticleGroupView> _listofArticles;
         private ViewCollection<Provider> _unSetterProvider;
-        private readonly XMLDataBase _dataBase;
-        private readonly XMLTable<Provider> _providerTable;
-        private readonly XMLTable<Url> _urlTypeTable;
     }
 }

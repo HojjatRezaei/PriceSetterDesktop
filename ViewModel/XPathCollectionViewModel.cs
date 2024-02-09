@@ -5,22 +5,15 @@
     using System.Windows;
     using System.Windows.Input;
     using WPFCollection.Data.List;
-    using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
 
     public class XPathCollectionViewModel : BaseDialog
     {
         public XPathCollectionViewModel()
         {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _xPathTable = db.GetTable<PathItem>(nameof(PathItem));
-            _containerXPathTable = db.GetTable<Container>(nameof(Container));
         }
         public XPathCollectionViewModel(Provider providerSelection)
         {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _xPathTable = db.GetTable<PathItem>(nameof(PathItem));
-            _containerXPathTable = db.GetTable<Container>(nameof(Container));
             CurrentContainer.ProviderID = providerSelection.ID;
             UpdateList();
         }
@@ -62,7 +55,7 @@
                 return;
             }
             CurrentXPathItem.ContainerID = SelectedContainer.ID;
-            _xPathTable.Add(CurrentXPathItem);
+            APIDataStorage.PathManager.Add(CurrentXPathItem);
             CurrentXPathItem = new();
             PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -80,7 +73,7 @@
                 return;
             }
             CurrentXPathItem.ContainerID = SelectedContainer.ID;
-            _xPathTable.Update(PathItemSelection.ID, CurrentXPathItem);
+            APIDataStorage.PathManager.Update(CurrentXPathItem, PathItemSelection.ID);
             CurrentXPathItem = new();
             PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -92,13 +85,13 @@
                 MessageBox.Show("آدرس منبعی جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _xPathTable.Remove(PathItemSelection.ID);
+            APIDataStorage.PathManager.Remove(PathItemSelection.ID);
             PropertyCall(nameof(SelectedContainer));
             MessageBox.Show("عملیات با موفقیت انجام شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
         }
         private void SubmitContainerCommandHandler()
         {
-            if (string.IsNullOrEmpty(CurrentContainer.ContainerPath))
+            if (string.IsNullOrEmpty(CurrentContainer.Path))
             {
                 MessageBox.Show("آدرس/نوع ظرف خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -108,7 +101,7 @@
                 MessageBox.Show("کد تامین کننده ثبت نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _containerXPathTable.Add(CurrentContainer);
+            APIDataStorage.ContainerManager.Add(CurrentContainer);
             UpdateList();
             var seed = CurrentContainer.ProviderID;
             CurrentContainer = new() { ProviderID = seed };
@@ -116,7 +109,7 @@
         }
         private void UpdateContainerCommandHandler()
         {
-            if (string.IsNullOrEmpty(CurrentContainer.ContainerPath))
+            if (string.IsNullOrEmpty(CurrentContainer.Path))
             {
                 MessageBox.Show("آدرس/نوع ظرف خالی میباشد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -131,7 +124,7 @@
                 MessageBox.Show("ظرفی جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            _containerXPathTable.Update(SelectedContainer.ID, CurrentContainer);
+            APIDataStorage.ContainerManager.Update(CurrentContainer, SelectedContainer.ID);
             UpdateList();
             var seed = CurrentContainer.ProviderID;
             CurrentContainer = new() { ProviderID = seed };
@@ -144,9 +137,11 @@
                 MessageBox.Show("ظرفی جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            var result = _xPathTable.List.Where(x => x.ContainerID == SelectedContainer.ID);
-            _xPathTable.Remove(result);
-            _containerXPathTable.Remove(SelectedContainer.ID);
+            APIDataStorage.PathManager.List.Where(x => x.ContainerID == SelectedContainer.ID).ToList().ForEach((pathItem) => 
+            {
+                APIDataStorage.PathManager.Remove(pathItem.ID);
+            });
+            APIDataStorage.ContainerManager.Remove(SelectedContainer.ID);
             //remove every related xpath to this container
             UpdateList();
             var seed = CurrentContainer.ProviderID;
@@ -155,7 +150,7 @@
         }
         private void UpdateList()
         {
-            ContainerList = _containerXPathTable.List.Where(x => x.ProviderID == CurrentContainer.ProviderID).ToList();
+            ContainerList = APIDataStorage.ContainerManager.List.Where(x => x.ProviderID == CurrentContainer.ProviderID).ToList();
         }
 
         private PathItem _currentXPathItem = new();
@@ -163,8 +158,6 @@
         private Container _selectedContainer = new();
         private Container _currentContainer = new();
         private ViewCollection<Container> _containerList = [];
-        private readonly XMLTable<PathItem> _xPathTable;
-        private readonly XMLTable<Container> _containerXPathTable;
         public override void FocusOnStartupObject()
         {
             //do nothing

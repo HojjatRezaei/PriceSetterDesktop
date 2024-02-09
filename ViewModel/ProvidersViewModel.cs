@@ -5,15 +5,11 @@
     using System.Windows;
     using System.Windows.Input;
     using WPFCollection.Data.List;
-    using WPFCollection.Data.Types;
-    using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
     public class ProvidersViewModel : BaseDialog
     {
         public ProvidersViewModel()
         {
-            _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
             UpdateProviderList();
         }
 
@@ -49,7 +45,7 @@
             //get provider name 
             var newItem = CurrentProvider;
             //check if exist in table 
-            var searchResult = _providerTable.List.FirstOrDefault(x => x.Equals(newItem));
+            var searchResult = APIDataStorage.ProviderManager.List.FirstOrDefault(x => x.Equals(newItem));
             if (searchResult != null)
             {
                 //promt user that provider name exist in database
@@ -59,7 +55,7 @@
             else
             {
                 //insert new value 
-                _providerTable.Add(newItem);
+                APIDataStorage.ProviderManager.Add(newItem);
                 //promt user that adding new item is succesfull
                 MessageBox.Show("کالا با موفقیت اضافه شد", "موفق", MessageBoxButton.OK, MessageBoxImage.Information);
             }
@@ -82,7 +78,7 @@
                 return;
             var newItem = CurrentProvider;
 
-            _providerTable.Update(SelectedProvider.ID, newItem);
+            APIDataStorage.ProviderManager.Update(newItem, SelectedProvider.ID);
             UpdateProviderList();
             CurrentProvider = new();
             MessageBox.Show("عملیات بروزرسانی با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
@@ -100,13 +96,13 @@
             var result = MessageBox.Show("ایا از حذف اطلاعات اطمینان دارید ؟", "سوال", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.No)
                 return;
-            _providerTable.Remove(SelectedProvider.ID);
+            APIDataStorage.ProviderManager.Remove(SelectedProvider.ID);
             UpdateProviderList();
             MessageBox.Show("عملیات حذف با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
         }
         private void UpdateProviderList()
         {
-            ProvidersList = _providerTable.List;
+            ProvidersList = APIDataStorage.ProviderManager.List;
         }
         public override void FocusOnStartupObject()
         {
@@ -115,9 +111,6 @@
         private Provider _selectedProvider = new();
         private Provider _currentProvider = new();
         private ViewCollection<Provider> _providersList = [];
-
-        private readonly XMLTable<Provider> _providerTable;
-        private readonly XMLDataBase _dataBase;
 
 
     }

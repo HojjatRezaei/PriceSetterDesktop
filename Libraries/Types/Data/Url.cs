@@ -12,10 +12,10 @@
 
     public partial class Url : IJsonConverter<Url>
     {
-        public string URL { get; set; } = "";
-        public int ProviderID { get; set; } = -1;
-        public int ArticleID { get; set; } = -1;
         public int ID { get; set; } = -1;
+        public string URL { get; set; } = "";
+        public int ArticleID { get; set; } = -1;
+        public int ProviderID { get; set; } = -1;
 
         private List<ArticleDetails> ScrapWeb(WebDriver driver, Provider provider)
         {
@@ -32,9 +32,9 @@
             //create new instance for javascript
             IJavaScriptExecutor scripter = driver;
             //try to find click and extract containers
-            var clickAndExtractContainers = provider.Containers.Where(x => x.ContainerType == Types.Enum.ContainerType.ClickAndExtract);
+            var clickAndExtractContainers = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndExtract);
             //try to find list containers
-            var listContainers = provider.Containers.Where(x => x.ContainerType == Types.Enum.ContainerType.List);
+            var listContainers = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.List);
             if (clickAndExtractContainers != null && clickAndExtractContainers.Any())
             {
                 var priceViewList = new List<ArticleDetails>();
@@ -46,14 +46,14 @@
                 //wait for DOM to load completely
                 try
                 {
-                    waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
+                    waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
                 }
                 catch (Exception)
                 {
                     //if couldn't find element , goto the next container
                     ReturnError("خطا در پیدا کردن ظرف", driver);
                 }
-                var clickElementContainer = driver.FindElement(By.XPath(clickContainer.ContainerPath));
+                var clickElementContainer = driver.FindElement(By.XPath(clickContainer.Path));
                 var clickElements = clickElementContainer.FindElements(By.XPath("*"));
                 foreach (IWebElement clickElement in clickElements)
                 {
@@ -102,12 +102,12 @@
                                 continue;
                             //extract container elements
                             //check if containerpath is valid
-                            var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                            var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
                             //check if CheckResult is Valid
                             if (checkResult is not IWebElement)
                                 continue;
                             //get rows from ListContainer Object
-                            var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
+                            var scrapResultElements = driver.FindElements(By.XPath(listContainer.Path));
                             //loop through each row
                             foreach (IWebElement scrapElement in scrapResultElements)
                             {
@@ -156,10 +156,10 @@
                             continue;
                         //extract container elements
                         //check if containerpath is valid
-                        var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.ContainerPath}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                        var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
                         if (checkResult is not IWebElement)
                             continue;
-                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.ContainerPath));
+                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.Path));
                         foreach (IWebElement scrapElement in scrapResultElements)
                         {
                             ArticleDetails articleDetails = new()
@@ -235,9 +235,14 @@
                     _ => ReturnError("مشکل در تشخیص نوع استخراج", driver),
                 };
         }
+        public Provider? GetProvider()
+        {
+            var result = APIDataStorage.ProviderManager.List.FirstOrDefault(x => x.ID == ProviderID);
+            return result;
+        }
         public string GetArticleName()
         {
-            var result = DataHolder.Articles.FirstOrDefault(x => x.ArticleID == ArticleID);
+            var result = APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == ArticleID);
             return result == null ? "" : result.ArticleName;
         }
         public Url ConvertFromJson(JToken jObjectItem)

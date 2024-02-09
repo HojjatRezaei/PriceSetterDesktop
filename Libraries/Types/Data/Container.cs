@@ -1,23 +1,30 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
+    using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Enum;
     using WPFCollection.Data.Interface.Generic;
 
     public class Container : IJsonConverter<Container>
     {
+        public int ID { get; set; } = -1;
         public int ProviderID { get; set; } = -1;
-        public string ContainerPath { get; set; } = "";
-        public ContainerType ContainerType { get; set; } = 0;
-        public List<PathItem> PathItems { get; }
-        public int ID { get; set; }
+        public string Path { get; set; } = "";
+        public ContainerType Type { get; set; } = 0;
+        public List<PathItem> PathItems
+        {
+            get
+            {
+                return APIDataStorage.PathManager.List.Where(x => x.ContainerID == ID).ToList();
+            }
+        }
 
         public Container ConvertFromJson(JToken jObjectItem)
         {
             ID = jObjectItem.Value<int>("ID");
             ProviderID = jObjectItem.Value<int>("ProviderID");
-            ContainerPath = jObjectItem.Value<string>("ContainerPath") ?? "";
-            ContainerType = (ContainerType)jObjectItem.Value<int>("ContainerType");
+            Path = jObjectItem.Value<string>("ContainerPath") ?? "";
+            Type = (ContainerType)jObjectItem.Value<int>("ContainerType");
             return this;
         }
 
@@ -27,8 +34,8 @@
             {
                 { nameof(ID), ID },
                 { nameof(ProviderID), ProviderID },
-                { nameof(ContainerPath), ContainerPath },
-                { nameof(ContainerType), (int)ContainerType }
+                { nameof(Path), Path },
+                { nameof(Type), (int)Type }
             };
             return jobject;
         }

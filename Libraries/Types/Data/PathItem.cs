@@ -9,10 +9,10 @@
         {
 
         }
+        public int ID { get; set; } = -1;
         public int ContainerID { get; set; }
         public string Path { get; set; } = "";
         public string PathTag { get; set; } = "";
-        public int ID { get; set; } = -1;
         public PathItem ConvertFromJson(JToken jObjectItem)
         {
             ContainerID = jObjectItem.Value<int>("ContainerID");
@@ -25,10 +25,10 @@
         {
             var jobject = new JObject
             {
+                { nameof(ID), ID },
                 { nameof(ContainerID), ContainerID },
                 { nameof(Path), Path },
                 { nameof(PathTag), PathTag },
-                { nameof(ID), ID }
             };
             return jobject;
         }

@@ -16,9 +16,6 @@
     {
         public ReportViewModel()
         {
-            _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
-            _urlTable = _dataBase.GetTable<Url>(nameof(Url));
         }
 
         public ViewCollection<ArticleReportViewExport> ArticleList
@@ -49,7 +46,7 @@
             //create priceViewList
             var scrappedArticleList = new List<ScrappedAritcles>();
             //get a list of urls
-            var urlList = _urlTable.List.ToList();
+            var urlList = APIDataStorage.UrlManager.List.ToList();
             //loop through urls
             foreach (Url url in urlList)
             {
@@ -157,9 +154,6 @@
             }
         }
         private List<ArticleReportViewExport> _finalList = [];
-        private readonly XMLDataBase _dataBase;
-        private readonly XMLTable<Provider> _providerTable;
-        private readonly XMLTable<Url> _urlTable;
         private ViewCollection<ArticleReportViewExport> _articleList;
     }
 }
