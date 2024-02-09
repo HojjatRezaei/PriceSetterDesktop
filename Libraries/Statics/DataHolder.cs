@@ -7,12 +7,38 @@
     {
         public static XmlManager XMLData { get; set; } = new();
         public static string XMLDataBaseName { get; set; } = "appDataXML";
+        /// <summary>
+        /// web generated
+        /// </summary>
         public static List<Article> Articles { get; set; } = [];
+        /// <summary>
+        /// back code generated
+        /// </summary>
         public static List<ArticleGroupView> ArticleGroups { get; set; } = [];
-        public static void UpdateArticleList()
+        public static void PullDataFromWeb()
+        {
+            //fetch article list using api
+            PullArticleList();
+        }
+        public static void PushDataToWeb()
+        {
+            //extract stored data in xml tables and push it to the web using api 
+
+            //fetch and push Container Items
+
+            //fetch and push xpath items
+
+            //fetch and push provider items
+
+            //fetch and push url list
+        }
+        /// <summary>
+        /// fetch article list from vetos website
+        /// </summary>
+        public static void PullArticleList()
         {
             Articles.Clear();
-            Articles = HTTPUtility.SendGETRequest<Article>("https://vetos-mobile.com/hojjatDebugTest/api/GetArticleList");
+            Articles = HTTPUtility.SendGETRequest<Article>("https://vetos-mobile.com/hojjatDebugTest/api/fetch/vetosdb/GetArticleList");
             ArticleGroups = Articles.GroupBy(x => x.ArticleID).Select((x) =>
             {
                 var newArticleView = new ArticleGroupView()
@@ -26,7 +52,7 @@
                     var extractedColor = new ArticleColorView()
                     {
                         ColorMetaID = y.ColorMetaID,
-                        ColorName = y.ColorName ,
+                        ColorName = y.ColorName,
                         PriceMetaID = y.PriceMetaID,
                         PriceValue = y.PriceValue,
                     };

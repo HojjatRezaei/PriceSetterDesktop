@@ -1,15 +1,9 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Enum
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-
-    public enum ExtractionTypes
+    public enum ExtractionTypes : int
     {
-        Scrap = 0 , 
-        Excel = 1 ,
+        Scrap = 0,
+        Excel = 1,
         Image = 2,
     }
 }

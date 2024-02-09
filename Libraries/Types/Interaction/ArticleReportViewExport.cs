@@ -1,17 +1,14 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
-    using WPFCollection.Data.Statics;
-    using WPFCollection.Data.Types.Generic;
-
     public class ArticleReportViewExport
     {
         public string ArticleName { get; set; } = string.Empty;
         public string ArticleColor { get; set; } = string.Empty;
-        public string ArticleDispaly 
+        public string ArticleDispaly
         {
             get
             {
-                return ArticleName + " " + ArticleColor;    
+                return ArticleName + " " + ArticleColor;
             }
         }
         public List<ProviderView> Providers { get; set; } = [];
@@ -24,7 +21,7 @@
             {
                 foreach (TagView tag in provider.ScrappedData)
                 {
-                    if(tag.TagName == "قیمت")
+                    if (tag.TagName == "قیمت")
                     {
                         finalString += $"{articleName};{articleColor};{provider.ProviderName};{tag.TagValue}\n";
                     }

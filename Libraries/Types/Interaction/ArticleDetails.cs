@@ -1,12 +1,8 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
     using PriceSetterDesktop.Libraries.Types.Data;
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
-    
+
     public class ArticleDetails
     {
         public Provider Provider { get; set; }

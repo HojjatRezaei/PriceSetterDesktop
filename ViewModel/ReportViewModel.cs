@@ -1,19 +1,16 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
-    using PriceSetterDesktop.Libraries.Types;
-    using System.Windows.Input;
-    using WPFCollection.Data.Types.Generic;
-    using WPFCollection.Data.Types;
-    using WPFCollection.Style.Base;
-    using PriceSetterDesktop.Libraries.Statics;
-    using WPFCollection.Data.List;
-    using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Chrome;
+    using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
+    using System.Windows.Input;
+    using WPFCollection.Data.List;
     using WPFCollection.Data.Statics;
-    using OpenQA.Selenium.Internal;
-    using OpenQA.Selenium.Support.UI;
+    using WPFCollection.Data.Types;
+    using WPFCollection.Data.Types.Generic;
+    using WPFCollection.Style.Base;
 
     public class ReportViewModel : BaseControl
     {
@@ -21,7 +18,7 @@
         {
             _dataBase = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
             _providerTable = _dataBase.GetTable<Provider>(nameof(Provider));
-            _urlTable = _dataBase.GetTable<URLType>(nameof(URLType));
+            _urlTable = _dataBase.GetTable<Url>(nameof(Url));
         }
 
         public ViewCollection<ArticleReportViewExport> ArticleList
@@ -54,7 +51,7 @@
             //get a list of urls
             var urlList = _urlTable.List.ToList();
             //loop through urls
-            foreach (URLType url in urlList)
+            foreach (Url url in urlList)
             {
                 //get article name based on url
                 var articleName = url.GetArticleName();
@@ -72,7 +69,7 @@
                     //check extracted colors , if found any match , remove other colors and set the main color for article
                     foreach (var tag in scrappedArticleDetails.Tags)
                     {
-                        if(tag.TagName == "رنگ")
+                        if (tag.TagName == "رنگ")
                         {
                             if (Name.Contains(tag.TagValue))
                             {
@@ -162,7 +159,7 @@
         private List<ArticleReportViewExport> _finalList = [];
         private readonly XMLDataBase _dataBase;
         private readonly XMLTable<Provider> _providerTable;
-        private readonly XMLTable<URLType> _urlTable;
+        private readonly XMLTable<Url> _urlTable;
         private ViewCollection<ArticleReportViewExport> _articleList;
     }
 }

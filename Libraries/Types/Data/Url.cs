@@ -1,5 +1,6 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
+    using Newtonsoft.Json.Linq;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Support.UI;
     using PriceSetterDesktop.Libraries.Statics;
@@ -7,23 +8,14 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using WPFCollection.Data.Attributes;
-    using WPFCollection.Data.Interface;
+    using WPFCollection.Data.Interface.Generic;
 
-    [XmlMarker(nameof(URLType))]
-    public partial class URLType :  IXmlItem
+    public partial class Url : IJsonConverter<Url>
     {
-        public URLType()
-        {
-
-        }
-        [XmlItem(nameof(URL), "string")]
         public string URL { get; set; } = "";
-        [XmlItem(nameof(ProviderID), "int")]
         public int ProviderID { get; set; } = -1;
-        [XmlItem(nameof(ArticleID), "int")]
         public int ArticleID { get; set; } = -1;
-        public int ElementSeed { get; set; } = -1;
+        public int ID { get; set; } = -1;
 
         private List<ArticleDetails> ScrapWeb(WebDriver driver, Provider provider)
         {
@@ -76,27 +68,27 @@
                     clickElement.Click();
                     //find next click element and loop through it 
                     var clickContainerCounter = clickAndExtractContainers.Count();
-                    if(clickContainerCounter > 1)
+                    if (clickContainerCounter > 1)
                     {
 
                     }
                     //wait 1 second to give html page some times to load AJAX
                     Thread.Sleep(1000);
                     //extract resources using xpath
-                    foreach (XPathItem pathItem in clickContainer.PathItems)
+                    foreach (PathItem pathItem in clickContainer.PathItems)
                     {
                         //collection resources with straight xpath 
-                        var extractionResult = driver.FindElement(By.XPath(pathItem.XPath)).Text;
+                        var extractionResult = driver.FindElement(By.XPath(pathItem.Path)).Text;
                         //check if extractionResult have any definition of color ,
                         //if it does , set the extraction result as PriceView Color
-                        if (extractionResult.Contains("رنگ") || pathItem.XPathTag == "رنگ")
+                        if (extractionResult.Contains("رنگ") || pathItem.PathTag == "رنگ")
                         {
                             newPriceView.Color = extractionResult;
                         }
                         //create tagView object and add it to the tagList
                         else
                         {
-                            TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = extractionResult };
+                            TagView newTag = new() { TagName = pathItem.PathTag, TagValue = extractionResult };
                             newPriceView.Tags.Add(newTag);
                         }
                     }
@@ -104,7 +96,7 @@
                     if (listContainers != null && listContainers.Any())
                     {
                         //loop throught each row of the list and collect resources
-                        foreach (ContainerXPath listContainer in listContainers)
+                        foreach (Container listContainer in listContainers)
                         {
                             if (listContainer == null || listContainer.PathItems.Count == 0)
                                 continue;
@@ -120,18 +112,18 @@
                             foreach (IWebElement scrapElement in scrapResultElements)
                             {
                                 //open up xpathitems book
-                                foreach (XPathItem pathItem in listContainer.PathItems)
+                                foreach (PathItem pathItem in listContainer.PathItems)
                                 {
                                     //extract value from scrapResultElements
                                     try
                                     {
                                         //try to find element inside a row 
-                                        var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
+                                        var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.Path}"));
                                         //if element founded
                                         if (listScrapResult != null)
                                         {
                                             //create new tag and add it to the collection
-                                            TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
+                                            TagView newTag = new() { TagName = pathItem.PathTag, TagValue = listScrapResult.Text };
                                             newPriceView.Tags.Add(newTag);
                                         }
                                     }
@@ -147,7 +139,7 @@
                     //return collected result
                     priceViewList.Add(newPriceView);
                 }
-                
+
                 //return scrap result collection
                 return priceViewList;
             }
@@ -158,7 +150,7 @@
                 //if url doesn't have click container , continue with list containers
                 if (listContainers != null && listContainers.Any())
                 {
-                    foreach (ContainerXPath listContainer in listContainers)
+                    foreach (Container listContainer in listContainers)
                     {
                         if (listContainer == null || listContainer.PathItems.Count == 0)
                             continue;
@@ -175,20 +167,20 @@
                                 Provider = provider,
                                 Color = "",
                             };
-                            foreach (XPathItem pathItem in listContainer.PathItems)
+                            foreach (PathItem pathItem in listContainer.PathItems)
                             {
                                 //extract value from scrapResultElements
                                 try
                                 {
-                                    var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.XPath}"));
-                                    if (listScrapResult.Text.Contains("رنگ") || pathItem.XPathTag == "رنگ")
+                                    var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.Path}"));
+                                    if (listScrapResult.Text.Contains("رنگ") || pathItem.PathTag == "رنگ")
                                     {
                                         articleDetails.Color = listScrapResult.Text;
                                     }
                                     //create tagView object and add it to the tagList
                                     else
                                     {
-                                        TagView newTag = new() { TagName = pathItem.XPathTag, TagValue = listScrapResult.Text };
+                                        TagView newTag = new() { TagName = pathItem.PathTag, TagValue = listScrapResult.Text };
                                         articleDetails.Tags.Add(newTag);
                                     }
                                 }
@@ -233,46 +225,39 @@
             //try to get provider object
             Provider? providerObject = GetProvider();
             // if couldn't find provider object , return with error
-            if (providerObject == null) return ReturnError("مشکل در پیدا کردن تامین کننده مربوط به کالا", driver);
-
-            return providerObject.Extraction switch
-            {
-                Types.Enum.ExtractionTypes.Scrap => ScrapWeb(driver, providerObject),
-                Types.Enum.ExtractionTypes.Excel => ScrapExcel(providerObject),
-                Types.Enum.ExtractionTypes.Image => ScrapImage(providerObject),
-                _ => ReturnError("مشکل در تشخیص نوع استخراج", driver),
-            };
-        }
-        public string GetProviderName()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Provider>(nameof(Provider));
-            var result = tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
-            if (result == null)
-                return "";
-            return result.Name;
-        }
-        public Provider? GetProvider()
-        {
-            var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-            var tb = db.GetTable<Provider>(nameof(Provider));
-            return tb.List.FirstOrDefault(x => x.ElementSeed == ProviderID);
+            return providerObject == null
+                ? ReturnError("مشکل در پیدا کردن تامین کننده مربوط به کالا", driver)
+                : providerObject.Extraction switch
+                {
+                    Types.Enum.ExtractionTypes.Scrap => ScrapWeb(driver, providerObject),
+                    Types.Enum.ExtractionTypes.Excel => ScrapExcel(providerObject),
+                    Types.Enum.ExtractionTypes.Image => ScrapImage(providerObject),
+                    _ => ReturnError("مشکل در تشخیص نوع استخراج", driver),
+                };
         }
         public string GetArticleName()
         {
             var result = DataHolder.Articles.FirstOrDefault(x => x.ArticleID == ArticleID);
-            if (result == null)
-                return "";
-            return result.ArticleName;
+            return result == null ? "" : result.ArticleName;
         }
-        public IXmlItem CreateObject()
+        public Url ConvertFromJson(JToken jObjectItem)
         {
+            ID = jObjectItem.Value<int>("ID");
+            ProviderID = jObjectItem.Value<int>("ProviderID");
+            ArticleID = jObjectItem.Value<int>("ArticleID");
+            URL = jObjectItem.Value<string>("Url") ?? string.Empty;
             return this;
         }
-        public string GenerateIdentifier()
+        public JObject CreateJsonObject()
         {
-            //propertyHash;
-            return "";
+            var jobject = new JObject
+            {
+                { nameof(ID), ID },
+                { nameof(ProviderID), ProviderID },
+                { nameof(ArticleID), ArticleID },
+                { nameof(URL), URL }
+            };
+            return jobject;
         }
     }
 }

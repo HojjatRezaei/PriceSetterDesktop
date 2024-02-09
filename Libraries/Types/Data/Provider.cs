@@ -1,70 +1,44 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
+    using Newtonsoft.Json.Linq;
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Enum;
     using System;
-    using System.Xml;
-    using WPFCollection.Data.Attributes;
-    using WPFCollection.Data.Interface;
+    using WPFCollection.Data.Interface.Generic;
 
-    [XmlMarker(nameof(Provider))]
-    public partial class Provider : IXmlItem
+    public partial class Provider : IJsonConverter<Provider>
     {
         public Provider()
         {
         }
-        [XmlItem(nameof(Name), "string")]
+        public int ID { get; set; } = -1;
         public string Name { get; set; } = "";
-        [XmlItem(nameof(Extraction) , "int")]
         public ExtractionTypes Extraction { get; set; } = 0;
-        public List<ContainerXPath> Containers 
+        public List<Container> Containers
         {
             get
             {
                 var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<ContainerXPath>(nameof(ContainerXPath));
-                return tb.List.Where(x => x.ProviderID == ElementSeed).ToList();
+                var tb = db.GetTable<Container>(nameof(Container));
+                return tb.List.Where(x => x.ProviderID == ID).ToList();
 
             }
-        
-        }
-        public IEnumerable<Prices> Prices
-        {
-            get
-            {
-                var db = DataHolder.XMLData.GetDataBase(DataHolder.XMLDataBaseName);
-                var tb = db.GetTable<Prices>(nameof(Prices));
-                return tb.List.Where(x => x.ProviderID == ElementSeed);
-            }
+
         }
         public bool HaveURL { get; set; } = false;
-        public bool HaveData 
-        { 
-            get 
+        public bool HaveData
+        {
+            get
             {
                 return Containers.Count != 0;
             }
         }
-        public int ElementSeed { get; set; } = -1;
 
-        public IXmlItem CreateObject()
-        {
-            return this;
-        }
-
-        public string GenerateIdentifier()
-        {
-            //propertyHash;
-            return "";
-        }
         public override bool Equals(object? obj)
         {
             var CompareObject = obj as Provider;
-            if (CompareObject == null)
-                return false;
-            return Name == CompareObject.Name;
+            return CompareObject == null ? false : Name == CompareObject.Name;
         }
-
         public override int GetHashCode()
         {
             return HashCode.Combine(Name);
@@ -72,6 +46,25 @@
         public override string ToString()
         {
             return $"{Name}";
+        }
+
+        public Provider ConvertFromJson(JToken jObjectItem)
+        {
+            ID = jObjectItem.Value<int>("ID");
+            Name = jObjectItem.Value<string>("Name") ?? "";
+            Extraction = (ExtractionTypes)jObjectItem.Value<int>("Extraction");
+            return this;
+        }
+
+        public JObject CreateJsonObject()
+        {
+            var jobject = new JObject
+            {
+                { nameof(ID), ID },
+                { nameof(Name), Name },
+                { nameof(Extraction),(int)Extraction }
+            };
+            return jobject;
         }
     }
 }

@@ -50,7 +50,7 @@
             var newItem = CurrentProvider;
             //check if exist in table 
             var searchResult = _providerTable.List.FirstOrDefault(x => x.Equals(newItem));
-            if (searchResult!=null)
+            if (searchResult != null)
             {
                 //promt user that provider name exist in database
                 MessageBox.Show("کالا در لیست تامین کننده ها وجود دارد", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -70,7 +70,7 @@
         }
         private void UpdateProviderInfoCommandHandler()
         {
-            if(SelectedProvider == null)
+            if (SelectedProvider == null)
             {
                 //promt user that no provider have been selected for updating operation 
                 MessageBox.Show("تامین کننده ای جهت بروزرسانی انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -82,7 +82,7 @@
                 return;
             var newItem = CurrentProvider;
 
-            _providerTable.Update(SelectedProvider.ElementSeed, newItem);
+            _providerTable.Update(SelectedProvider.ID, newItem);
             UpdateProviderList();
             CurrentProvider = new();
             MessageBox.Show("عملیات بروزرسانی با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
@@ -100,7 +100,7 @@
             var result = MessageBox.Show("ایا از حذف اطلاعات اطمینان دارید ؟", "سوال", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.No)
                 return;
-            _providerTable.Remove(SelectedProvider.ElementSeed);
+            _providerTable.Remove(SelectedProvider.ID);
             UpdateProviderList();
             MessageBox.Show("عملیات حذف با موفقیت انجام شد .", "موفق", MessageBoxButton.YesNo, MessageBoxImage.Information);
         }
@@ -112,13 +112,13 @@
         {
             //do nothing
         }
-        private Provider _selectedProvider=new();
-        private Provider _currentProvider=new();
+        private Provider _selectedProvider = new();
+        private Provider _currentProvider = new();
         private ViewCollection<Provider> _providersList = [];
 
         private readonly XMLTable<Provider> _providerTable;
         private readonly XMLDataBase _dataBase;
 
-        
+
     }
 }
