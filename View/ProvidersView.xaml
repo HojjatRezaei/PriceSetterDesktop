@@ -29,7 +29,7 @@
               <TextBlock Text="نوع استخراج : "
                          Grid.Row="1"
                          Grid.Column="0"/>
-              <ComboBox SelectedIndex="{Binding CurrentProvider.Extraction , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+              <ComboBox SelectedIndex="{Binding CurrentProvider.Extraction , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged , Converter={StaticResource ExtractionTypesConverter}}" 
                         Grid.Row="1" 
                         Grid.Column="1"
                         Grid.ColumnSpan="2">
@@ -38,7 +38,7 @@
                 <ComboBoxItem Content="عکس"/>
               </ComboBox>
               <Button Content="استخراج"
-                      Command="{Binding GotoXPathCollection}"
+                      Command="{Binding GotoContainerDefinitionPage}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                       Grid.Row="4"
                       Grid.Column="0"

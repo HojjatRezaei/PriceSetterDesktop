@@ -83,7 +83,7 @@
                 
                 <ComboBox 
                  ItemsSource="{Binding ListOfProviders}" 
-                 SelectedItem="{Binding SelectedProvider , Mode=OneWay , UpdateSourceTrigger=PropertyChanged}"
+                 SelectedItem="{Binding SelectedProvider , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
                  Grid.Row="3"
                  Grid.Column="0"
                  Grid.ColumnSpan="2"

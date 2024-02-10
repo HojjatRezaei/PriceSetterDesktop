@@ -26,7 +26,7 @@
             ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.UpdateProviderInfoCommandHandler(); }, (object parameter) => { return true; });
         public ICommand RemoveProviderInfoCommand { get; set; } = new FastCommand
             ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.RemoveProviderInfoCommandHandler(); }, (object parameter) => { return true; });
-        public ICommand GotoXPathCollection { get; set; } = new FastCommand
+        public ICommand GotoContainerDefinitionPage { get; set; } = new FastCommand
             ((object parameter) => { ProvidersViewModel model = (ProvidersViewModel)parameter; model.GotoContainerDefinitionPageCommand(); }, (object parameter) => { return true; });
 
         private async void GotoContainerDefinitionPageCommand()

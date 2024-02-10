@@ -16,7 +16,10 @@
         public string URL { get; set; } = "";
         public int ArticleID { get; set; } = -1;
         public int ProviderID { get; set; } = -1;
-
+        private string CleanString(string txt)
+        {
+            return "";
+        }
         private List<ArticleDetails> ScrapWeb(WebDriver driver, Provider provider)
         {
             //navigate to the url
@@ -48,10 +51,10 @@
                 {
                     waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
                     //if couldn't find element , goto the next container
-                    ReturnError("خطا در پیدا کردن ظرف", driver);
+                    ReturnError(ex.Message, driver);
                 }
                 var clickElementContainer = driver.FindElement(By.XPath(clickContainer.Path));
                 var clickElements = clickElementContainer.FindElements(By.XPath("*"));
@@ -64,13 +67,38 @@
                     };
                     if (clickElement == null)
                         continue;
+                    //try to find close ad button
+                    ///html/body/div[3]/div[2]
+                    var adDetector = scripter.ExecuteScript($"return document.evaluate(\"/html/body/div[3]/div[2]\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                    if(adDetector is IWebElement adCloseButton)
+                    {
+                        adCloseButton.Click();
+                    }
                     //click on element 
                     clickElement.Click();
                     //find next click element and loop through it 
-                    var clickContainerCounter = clickAndExtractContainers.Count();
-                    if (clickContainerCounter > 1)
+                    var clickAndContinue = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndContinue).FirstOrDefault();
+                    if(clickAndContinue != null)
                     {
-
+                        var diffClickElement = driver.FindElement(By.XPath(clickAndContinue.Path));
+                        //extract all children
+                        var diffClickElementChilds = diffClickElement.FindElements(By.XPath("*"));
+                        //if click element is 1 , ignore the loop and just click on it
+                        foreach (var diffClick in diffClickElementChilds)
+                        {
+                            if (diffClick == null)
+                                continue;
+                            //extract path items
+                            var diffClickPathes = clickAndContinue.PathItems;
+                            var diffPathSearch = diffClickPathes.Where(x => x.PathTag == "Search").FirstOrDefault();
+                            if (diffClickPathes.Count != 0 && diffPathSearch != null)
+                            {
+                                if (diffClick.Text == diffPathSearch.Path || diffClick.Text.Contains(diffPathSearch.Path))
+                                {
+                                    diffClick.Click();
+                                }
+                            }
+                        }
                     }
                     //wait 1 second to give html page some times to load AJAX
                     Thread.Sleep(1000);
@@ -83,12 +111,12 @@
                         //if it does , set the extraction result as PriceView Color
                         if (extractionResult.Contains("رنگ") || pathItem.PathTag == "رنگ")
                         {
-                            newPriceView.Color = extractionResult;
+                            newPriceView.Color = CleanString(extractionResult);
                         }
                         //create tagView object and add it to the tagList
                         else
                         {
-                            TagView newTag = new() { TagName = pathItem.PathTag, TagValue = extractionResult };
+                            TagView newTag = new() { TagName = pathItem.PathTag, TagValue = CleanString(extractionResult) };
                             newPriceView.Tags.Add(newTag);
                         }
                     }
@@ -159,7 +187,7 @@
                         var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
                         if (checkResult is not IWebElement)
                             continue;
-                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.Path));
+                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.Path + "/*"));
                         foreach (IWebElement scrapElement in scrapResultElements)
                         {
                             ArticleDetails articleDetails = new()
@@ -248,9 +276,9 @@
         public Url ConvertFromJson(JToken jObjectItem)
         {
             ID = jObjectItem.Value<int>("ID");
-            ProviderID = jObjectItem.Value<int>("ProviderID");
+            URL = jObjectItem.Value<string>("URL") ?? string.Empty;
             ArticleID = jObjectItem.Value<int>("ArticleID");
-            URL = jObjectItem.Value<string>("Url") ?? string.Empty;
+            ProviderID = jObjectItem.Value<int>("ProviderID");
             return this;
         }
         public JObject CreateJsonObject()
@@ -258,9 +286,9 @@
             var jobject = new JObject
             {
                 { nameof(ID), ID },
-                { nameof(ProviderID), ProviderID },
+                { nameof(URL), URL },
                 { nameof(ArticleID), ArticleID },
-                { nameof(URL), URL }
+                { nameof(ProviderID), ProviderID },
             };
             return jobject;
         }

@@ -63,20 +63,20 @@
                 //loop through scrapped items from web
                 foreach (var scrappedArticleDetails in scrappedArticleDetailsList)
                 {
-                    //check extracted colors , if found any match , remove other colors and set the main color for article
-                    foreach (var tag in scrappedArticleDetails.Tags)
-                    {
-                        if (tag.TagName == "رنگ")
-                        {
-                            if (Name.Contains(tag.TagValue))
-                            {
-                                //سفید
-                                //مشکی
-                                //بنفش
-                                //
-                            }
-                        }
-                    }
+                    ////check extracted colors , if found any match , remove other colors and set the main color for article
+                    //foreach (var tag in scrappedArticleDetails.Tags)
+                    //{
+                    //    if (tag.TagName == "رنگ")
+                    //    {
+                    //        if (Name.Contains(tag.TagValue))
+                    //        {
+                    //            //سفید
+                    //            //مشکی
+                    //            //بنفش
+                    //            //
+                    //        }
+                    //    }
+                    //}
                     //gather scrapped resoucres 
                     scrappedArticles.ArticleDetails.Add(scrappedArticleDetails);
                 }

@@ -15,10 +15,10 @@
         public string PathTag { get; set; } = "";
         public PathItem ConvertFromJson(JToken jObjectItem)
         {
+            ID = jObjectItem.Value<int>("ID");
             ContainerID = jObjectItem.Value<int>("ContainerID");
             Path = jObjectItem.Value<string>("Path") ?? "";
             PathTag = jObjectItem.Value<string>("PathTag") ?? "";
-            ID = jObjectItem.Value<int>("ID");
             return this;
         }
         public JObject CreateJsonObject()

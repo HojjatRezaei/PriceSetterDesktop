@@ -34,19 +34,20 @@
               <TextBlock Text="آدرس ظرف : " 
                          Grid.Row="0"
                          Grid.Column="0"/>
-              <TextBox Text="{Binding CurrentContainer.ContainerPath , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
+              <TextBox Text="{Binding CurrentContainer.Path , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}" 
                        Grid.Row="0"
                        Grid.Column="1"/>
               <TextBlock Text="نوع ظرف : " 
                          Grid.Row="1"
                          Grid.Column="0"/>
-              <ComboBox SelectedIndex="{Binding CurrentContainer.ContainerType , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}"
+              <ComboBox SelectedIndex="{Binding CurrentContainer.Type , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged , Converter={StaticResource ContainerTypeConverter}}"
                         Grid.Row="1"
                         Grid.Column="1"
                         Grid.ColumnSpan="3" 
                         Margin="0,5,0,5">
                 <ComboBoxItem Content="کلیک و استخراج"/>
                 <ComboBoxItem Content="لیست"/>
+                <ComboBoxItem Content="کلیک و ادامه"/>
               </ComboBox>
               <Grid Grid.Row="2" 
                     Grid.Column="0"
@@ -78,8 +79,8 @@
                 <ListView.ItemTemplate>
                   <DataTemplate>
                     <StackPanel FlowDirection="LeftToRight">
-                      <TextBlock Text="{Binding ContainerPath}"/>
-                      <TextBlock Text="{Binding ContainerType}"/>
+                      <TextBlock Text="{Binding Path}"/>
+                      <TextBlock Text="{Binding Type}"/>
                     </StackPanel>
                   </DataTemplate>
                 </ListView.ItemTemplate>
@@ -106,7 +107,7 @@
                              Grid.Row="0"
                              Grid.Column="0"
                              Margin="0,5,0,5"/>
-                  <TextBox Text="{Binding CurrentXPathItem.XPath}"
+                  <TextBox Text="{Binding CurrentXPathItem.Path}"
                            Grid.Row="0"
                            Grid.Column="1"
                            Margin="0,5,0,5"/>
@@ -114,7 +115,7 @@
                              Grid.Row="1"
                              Grid.Column="0"
                              Margin="0,5,0,5"/>
-                  <TextBox Text="{Binding CurrentXPathItem.XPathTag}"
+                  <TextBox Text="{Binding CurrentXPathItem.PathTag}"
                            Grid.Row="1"
                            Grid.Column="1"
                            Margin="0,5,0,5"/>
@@ -143,13 +144,13 @@
                   <ListView Grid.Row="3"
                             Grid.Column="0"
                             Grid.ColumnSpan="2"
-                            ItemsSource="{Binding SelectedContainer.PathItems}"
+                            ItemsSource="{Binding SelectedContainer.PathItems , Mode=OneWay , UpdateSourceTrigger=PropertyChanged}"
                             SelectedItem="{Binding PathItemSelection , Mode=TwoWay , UpdateSourceTrigger=PropertyChanged}">
                     <ListView.ItemTemplate>
                       <DataTemplate>
                         <StackPanel FlowDirection="LeftToRight">
-                          <TextBlock Text="{Binding XPathTag}"/>
-                          <TextBlock Text="{Binding XPath}"/>
+                          <TextBlock Text="{Binding PathTag}"/>
+                          <TextBlock Text="{Binding Path}"/>
                         </StackPanel>
                       </DataTemplate>
                     </ListView.ItemTemplate>

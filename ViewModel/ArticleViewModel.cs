@@ -27,7 +27,14 @@
         public Url CurrentURL
         { get => _currentURL; set { _currentURL = value; PropertyCall(); } }
         public Provider SelectedProvider
-        { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
+        { 
+            get => _selectedProvider; 
+            set
+            {
+                _selectedProvider = value;
+                PropertyCall();
+            }
+        }
         public ArticleGroupView SelectedArticle
         { get => _selectedArticle; set { _selectedArticle = value; PropertyCall(); } }
         public ViewCollection<Provider> ListOfProviders
@@ -103,7 +110,9 @@
         private void UpdateArticleList()
         {
             DataHolder.PullArticleList();
-            ListofArticles = DataHolder.ArticleGroups.ToList();
+            var finalResult = DataHolder.ArticleGroups.ToList();
+            finalResult.Sort();
+            ListofArticles = finalResult;
         }
         private void UpdateProviderList(ArticleGroupView? art = null)
         {

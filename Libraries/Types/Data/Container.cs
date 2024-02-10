@@ -23,8 +23,8 @@
         {
             ID = jObjectItem.Value<int>("ID");
             ProviderID = jObjectItem.Value<int>("ProviderID");
-            Path = jObjectItem.Value<string>("ContainerPath") ?? "";
-            Type = (ContainerType)jObjectItem.Value<int>("ContainerType");
+            Path = jObjectItem.Value<string>("Path") ?? "";
+            Type = (ContainerType)jObjectItem.Value<int>("Type");
             return this;
         }
 

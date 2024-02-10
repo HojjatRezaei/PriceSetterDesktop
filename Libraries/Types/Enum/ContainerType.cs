@@ -4,6 +4,7 @@
     {
         ClickAndExtract = 0,
         List = 1,
+        ClickAndContinue = 2,
 
     }
 }

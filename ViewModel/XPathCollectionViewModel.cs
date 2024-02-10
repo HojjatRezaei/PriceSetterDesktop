@@ -19,7 +19,14 @@
         }
 
         public Container SelectedContainer
-        { get => _selectedContainer; set { _selectedContainer = value; PropertyCall(); } }
+        { 
+            get => _selectedContainer; 
+            set
+            { 
+                _selectedContainer = value;
+                PropertyCall();
+            }
+        }
         public Container CurrentContainer
         { get => _currentContainer; set { _currentContainer = value; PropertyCall(); } }
         public PathItem CurrentXPathItem
