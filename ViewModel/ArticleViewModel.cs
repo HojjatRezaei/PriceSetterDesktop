@@ -8,8 +8,6 @@
     using System.Windows.Controls;
     using System.Windows.Input;
     using WPFCollection.Data.List;
-    using WPFCollection.Data.Types;
-    using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
 
     public class ArticleViewModel : BasePage
@@ -27,19 +25,12 @@
         public Url CurrentURL
         { get => _currentURL; set { _currentURL = value; PropertyCall(); } }
         public Provider SelectedProvider
-        { 
-            get => _selectedProvider; 
-            set
-            {
-                _selectedProvider = value;
-                PropertyCall();
-            }
-        }
-        public ArticleGroupView SelectedArticle
+        { get => _selectedProvider; set { _selectedProvider = value; PropertyCall(); } }
+        public ReadableArticle SelectedArticle
         { get => _selectedArticle; set { _selectedArticle = value; PropertyCall(); } }
         public ViewCollection<Provider> ListOfProviders
         { get => _listOfProviders; set { _listOfProviders = value; PropertyCall(); } }
-        public ViewCollection<ArticleGroupView> ListofArticles
+        public ViewCollection<ReadableArticle> ListofArticles
         { get => _listofArticles; set { _listofArticles = value; PropertyCall(); } }
         public ICommand GotoPrivdersPageCommand { get; set; } = new FastCommand
             ((object parameter) => { ArticleViewModel model = (ArticleViewModel)parameter; model.GotoProvidersPageCommandHandler(); }, (object parameter) => { return true; });
@@ -109,14 +100,12 @@
         }
         private void UpdateArticleList()
         {
-            DataHolder.PullArticleList();
-            var finalResult = DataHolder.ArticleGroups.ToList();
-            finalResult.Sort();
-            ListofArticles = finalResult;
+            DataHolder.UpdateReadableArticleList();
+            ListofArticles = DataHolder.ReadableArticleList.ToList();
         }
-        private void UpdateProviderList(ArticleGroupView? art = null)
+        private void UpdateProviderList(ReadableArticle? art = null)
         {
-            ArticleGroupView ArticleSelection;
+            ReadableArticle ArticleSelection;
             if (art != null)
             {
                 ArticleSelection = art;
@@ -141,7 +130,7 @@
         }
         private void ArticleSelectionChangedHandler(SelectionChangedEventArgs e)
         {
-            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is ArticleGroupView selectedItem)
+            if (e.OriginalSource.GetType().GetProperty("DataContext") is PropertyInfo prop && prop.GetValue(e.OriginalSource) is ArticleViewModel castedModel && e.AddedItems.Count != 0 && e.AddedItems[0] is ReadableArticle selectedItem)
             {
                 castedModel.UpdateProviderList(selectedItem);
                 if (castedModel.SelectedProvider != null)
@@ -174,9 +163,9 @@
         private string _currentXPath = string.Empty;
         private Url _currentURL = new();
         private Provider _selectedProvider;
-        private ArticleGroupView _selectedArticle;
+        private ReadableArticle _selectedArticle;
         private ViewCollection<Provider> _listOfProviders;
-        private ViewCollection<ArticleGroupView> _listofArticles;
+        private ViewCollection<ReadableArticle> _listofArticles;
         private ViewCollection<Provider> _unSetterProvider;
     }
 }

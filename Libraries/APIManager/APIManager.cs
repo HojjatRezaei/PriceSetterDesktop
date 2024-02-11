@@ -32,9 +32,16 @@
         }
         public void Get()
         {
-            //send http get request
-            _list = HTTPUtility.SendGETRequest<T>(_api);
-            _updated = true;
+            if(string.IsNullOrEmpty(_api))
+            {
+                _updated = false; return;
+            }
+            else
+            {
+                //send http get request
+                _list = HTTPUtility.SendGETRequest<T>(_api);
+                _updated = true;
+            }
         }
         public void Add(T newItem)
         {

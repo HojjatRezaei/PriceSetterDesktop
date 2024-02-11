@@ -2,13 +2,13 @@
 {
     using System.Collections.Generic;
 
-    public class ArticleGroupView : IComparable<ArticleGroupView>
+    public class ReadableArticle : IComparable<ReadableArticle>
     {
         public int ID { get; set; }
         public string Name { get; set; } = string.Empty;
-        public List<ArticleColorView> Colors { get; set; } = [];
+        public List<ColorView> Colors { get; set; } = [];
 
-        public int CompareTo(ArticleGroupView? other)
+        public int CompareTo(ReadableArticle? other)
         {
             if (other == null)
                 return 0;

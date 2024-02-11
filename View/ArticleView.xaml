@@ -214,7 +214,7 @@
                         <ListView ItemsSource="{Binding Colors}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
                           <ListView.ItemTemplate>
                             <DataTemplate>
-                              <TextBlock Text="{Binding ColorName}"/>
+                              <TextBlock Text="{Binding Name}"/>
                             </DataTemplate>
                           </ListView.ItemTemplate>
                         </ListView>

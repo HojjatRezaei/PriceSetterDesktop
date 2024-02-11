@@ -1,6 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
+    using PriceSetterDesktop.Libraries.Statics;
     using WPFCollection.Data.Interface.Generic;
 
     public partial class Article : IJsonConverter<Article>
@@ -15,7 +16,6 @@
         public string ColorName { get; set; } = string.Empty;
         public int PriceMetaID { get; set; } = -1;
         public double PriceValue { get; set; } = -1;
-
         public Article ConvertFromJson(JToken jObjectItem)
         {
             ID = jObjectItem.Value<int>("ArticleID");

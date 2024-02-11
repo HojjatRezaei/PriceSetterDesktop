@@ -1,7 +1,18 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:PriceSetterDesktop.ViewModel"
-                    xmlns:proxy="clr-namespace:WPFCollection.Data.Proxy;assembly=WPFCollection">
+                    xmlns:proxy="clr-namespace:WPFCollection.Data.Proxy;assembly=WPFCollection"
+                    xmlns:cc="clr-namespace:WPFCollection.Style.Model;assembly=WPFCollection">
+  <Style TargetType="{x:Type DataGridCell}" x:Key="LocalScopeDataGridCellStyle">
+    <Style.Triggers>
+      <DataTrigger Binding="{Binding ValidData}" Value="False">
+        <Setter Property="Background" Value="Green"></Setter>
+      </DataTrigger>
+      <DataTrigger Binding="{Binding ValidData}" Value="True">
+        <Setter Property="Background" Value="Red"></Setter>
+      </DataTrigger>
+    </Style.Triggers>
+  </Style>
   <Style TargetType="{x:Type ListViewItem}" x:Key="ListViewItemStyleForReportView">
     <Setter Property="FlowDirection" Value="RightToLeft"/>
   </Style>
@@ -23,75 +34,60 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
               </Grid.RowDefinitions>
-              <Border Grid.Column="0"
-                      Grid.ColumnSpan="3"
-                      Grid.Row="0"
-                      Padding="5"
-                      BorderBrush="Transparent"
-                      >
-                <ListView ItemsSource="{Binding ArticleList}" 
-                          ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}"
-                          ScrollViewer.VerticalScrollBarVisibility="Visible">
-                  <ListView.ItemTemplate>
-                    <DataTemplate>
-                      <Border Padding="5">
-                        <Grid>
-                          <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                          </Grid.ColumnDefinitions>
-                          <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                          </Grid.RowDefinitions>
-                          <TextBlock Text="{Binding ArticleDispaly}" 
-                                     Grid.Row="0" 
-                                     Grid.Column="0" 
-                                     Style="{StaticResource PersianTextBlockLeft}"/>
-                          <ListView ItemsSource="{Binding Providers}" 
-                                    Grid.Row="1" 
-                                    Grid.Column="0"
-                                    ItemContainerStyle="{StaticResource ListViewItemStyleForReportView}">
-                            <ListView.ItemsPanel>
-                              <ItemsPanelTemplate>
-                                <StackPanel Orientation="Horizontal"></StackPanel>
-                              </ItemsPanelTemplate>
-                            </ListView.ItemsPanel>
-                            <ListView.ItemTemplate>
-                            
-                            <DataTemplate>
-                                <Border>
-                                  <Grid>
-                                    <Grid.ColumnDefinitions>
-                                      <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <Grid.RowDefinitions>
-                                      <RowDefinition Height="Auto"/>
-                                      <RowDefinition Height="*"/>
-                                    </Grid.RowDefinitions>
-                                    <StackPanel Grid.Column="0" Grid.Row="0">
-                                      <TextBlock Text="{Binding ProviderName}" Style="{StaticResource PersianTextBlockLeft}"/>
-                                    </StackPanel>
-                                    <ListView ItemsSource="{Binding ScrappedData}" Grid.Column="0" Grid.Row="1">
-                                      <ListView.ItemTemplate>
-                                        <DataTemplate>
-                                          <StackPanel Orientation="Vertical">
-                                            <TextBlock Text="{Binding TagName}"/>
-                                            <TextBlock Text="{Binding TagValue}"/>
-                                          </StackPanel>
-                                        </DataTemplate>
-                                      </ListView.ItemTemplate>
-                                    </ListView>
-                                  </Grid>
-                                </Border>
-                              </DataTemplate>
-                            </ListView.ItemTemplate>
-                          </ListView>
-                        </Grid>
-                      </Border>
-                    </DataTemplate>
-                  </ListView.ItemTemplate>
-                </ListView>
-              </Border>
+              <cc:LocalDataGrid ItemsSource="{Binding ScrapItems}" 
+                        Background="Transparent" 
+                        RowBackground="Transparent" 
+                        Foreground="White"
+                        AutoGenerateColumns="False"
+                        Grid.Column="0"
+                        Grid.ColumnSpan="3"
+                        Grid.Row="0"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        CanUserSortColumns="True"
+                        CanUserReorderColumns="True"
+                        CanUserResizeColumns="False"
+                        CanUserResizeRows="False"
+                          >
+                <cc:LocalDataGrid.Columns>
+                  <DataGridTextColumn Header="نام کالا" 
+                                      Binding="{Binding ArticleName , Mode=OneWay , UpdateSourceTrigger=PropertyChanged}" 
+                                      MinWidth="100" 
+                                      CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
+                  <DataGridTextColumn Header="رنگ"
+                                      Binding="{Binding ColorName}" 
+                                      MinWidth="100" 
+                                      CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
+                  <DataGridTextColumn Header="تامین کننده" 
+                                      Binding="{Binding Source}"
+                                      MinWidth="100"
+                                      CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
+                  <DataGridTextColumn Header="قیمت" 
+                                      Binding="{Binding Price , StringFormat='#,##0'}" 
+                                      MinWidth="100" 
+                                      CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
+                  <DataGridTemplateColumn Header="عملیات"
+                                          MinWidth="100">
+                    <DataGridTemplateColumn.CellTemplate>
+                      <DataTemplate>
+                        <Button Content="تلاش مجدد" 
+                                Visibility="{Binding ValidData , Converter={StaticResource BooleanToVisibility}}"
+                                Command="{Binding Source={StaticResource DataContextBridge} , Path=Data.TryAgainCommand}">
+                          <Button.CommandParameter>
+                            <MultiBinding Converter="{StaticResource MultiParameter}">
+                              <Binding Source="{StaticResource DataContextBridge}" Path="Data"/>
+                              <Binding />
+                            </MultiBinding>
+                          </Button.CommandParameter>
+                        </Button>
+                      </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                  </DataGridTemplateColumn>
+                  <DataGridTextColumn Header="پیام ها" 
+                                      Binding="{Binding Messages}" 
+                                      MinWidth="100"/>
+                </cc:LocalDataGrid.Columns>
+              </cc:LocalDataGrid>
               <Button Content="خروجی اکسل" 
                       Grid.Row="1" 
                       Grid.Column="3"

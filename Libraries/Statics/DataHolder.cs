@@ -10,16 +10,16 @@
         /// <summary>
         /// back code generated
         /// </summary>
-        public static List<ArticleGroupView> ArticleGroups { get; set; } = [];
+        public static List<ReadableArticle> ReadableArticleList { get; set; } = [];
         /// <summary>
         /// fetch article list from vetos website
         /// </summary>
-        public static void PullArticleList()
+        public static void UpdateReadableArticleList()
         {
             var articles = APIDataStorage.ArticleManager.List.ToList();
-            ArticleGroups = articles.GroupBy(x => x.ID).Select((x) =>
+            ReadableArticleList = articles.GroupBy(x => x.ID).Select((x) =>
             {
-                var newArticleView = new ArticleGroupView()
+                var newArticleView = new ReadableArticle()
                 {
                     ID = x.Key,
                 };
@@ -27,12 +27,11 @@
                 newArticleView.Name = extractedArticle == null ? string.Empty : extractedArticle.ArticleName;
                 newArticleView.Colors = x.Where(y => y.ID == x.Key).Select((y) =>
                 {
-                    var extractedColor = new ArticleColorView()
+                    var extractedColor = new ColorView()
                     {
-                        ColorMetaID = y.ColorMetaID,
-                        ColorName = y.ColorName,
+                        ID = y.ColorMetaID,
+                        Name = y.ColorName,
                         PriceMetaID = y.PriceMetaID,
-                        PriceValue = y.PriceValue,
                     };
                     return extractedColor;
                 }).ToList();

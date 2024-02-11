@@ -13,12 +13,22 @@
         }
         public int ID { get; set; } = -1;
         public string Name { get; set; } = "";
-        public ExtractionTypes Extraction { get; set; } = 0;
-        public List<Container> Containers
+        public int LoginInfoID { get; set; } = -1;
+        public LoginInfo? LoginInfo 
         {
             get
             {
-                return APIDataStorage.ContainerManager.List.Where(x => x.ProviderID == ID).ToList();
+                if (LoginInfoID == -1)
+                    return null;
+                return APIDataStorage.LoginManager.List.FirstOrDefault(x => x.ID == LoginInfoID);
+            }
+        }
+        public ExtractionTypes Extraction { get; set; } = 0;
+        public IEnumerable<Container> Containers
+        {
+            get
+            {
+                return APIDataStorage.ContainerManager.List.Where(x => x.ProviderID == ID);
             }
 
         }
@@ -27,10 +37,16 @@
         {
             get
             {
-                return Containers.Count != 0;
+                return Containers.Any();
             }
         }
-
+        public IEnumerable<Url> UrlList
+        {
+            get
+            {
+                return APIDataStorage.UrlManager.List.Where(x => x.ProviderID == ID);
+            }
+        }
         public override bool Equals(object? obj)
         {
             var CompareObject = obj as Provider;
