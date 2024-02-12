@@ -150,6 +150,7 @@
                  Margin="0,10,0,0"/>
                 <ListView 
                  ItemsSource="{Binding UnSetterProvider}" 
+                 SelectedItem="{Binding SelectedProvider}"
                  Grid.Row="4" 
                  Grid.Column="0" 
                  Grid.ColumnSpan="3" 

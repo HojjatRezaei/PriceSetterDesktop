@@ -1,5 +1,6 @@
 ﻿namespace PriceSetterDesktop.Libraries.APIManager
 {
+    using Microsoft.IdentityModel.Tokens;
     using System.Collections.Generic;
     using System.Net.Http;
     using WPFCollection.Data.Interface.Generic;
@@ -45,7 +46,10 @@
         }
         public void Add(T newItem)
         {
-            if (_getOnlyApi) return;
+            if (_getOnlyApi) 
+                return;
+            if (!newItem.IsValidData())
+                return;
             var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Post);
             if (respond != null )
             {
@@ -56,6 +60,7 @@
         public void Update(T newItem , int id)
         {
             if (_getOnlyApi) return;
+            if (!newItem.IsValidData()) return;
             newItem.ID = id;
             var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Put);
             if (respond != null )

@@ -32,5 +32,9 @@
         {
             throw new NotImplementedException();
         }
+        public bool IsValidData()
+        {
+            return true;
+        }
     }
 }

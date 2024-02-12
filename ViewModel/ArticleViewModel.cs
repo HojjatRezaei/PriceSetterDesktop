@@ -93,7 +93,6 @@
             //check if any value have changed
             CurrentURL = new();
             UpdateProviderList(SelectedArticle);
-            UpdateArticleList();
             MessageBox.Show("عملیات با موفقت انجام شد", "اطلاعات", MessageBoxButton.OK, MessageBoxImage.Information);
 
 

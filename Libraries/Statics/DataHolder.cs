@@ -19,6 +19,7 @@
             var articles = APIDataStorage.ArticleManager.List.ToList();
             ReadableArticleList = articles.GroupBy(x => x.ID).Select((x) =>
             {
+                //Article currentArticle = x.FirstOrDefault(y => y.ID == x.Key);
                 var newArticleView = new ReadableArticle()
                 {
                     ID = x.Key,
@@ -31,12 +32,16 @@
                     {
                         ID = y.ColorMetaID,
                         Name = y.ColorName,
+                        ArticleID = y.ID,
                         PriceMetaID = y.PriceMetaID,
                     };
                     return extractedColor;
                 }).ToList();
+                //if(currentArticle != null)
+                //    newArticleView.Providers = APIDataStorage.ProviderManager.List.Where(y => y.ArticleList.Contains(currentArticle)).ToList();
                 return newArticleView;
             }).ToList();
+            ReadableArticleList.Sort();
         }
     }
 }

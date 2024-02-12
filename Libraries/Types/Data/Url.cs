@@ -49,5 +49,9 @@
             };
             return jobject;
         }
+        public bool IsValidData()
+        {
+            return true;
+        }
     }
 }

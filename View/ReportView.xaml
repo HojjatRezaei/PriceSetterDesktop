@@ -71,7 +71,6 @@
                     <DataGridTemplateColumn.CellTemplate>
                       <DataTemplate>
                         <Button Content="تلاش مجدد" 
-                                Visibility="{Binding ValidData , Converter={StaticResource BooleanToVisibility}}"
                                 Command="{Binding Source={StaticResource DataContextBridge} , Path=Data.TryAgainCommand}">
                           <Button.CommandParameter>
                             <MultiBinding Converter="{StaticResource MultiParameter}">
@@ -90,13 +89,18 @@
               </cc:LocalDataGrid>
               <Button Content="خروجی اکسل" 
                       Grid.Row="1" 
-                      Grid.Column="3"
+                      Grid.Column="2"
                       Command="{Binding ExcelOutputCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
-              <Button Content="به روز رسانی قیمت ها" 
+              <Button Content="استخراج قیمت" 
                       Grid.Row="1" 
                       Grid.Column="0"
                       Command="{Binding UpdatePricesCommand}"
+                      CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
+              <Button Content="ارسال قیمت ها به سایت"
+                      Grid.Row="1"
+                      Grid.Column="1"
+                      Command="{Binding SendPriceToWebCommand}"
                       CommandParameter="{Binding RelativeSource={RelativeSource TemplatedParent}}"/>
             </Grid>
           </Border>

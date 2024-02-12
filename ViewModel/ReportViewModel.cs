@@ -17,6 +17,8 @@
     {
         public ReportViewModel()
         {
+            //check for last inserted data
+            ScrapItems = APIDataStorage.ScrapManager.List.ToList();
         }
 
         private ViewCollection<ScrapResult> _scrapItems = [];
@@ -26,7 +28,6 @@
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.ExcelOutputCommandHandler(); }, (object parameter) => { return true; });
         public ICommand UpdatePricesCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.UpdatePricesCommandHandler(); }, (object parameter) => { return true; });
-
         public ICommand TryAgainCommand { get; set; } = new FastCommand
         ((object parameter) => 
         {
@@ -45,8 +46,7 @@
             var scrapList = new List<ScrapResult>();
             //remove every related provider and article
             ScrapItems.Remove(retryScrapItem);
-            scrapList = [.. ScrapItems];
-            //scrapList = ScrapItems.Where(x => x.ProviderID != retryScrapItem.ProviderID || (x.ArticleID != retryScrapItem.ArticleID && x.ColorID != retryScrapItem.ColorID)).ToList();
+            scrapList = [.. ScrapItems.Where(x => x != null)];
             webScrap.TurnOn();
             var scrapResult = webScrap.Scrap(providerObject, articleObject);
             if (scrapResult != null)
@@ -93,6 +93,19 @@
             }
             webScrap.TurnOff();
             ScrapItems = scrapList;
+        }
+
+        public ICommand SendPriceToWebCommand { get; set; } = new FastCommand
+            ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.SendPriceToWebCommandHandler(); }, (object parameter) => { return true; });
+        private void SendPriceToWebCommandHandler()
+        {
+            var scrItems = ScrapItems.ToList();
+            foreach (var scrapitem in scrItems)
+            {
+                if (scrapitem.ColorID == -1 || scrapitem.PriceID == -1 || !scrapitem.IsValidData())
+                    continue;
+                APIDataStorage.ScrapManager.Add(scrapitem);
+            }
         }
     }
 }
