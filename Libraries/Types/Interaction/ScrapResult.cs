@@ -25,7 +25,22 @@
         }
         public int ProviderID { get; set; } = -1;
         public int ColorID { get; set; } = -1;
-        public string ColorName { get; set; } = string.Empty;
+        public string ColorName
+        {
+            get 
+            {
+                if (string.IsNullOrEmpty(_colorName))
+                {
+                    //try to find color name
+                    //extract article list 
+                    var res = APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == ArticleID && x.ColorMetaID == ColorID);
+                    if (res != null)
+                        _colorName = res.ColorName.Replace("رنگ" , string.Empty).Replace(":",string.Empty);
+                }
+                return _colorName;
+            }
+            set { _colorName = value; }
+        }
         public double Price { get; set; } = 0;
         public PersianDate Date { get; set; } = PersianDate.Now;
         public string Time { get; set; } = "";
@@ -34,6 +49,8 @@
         public bool HaveMessage { get; set; }
         public string Messages { get; set; } = string.Empty;
         public bool ValidData => !(ColorID != -1 && PriceID != -1);
+        public string DateTimeStr => Date.ToString() + "-" + Time;
+
         public Article? GetArticle()
         {
             return APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == ArticleID);
@@ -60,15 +77,14 @@
             var jobject = new JObject
             {
                 { nameof(ID), ID },
-                { nameof(ProviderID), ProviderID },
-                { nameof(Date), Date.ToString() },
-                { nameof(Time), Time },
-                { nameof(Price), Price },
                 { nameof(ArticleID), ArticleID },
                 { nameof(ProviderID), ProviderID },
-                { nameof(Source), Source },
                 { nameof(ColorID), ColorID },
+                { nameof(Price), Price.ToString() },
+                { nameof(Date), Date.ToString() },
+                { nameof(Time), Time },
                 { nameof(PriceID), PriceID },
+                { nameof(Source), Source },
             };
             return jobject;
         }
@@ -76,5 +92,22 @@
         {
             return true;
         }
+        public override bool Equals(object? obj)
+        {
+            if (obj == null) return false;
+            if(obj is ScrapResult compare)
+            {
+                return compare.ArticleID == ArticleID && compare.ProviderID == ProviderID && compare.ColorID == ColorID;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private string _colorName = string.Empty;
+
+        
+
     }
 }

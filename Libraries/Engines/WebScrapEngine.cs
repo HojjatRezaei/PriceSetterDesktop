@@ -33,7 +33,7 @@
             chromeOption.AddArgument("--disable-popup-blocking");
             //create new instance of chrome driver
             _drive = new ChromeDriver(chromeOption);
-            
+
             //create instance for executing javascript commands
             _scripter = _drive;
             //create new list container for saving scrapped result
@@ -44,28 +44,19 @@
             _drive.Quit();
             _drive.Dispose();
         }
-        public IEnumerable<ScrapResult>? Scrap(Provider providerObject , Article? articleObject = null)
+        public IEnumerable<ScrapResult>? Scrap(Provider providerObject, Article? articleObject = null)
         {
             //detect scrap type
             switch (providerObject.Extraction)
             {
                 case Types.Enum.ExtractionTypes.Scrap:
-                    return ScrapFromWeb(providerObject , articleObject);
+                    return ScrapFromWeb(providerObject, articleObject);
                 case Types.Enum.ExtractionTypes.Excel:
                     return ScrapFromExcelFile();
                 case Types.Enum.ExtractionTypes.Image:
                     return ScrapFromImageFile();
             }
             return null;
-        }
-
-        /// <summary>
-        /// method for handling errors in process
-        /// </summary>
-        /// <param name="exception">throwed exception</param>
-        private void HandleError(Exception exception)
-        {
-
         }
         private IEnumerable<ScrapResult>? ScrapFromWeb(Provider providerObject, Article? articleObject = null)
         {
@@ -78,7 +69,7 @@
                 //check for articleList nullable
                 foreach (var url in providerObject.UrlList)
                 {
-                    if(url != null)
+                    if (url != null)
                     {
                         var result = ScrapSingleURL(url);
                         if (result == null)
@@ -96,8 +87,8 @@
             else
             {
                 //extract related url
-                var url = providerObject.UrlList.FirstOrDefault(x=> x.ArticleID == articleObject.ID);
-                if(url != null)
+                var url = providerObject.UrlList.FirstOrDefault(x => x.ArticleID == articleObject.ID);
+                if (url != null)
                 {
                     //single scrap
                     return ScrapSingleURL(url);
@@ -116,34 +107,68 @@
         {
             return null;
         }
+        //return true if page have stock , return false if page doesn't have stock
+        private bool CheckStock(Container containerObject)
+        {
+            if (containerObject == null)
+                return true;
+            //extract container nostock tag value
+            var searchResult = containerObject.PathItems.FirstOrDefault(x => x.PathTag == "NoStock");
+            if(searchResult != null)
+            {
+                //try to find nostock element
+                try
+                {
+                    var searchElementResult = _drive.FindElement(By.XPath(searchResult.Path));
+                    if (searchElementResult == null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        var targetText = searchElementResult.Text;
+                        //try for search 'نا موجود' key word
+                        return !(targetText.Contains("موجود") || targetText == "نا موجود" || targetText == "ناموجود");
+                    }
+                }
+                catch (Exception)
+                {
 
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
         private IEnumerable<ScrapResult>? ScrapSingleURL(Types.Data.Url urlObject)
         {
             //try to get providerObject
             var providerObject = urlObject.GetProvider();
             if (providerObject == null)
-                return [new ScrapResult() { HaveMessage = true , Messages = "cannot find provider object"}];
+                return [new ScrapResult() { HaveMessage = true , Messages = "Cannot Find Provider Object"}];
             //try to extract containers
             var articleObject = urlObject.GetArticle();
             if (articleObject == null)
-                return [new ScrapResult() { HaveMessage = true, Messages = "cannot find article object" }];
+                return [new ScrapResult() { HaveMessage = true, Messages = "Cannot Find Article Object" , ProviderID = providerObject.ID }];
+            //create new instance for dirve waiter
+            _driveWaiter = new(_drive, new(0, 0, 10));
+            //time out for waiting a page to load
+            _drive.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 20);
+            //time out for searching for elements
+            _drive.Manage().Timeouts().ImplicitWait = new TimeSpan(0, 0, 2);
+            //time out for executing javascript commands
+            _drive.Manage().Timeouts().AsynchronousJavaScript = new TimeSpan(0, 0, 2);
             //nagivate to url and for page to load completely 
             //catch navigation time out error
             try
             {
-                //create new instance for dirve waiter
-                _driveWaiter = new(_drive, new(0, 0, 10));
-                //time out for waiting a page to load
-                _drive.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 20);
-                //time out for searching for elements
-                _drive.Manage().Timeouts().ImplicitWait = new TimeSpan(0, 0, 10);
-                //time out for executing javascript commands
-                _drive.Manage().Timeouts().AsynchronousJavaScript = new TimeSpan(0, 0, 10);
                 _drive.Navigate().GoToUrl(urlObject.URL);
             }
             catch (Exception e)
             {
-                return [new ScrapResult() { HaveMessage = true, Messages = "TimeOut" }];
+                return [new ScrapResult() { HaveMessage = true, Messages = "TimeOut", ProviderID = providerObject.ID , ArticleID = articleObject.ID }];
             }
             /*Create Task for checking ad popup and try to close it*/
 
@@ -157,6 +182,11 @@
             //continue process based on valid container
             if (clickAndExtractContainers.Any())
             {
+                if (!CheckStock(clickAndExtractContainers.First()))
+                {
+                    return [new ScrapResult() { Messages = "موجود نیست" , HaveMessage = true, ProviderID = providerObject.ID, ArticleID = articleObject.ID ,Source = providerObject.Name }];
+                }
+                //extract nostock tag from container
                 var clickScrapResult = ClickAndExtract(clickAndExtractContainers , articleObject , providerObject , clickAndContinueContainers);
                 //try to relate extracted result to article available colors
                 if (clickScrapResult != null)
@@ -171,6 +201,10 @@
             }
             else if (listExtractContainer.Any())
             {
+                if (!CheckStock(listExtractContainer.First()))
+                {
+                    return [new ScrapResult() { Messages = "موجود نیست", HaveMessage = true, ProviderID = providerObject.ID, ArticleID = articleObject.ID, Source = providerObject.Name }];
+                }
                 var listScrapResult = ListExtract(listExtractContainer, articleObject, providerObject);
                 //try to relate extracted result to article available colors
                 if(listScrapResult != null)
@@ -259,10 +293,7 @@
                 return false;
             }
         }
-        private IEnumerable<ScrapResult> ClickAndExtract(
-            IEnumerable<Container> container , 
-            Article article, Provider provider, 
-            IEnumerable<Container>? clickAndContinueContainer = null)
+        private IEnumerable<ScrapResult> ClickAndExtract(IEnumerable<Container> container , Article article, Provider provider, IEnumerable<Container>? clickAndContinueContainer = null)
         {
             //loop through click elements
             //try to find container
@@ -271,7 +302,7 @@
             var scrapList = new List<ScrapResult>();
             if (clickableElements == null || clickableElements.Count == 0)
             {
-                scrapList.Add(new ScrapResult() { HaveMessage = true, Messages = "Can't find click elements" });
+                scrapList.Add(new ScrapResult() { HaveMessage = true, Messages = "Can't find click elements", ProviderID = provider.ID, ArticleID = article.ID , Source=provider.Name });
                 return scrapList;
             }
             else
@@ -285,7 +316,7 @@
                     //try to get xpath string from webelement
                     //clickElement.header + clickElement.TagName + clickElement.GetAttribute("class") 
                     //try to find element
-                        clickElement.Click();
+                    clickElement.Click();
                     //try
                     //{
                     //}
@@ -295,7 +326,7 @@
                     //    clickElement.Click();
                     //}
                     //wait 1 second after click on element for processing AJAX
-                    Thread.Sleep(1000);
+                    Thread.Sleep(500);
                     //after a successfull click , check for clickAndContinue elements
                     if (clickAndContinueContainer != null && clickAndContinueContainer.Any())
                     {
@@ -313,6 +344,8 @@
                     };
                     foreach (PathItem pathItem in containerObject.PathItems)
                     {
+                        if (pathItem.PathTag == "NoStock")
+                            continue;
                         //collection resources with straight xpath 
                         var element = FindSingleElement(pathItem.Path);
                         if (element == null) continue;
@@ -329,14 +362,14 @@
             var table = container.FirstOrDefault();
             if(table == null)
             {
-                yield return new ScrapResult() { HaveMessage = true , Messages="Container not found" };
+                yield return new ScrapResult() { HaveMessage = true , Messages="Container not found", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
             }
             else
             {
                 var scrapRows = FindChildren(table.Path);
                 if (scrapRows == null)
                 {
-                    yield return new ScrapResult() { HaveMessage = true, Messages = "Container Row Not Found " };
+                    yield return new ScrapResult() { HaveMessage = true, Messages = "Container Row Not Found ", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
                 }
                 else
                 {
@@ -351,6 +384,8 @@
                         };
                         foreach (PathItem pathItem in table.PathItems)
                         {
+                            if (pathItem.PathTag == "NoStock")
+                                continue;
                             IWebElement? scrappedItem=null;
                             bool scrapValidation;
                             //extract value from scrapResultElements
@@ -366,15 +401,11 @@
 
                             if(scrapValidation == false)
                             {
-                                yield return new ScrapResult() { HaveMessage = true, Messages = "Container Row Not Found " };
+                                yield return new ScrapResult() { HaveMessage = true, Messages = "Container Row Not Found ", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
                             }
                             else
                             {
-                                if (scrappedItem == null)
-                                {
-
-                                }
-                                else
+                                if (scrappedItem != null)
                                 {
                                     ScrapExtratedElement(scrappedItem, pathItem.PathTag, ref scrapCell);
                                 }
@@ -415,7 +446,7 @@
                     if (clickElement.Text == diffPathSearch.Path || clickElement.Text.Contains(diffPathSearch.Path))
                     {
                         clickElement.Click();
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                     }
                 }
             }
@@ -475,11 +506,21 @@
         }
         private string ExtractColor(string colorName)
         {
+            if(colorName.Contains("سورمه"))
+            {
+                colorName = colorName.Replace("سورمه", "سرمه");
+            }
             //search in color collection and find related color id
             return colorName.Replace("رنگ" , string.Empty).Replace(":",string.Empty).Trim();
         }
         private double ExtractPrice(string scrapString)
         {
+            //try to split the string
+            var result = scrapString.Split("\n\r");
+            if(result.Length > 1) 
+            {
+
+            }
             //clean string
             return double.TryParse(scrapString.RemoveWords().CorrectPersianNumber().Replace(",",string.Empty), out double price) ? price : 0;
         }

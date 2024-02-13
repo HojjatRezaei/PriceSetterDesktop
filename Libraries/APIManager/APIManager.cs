@@ -31,6 +31,19 @@
                 Get();
             }
         }
+        public T GetSingle(T searchItem)
+        {
+            if (!string.IsNullOrEmpty(_api))
+            {
+                //send http get request
+                return HTTPUtility.SendGetSingleRequest<T>(_api, searchItem);
+            }
+            else
+            {
+                return new();
+            }
+            
+        }
         public void Get()
         {
             if(string.IsNullOrEmpty(_api))

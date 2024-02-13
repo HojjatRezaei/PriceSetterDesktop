@@ -1,16 +1,11 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Chrome;
     using PriceSetterDesktop.Libraries.Engines;
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
     using System.Windows.Input;
     using WPFCollection.Data.List;
-    using WPFCollection.Data.Statics;
     using WPFCollection.Data.Types;
-    using WPFCollection.Data.Types.Generic;
     using WPFCollection.Style.Base;
 
     public class ReportViewModel : BaseControl
@@ -29,7 +24,7 @@
         public ICommand UpdatePricesCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.UpdatePricesCommandHandler(); }, (object parameter) => { return true; });
         public ICommand TryAgainCommand { get; set; } = new FastCommand
-        ((object parameter) => 
+        ((object parameter) =>
         {
             ReportViewModel model = (ReportViewModel)((object[])parameter)[0];
             model.TryAgainCommandHandler((ScrapResult)((object[])parameter)[1]);
@@ -54,7 +49,7 @@
                 bool validScrap = false;
                 foreach (var scrappedData in scrapResult)
                 {
-                    if (scrappedData.Equals(retryScrapItem))
+                    if (scrappedData.ArticleID == retryScrapItem.ArticleID && scrappedData.ProviderID == retryScrapItem.ProviderID && (retryScrapItem.ColorID == -1 || retryScrapItem.ColorID == scrappedData.ColorID))
                     {
                         scrapList.Add(scrappedData);
                         validScrap = true;
@@ -83,7 +78,7 @@
             foreach (var provider in APIDataStorage.ProviderManager.List)
             {
                 var scrapResult = webScrap.Scrap(provider);
-                if(scrapResult != null)
+                if (scrapResult != null)
                 {
                     foreach (var scrappedData in scrapResult)
                     {
@@ -99,11 +94,15 @@
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.SendPriceToWebCommandHandler(); }, (object parameter) => { return true; });
         private void SendPriceToWebCommandHandler()
         {
-            var scrItems = ScrapItems.ToList();
+            //set time
+            //set date
+            PersianDate pd = PersianDate.Now;
+            string time = $"{DateTime.Now.Hour}:{DateTime.Now.Minute}";
+            var scrItems = ScrapItems.Where(x => !x.ValidData && x.ColorName != "").ToList();
             foreach (var scrapitem in scrItems)
             {
-                if (scrapitem.ColorID == -1 || scrapitem.PriceID == -1 || !scrapitem.IsValidData())
-                    continue;
+                scrapitem.Time = time;
+                scrapitem.Date = pd;
                 APIDataStorage.ScrapManager.Add(scrapitem);
             }
         }

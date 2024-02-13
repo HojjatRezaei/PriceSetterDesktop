@@ -52,19 +52,24 @@
                 <cc:LocalDataGrid.Columns>
                   <DataGridTextColumn Header="نام کالا" 
                                       Binding="{Binding ArticleName , Mode=OneWay , UpdateSourceTrigger=PropertyChanged}" 
-                                      MinWidth="100" 
+                                      MinWidth="50" 
                                       CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
                   <DataGridTextColumn Header="رنگ"
                                       Binding="{Binding ColorName}" 
-                                      MinWidth="100" 
+                                      MinWidth="50" 
                                       CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
                   <DataGridTextColumn Header="تامین کننده" 
                                       Binding="{Binding Source}"
-                                      MinWidth="100"
+                                      MinWidth="50"
                                       CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
                   <DataGridTextColumn Header="قیمت" 
                                       Binding="{Binding Price , StringFormat='#,##0'}" 
-                                      MinWidth="100" 
+                                      MinWidth="50" 
+                                      CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
+
+                  <DataGridTextColumn Header="تاریخ و زمان" 
+                                      Binding="{Binding DateTimeStr}" 
+                                      MinWidth="50" 
                                       CellStyle="{StaticResource LocalScopeDataGridCellStyle}"/>
                   <DataGridTemplateColumn Header="عملیات"
                                           MinWidth="100">
