@@ -1,6 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
+    using OpenQA.Selenium.DevTools.V119.DOM;
     using PriceSetterDesktop.Libraries.Statics;
     using WPFCollection.Data.Interface.Generic;
 
@@ -14,16 +15,21 @@
         public string ArticleName { get; set; } = string.Empty;
         public int ColorMetaID { get; set; } = -1;
         public string ColorName { get; set; } = string.Empty;
-        public int PriceMetaID { get; set; } = -1;
-        public double PriceValue { get; set; } = -1;
+        public int PriceID { get; set; } = -1;
+        public int RegularPriceID { get; set; } = -1;
+        public int OptionID { get; set; } = -1;
+        public string OptionValue { get; set; } = string.Empty;
+
         public Article ConvertFromJson(JToken jObjectItem)
         {
             ID = jObjectItem.Value<int>("ArticleID");
             ArticleName = jObjectItem.Value<string>("ArticleName") ?? "";
             ColorMetaID = jObjectItem.Value<int>("ColorID");
             ColorName = jObjectItem.Value<string>("ColorName") ?? "";
-            PriceMetaID = jObjectItem.Value<int>("PriceMetaID");
-            PriceValue = double.TryParse(jObjectItem.Value<string>("PriceValue") ?? "", out double castedPrice) ? castedPrice : 0;
+            PriceID = jObjectItem.Value<int>("PriceID");
+            RegularPriceID = jObjectItem.Value<int>("RegularPriceID");
+            OptionID = jObjectItem.Value<int>("OptionID");
+            OptionValue = jObjectItem.Value<string>("OptionValue") ?? "";
             return this;
         }
 
@@ -35,8 +41,10 @@
                 { nameof(ArticleName), ArticleName },
                 { nameof(ColorMetaID), ColorMetaID },
                 { nameof(ColorName), ColorName },
-                { nameof(PriceMetaID), PriceMetaID },
-                { nameof(PriceValue), PriceValue }
+                { nameof(PriceID), PriceID },
+                { nameof(RegularPriceID), RegularPriceID },
+                { nameof(OptionID), OptionID },
+                { nameof(OptionValue), OptionValue },
             };
             return jobject;
         }

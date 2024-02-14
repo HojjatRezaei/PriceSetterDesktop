@@ -45,6 +45,9 @@
         public PersianDate Date { get; set; } = PersianDate.Now;
         public string Time { get; set; } = "";
         public int PriceID { get; set; } = -1;
+        public int RegularPriceID { get; set; } = -1;
+        public int OptionID { get; set; } = -1;
+        public string OptionValue { get; set; } = string.Empty;
         public string Source { get; set; } = string.Empty;
         public bool HaveMessage { get; set; }
         public string Messages { get; set; } = string.Empty;
@@ -70,6 +73,9 @@
             Source = jObjectItem.Value<string>("Source") ?? string.Empty;
             ColorID = jObjectItem.Value<int>("ColorID");
             PriceID = jObjectItem.Value<int>("PriceID");
+            RegularPriceID = jObjectItem.Value<int>("RegularPriceID");
+            OptionID = jObjectItem.Value<int>("OptionID");
+            OptionValue = jObjectItem.Value<string>("OptionValue")??string.Empty;
             return this;
         }
         public JObject CreateJsonObject()
@@ -85,12 +91,15 @@
                 { nameof(Time), Time },
                 { nameof(PriceID), PriceID },
                 { nameof(Source), Source },
+                { nameof(RegularPriceID), RegularPriceID },
+                { nameof(OptionID), OptionID },
+                { nameof(OptionValue), OptionValue },
             };
             return jobject;
         }
         public bool IsValidData()
         {
-            return true;
+            return !ValidData && Price > 100 && ColorID != -1;
         }
         public override bool Equals(object? obj)
         {

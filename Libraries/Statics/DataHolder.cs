@@ -5,8 +5,6 @@
     using WPFCollection.Data.Statics;
     public static class DataHolder
     {
-        public static XmlManager XMLData { get; set; } = new();
-        public static string XMLDataBaseName { get; set; } = "appDataXML";
         /// <summary>
         /// back code generated
         /// </summary>
@@ -33,12 +31,10 @@
                         ID = y.ColorMetaID,
                         Name = y.ColorName,
                         ArticleID = y.ID,
-                        PriceMetaID = y.PriceMetaID,
+                        PriceMetaID = y.PriceID,
                     };
                     return extractedColor;
                 }).ToList();
-                //if(currentArticle != null)
-                //    newArticleView.Providers = APIDataStorage.ProviderManager.List.Where(y => y.ArticleList.Contains(currentArticle)).ToList();
                 return newArticleView;
             }).ToList();
             ReadableArticleList.Sort();
