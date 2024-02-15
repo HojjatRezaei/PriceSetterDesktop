@@ -5,10 +5,10 @@
                     xmlns:cc="clr-namespace:WPFCollection.Style.Model;assembly=WPFCollection">
   <Style TargetType="{x:Type DataGridCell}" x:Key="LocalScopeDataGridCellStyle">
     <Style.Triggers>
-      <DataTrigger Binding="{Binding ValidData}" Value="False">
+      <DataTrigger Binding="{Binding ValidData}" Value="True">
         <Setter Property="Background" Value="Green"></Setter>
       </DataTrigger>
-      <DataTrigger Binding="{Binding ValidData}" Value="True">
+      <DataTrigger Binding="{Binding ValidData}" Value="False">
         <Setter Property="Background" Value="Red"></Setter>
       </DataTrigger>
     </Style.Triggers>

@@ -1,6 +1,6 @@
 ﻿namespace PriceSetterDesktop.Libraries.APIManager
 {
-    using Microsoft.IdentityModel.Tokens;
+    using OpenQA.Selenium;
     using System.Collections.Generic;
     using System.Net.Http;
     using WPFCollection.Data.Interface.Generic;
@@ -12,9 +12,9 @@
         private readonly bool _getOnlyApi;
         private List<T> _list = [];
         private bool _updated = false;
-        public List<T> List 
-        { 
-            get 
+        public List<T> List
+        {
+            get
             {
                 if (!_updated)
                     Get();
@@ -36,17 +36,17 @@
             if (!string.IsNullOrEmpty(_api))
             {
                 //send http get request
-                return HTTPUtility.SendGetSingleRequest<T>(_api, searchItem);
+                return HTTPUtility.SendGetSingleRequest(_api, searchItem);
             }
             else
             {
                 return new();
             }
-            
+
         }
         public void Get()
         {
-            if(string.IsNullOrEmpty(_api))
+            if (string.IsNullOrEmpty(_api))
             {
                 _updated = false; return;
             }
@@ -57,38 +57,66 @@
                 _updated = true;
             }
         }
-        public void Add(T newItem)
+        public bool Add(T newItem)
         {
-            if (_getOnlyApi) 
-                return;
+            if (_getOnlyApi)
+                return false;
             if (!newItem.IsValidData())
-                return;
+                return false;
             var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Post);
-            if (respond != null )
+            if (respond.Value<int>("status code") < 500)
             {
-                newItem.ID = respond.Value<int>("ID");
-                _list.Add(newItem);
-            }
-        }
-        public void Update(T newItem , int id)
-        {
-            if (_getOnlyApi) return;
-            if (!newItem.IsValidData()) return;
-            newItem.ID = id;
-            var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Put);
-            if (respond != null )
-            {
-                var searchResult = _list.FirstOrDefault(x => x.ID == id);
-                if (searchResult != null)
+                if (respond.Value<string>("messagetype") != "success_noupdate")
                 {
-                    int index = _list.IndexOf(searchResult);
-                    _list[index] = newItem;
+                    newItem.ID = respond.Value<int>("ID");
+                    _list.Add(newItem);
+                    return true;
+                }
+                else
+                {
+                    return true;
                 }
             }
+            else
+            {
+                return false;
+            }
         }
-        public void Remove(int id)
+        public bool Update(T newItem, int id)
         {
-            if (_getOnlyApi) return;
+            if (_getOnlyApi) return false;
+            if (!newItem.IsValidData()) return false;
+            newItem.ID = id;
+            var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Put);
+            if (respond != null)
+            {
+                if (respond.Value<string>("messagetype") != "success_noupdate")
+                {
+                    var searchResult = _list.FirstOrDefault(x => x.ID == id);
+                    if (searchResult != null)
+                    {
+                        int index = _list.IndexOf(searchResult);
+                        _list[index] = newItem;
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                    
+                }
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
+            }
+        }
+        public bool Remove(int id)
+        {
+            if (_getOnlyApi) return false;
             T newItem = new T
             {
                 ID = id
@@ -96,9 +124,27 @@
             var respond = HTTPUtility.SendRequest(_api, newItem, HttpMethod.Delete);
             if (respond != null)
             {
-                var searchResult = _list.FirstOrDefault(x => x.ID == id);
-                if(searchResult != null)
-                    _list.Remove(searchResult);
+                if (respond.Value<string>("messagetype") != "success_noupdate")
+                {
+                    var searchResult = _list.FirstOrDefault(x => x.ID == id);
+                    if (searchResult != null)
+                    {
+                        _list.Remove(searchResult);
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                return false;
             }
         }
     }

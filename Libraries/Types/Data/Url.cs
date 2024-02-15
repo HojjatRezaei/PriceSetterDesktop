@@ -1,12 +1,7 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
-    using OpenQA.Selenium;
-    using OpenQA.Selenium.Support.UI;
     using PriceSetterDesktop.Libraries.Statics;
-    using PriceSetterDesktop.Libraries.Types.Interaction;
-    using System;
-    using System.Collections.Generic;
     using System.Linq;
     using WPFCollection.Data.Interface.Generic;
 

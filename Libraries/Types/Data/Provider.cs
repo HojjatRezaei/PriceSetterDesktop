@@ -1,7 +1,6 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Data
 {
     using Newtonsoft.Json.Linq;
-    using OpenQA.Selenium.DevTools.V119.Network;
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Enum;
     using System;
@@ -17,7 +16,7 @@
         public int LoginInfoID { get; set; } = -1;
         public ExtractionTypes Extraction { get; set; } = 0;
         public bool HaveURL { get; set; } = false;
-        public LoginInfo? LoginInfo 
+        public LoginInfo? LoginInfo
         {
             get
             {

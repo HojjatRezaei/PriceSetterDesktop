@@ -1,13 +1,8 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Enum.ViewConvertor
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using System.Windows.Data;
-    using WPFCollection.Data.Enums;
 
     internal class ContainerTypeConverter : IValueConverter
     {

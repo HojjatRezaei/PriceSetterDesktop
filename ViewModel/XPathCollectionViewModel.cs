@@ -19,10 +19,10 @@
         }
 
         public Container SelectedContainer
-        { 
-            get => _selectedContainer; 
+        {
+            get => _selectedContainer;
             set
-            { 
+            {
                 _selectedContainer = value;
                 PropertyCall();
             }
@@ -144,7 +144,7 @@
                 MessageBox.Show("ظرفی جهت حذف انتخاب نشده", "خطا", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            APIDataStorage.PathManager.List.Where(x => x.ContainerID == SelectedContainer.ID).ToList().ForEach((pathItem) => 
+            APIDataStorage.PathManager.List.Where(x => x.ContainerID == SelectedContainer.ID).ToList().ForEach((pathItem) =>
             {
                 APIDataStorage.PathManager.Remove(pathItem.ID);
             });

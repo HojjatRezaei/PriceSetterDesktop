@@ -1,8 +1,6 @@
 ﻿namespace PriceSetterDesktop.Libraries.Statics
 {
-    using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
-    using WPFCollection.Data.Statics;
     public static class DataHolder
     {
         /// <summary>
@@ -28,7 +26,7 @@
                 {
                     var extractedColor = new ColorView()
                     {
-                        ID = y.ColorMetaID,
+                        ID = y.ColorID,
                         Name = y.ColorName,
                         ArticleID = y.ID,
                         PriceMetaID = y.PriceID,

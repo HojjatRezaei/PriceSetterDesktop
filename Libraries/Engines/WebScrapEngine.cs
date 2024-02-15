@@ -1,29 +1,22 @@
 ﻿namespace PriceSetterDesktop.Libraries.Engines
 {
-    using OpenQA.Selenium.Support.UI;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Chrome;
+    using OpenQA.Selenium.Support.UI;
+    using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
-    using OpenQA.Selenium.Chrome;
-    using Microsoft.VisualBasic;
     using System.Collections.ObjectModel;
-    using System.Runtime.CompilerServices;
-    using System.Security.Policy;
-    using System.Xml.XPath;
     using WPFCollection.Data.Statics;
-    using PriceSetterDesktop.Libraries.Statics;
-    using System.Windows.Automation.Provider;
 
     public class WebScrapEngine : IDisposable
     {
-        private WebDriver _drive;
-        private WebDriverWait _driveWaiter;
-        private IJavaScriptExecutor _scripter;
-        private List<ScrapResult> _scrapResult;
-        public WebScrapEngine()
-        {
+        #region Scope Properties
+        private List<ScrapResult> _scrapResult = [];
 
-        }
+        #endregion
+
+        #region WebScrap From URL
         public void TurnOn()
         {
             //setup chrome startup option
@@ -41,22 +34,60 @@
         }
         public void TurnOff()
         {
-            _drive.Quit();
-            _drive.Dispose();
+            Dispose();
         }
-        public IEnumerable<ScrapResult>? Scrap(Provider providerObject, Article? articleObject = null)
+        private IWebElement? FindSingleElement(string path)
         {
-            //detect scrap type
-            switch (providerObject.Extraction)
+            //try the following , if error occured , return null,
+            try
             {
-                case Types.Enum.ExtractionTypes.Scrap:
-                    return ScrapFromWeb(providerObject, articleObject);
-                case Types.Enum.ExtractionTypes.Excel:
-                    return ScrapFromExcelFile();
-                case Types.Enum.ExtractionTypes.Image:
-                    return ScrapFromImageFile();
+                //if xpath argument is null or empty , return null
+                if (string.IsNullOrEmpty(path)) return null;
+                //return single value
+                //validate path by trying to find element
+                var isValid = _driveWaiter.Until((x) => { return _scripter.ExecuteScript($"return document.evaluate(\"{path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
+                //if element founded
+                if (isValid)
+                {
+                    return _drive.FindElement(By.XPath(path));
+                }
+                else
+                {
+                    return null;
+                }
+
             }
-            return null;
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        private ReadOnlyCollection<IWebElement>? FindChildren(string path)
+        {
+            //try the following , if error occured , return null,
+            try
+            {
+                //if xpath argument is null or empty , return null
+                if (string.IsNullOrEmpty(path)) return null;
+                //return single value
+                //validate path by trying to find element
+                var isValid = _driveWaiter.Until((x) => { return _scripter.ExecuteScript($"return document.evaluate(\"{path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
+                //if element founded
+                if (isValid)
+                {
+                    return _drive.FindElements(By.XPath(path + "/*"));
+                }
+                else
+                {
+                    return null;
+                }
+
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+
         }
         private IEnumerable<ScrapResult>? ScrapFromWeb(Provider providerObject, Article? articleObject = null)
         {
@@ -99,59 +130,16 @@
                 }
             }
         }
-        private List<ScrapResult>? ScrapFromExcelFile()
-        {
-            return null;
-        }
-        private List<ScrapResult>? ScrapFromImageFile()
-        {
-            return null;
-        }
-        //return true if page have stock , return false if page doesn't have stock
-        private bool CheckStock(Container containerObject)
-        {
-            if (containerObject == null)
-                return true;
-            //extract container nostock tag value
-            var searchResult = containerObject.PathItems.FirstOrDefault(x => x.PathTag == "NoStock");
-            if(searchResult != null)
-            {
-                //try to find nostock element
-                try
-                {
-                    var searchElementResult = _drive.FindElement(By.XPath(searchResult.Path));
-                    if (searchElementResult == null)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        var targetText = searchElementResult.Text;
-                        //try for search 'نا موجود' key word
-                        return !(targetText.Contains("موجود") || targetText == "نا موجود" || targetText == "ناموجود");
-                    }
-                }
-                catch (Exception)
-                {
-
-                    return true;
-                }
-            }
-            else
-            {
-                return true;
-            }
-        }
-        private IEnumerable<ScrapResult>? ScrapSingleURL(Types.Data.Url urlObject)
+        private IEnumerable<ScrapResult>? ScrapSingleURL(Url urlObject)
         {
             //try to get providerObject
             var providerObject = urlObject.GetProvider();
             if (providerObject == null)
-                return [new ScrapResult() { HaveMessage = true , Messages = "Cannot Find Provider Object"}];
+                return [new ScrapResult() { HaveMessage = true, Messages = "Cannot Find Provider Object" }];
             //try to extract containers
             var articleObject = urlObject.GetArticle();
             if (articleObject == null)
-                return [new ScrapResult() { HaveMessage = true, Messages = "Cannot Find Article Object" , ProviderID = providerObject.ID }];
+                return [new ScrapResult() { HaveMessage = true, Messages = "Cannot Find Article Object", ProviderID = providerObject.ID, Source = providerObject.Name }];
             //create new instance for dirve waiter
             _driveWaiter = new(_drive, new(0, 0, 10));
             //time out for waiting a page to load
@@ -166,9 +154,9 @@
             {
                 _drive.Navigate().GoToUrl(urlObject.URL);
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                return [new ScrapResult() { HaveMessage = true, Messages = "TimeOut", ProviderID = providerObject.ID , ArticleID = articleObject.ID }];
+                return [new ScrapResult() { HaveMessage = true, Messages = "TimeOut", ProviderID = providerObject.ID, ArticleID = articleObject.ID, Source = providerObject.Name }];
             }
             /*Create Task for checking ad popup and try to close it*/
 
@@ -176,7 +164,7 @@
 
             /* Scrap Part*/
 
-            var clickAndExtractContainers = providerObject.Containers.Where(x=> x.Type == Types.Enum.ContainerType.ClickAndExtract);
+            var clickAndExtractContainers = providerObject.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndExtract);
             var listExtractContainer = providerObject.Containers.Where(x => x.Type == Types.Enum.ContainerType.List);
             var clickAndContinueContainers = providerObject.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndContinue);
             //continue process based on valid container
@@ -184,10 +172,10 @@
             {
                 if (!CheckStock(clickAndExtractContainers.First()))
                 {
-                    return [new ScrapResult() { Messages = "موجود نیست" , HaveMessage = true, ProviderID = providerObject.ID, ArticleID = articleObject.ID ,Source = providerObject.Name }];
+                    return [new ScrapResult() { Messages = "موجود نیست", HaveMessage = true, ProviderID = providerObject.ID, ArticleID = articleObject.ID, Source = providerObject.Name }];
                 }
                 //extract nostock tag from container
-                var clickScrapResult = ClickAndExtract(clickAndExtractContainers , articleObject , providerObject , clickAndContinueContainers);
+                var clickScrapResult = ClickAndExtract(clickAndExtractContainers, articleObject, providerObject, clickAndContinueContainers);
                 //try to relate extracted result to article available colors
                 if (clickScrapResult != null)
                 {
@@ -207,7 +195,7 @@
                 }
                 var listScrapResult = ListExtract(listExtractContainer, articleObject, providerObject);
                 //try to relate extracted result to article available colors
-                if(listScrapResult != null)
+                if (listScrapResult != null)
                 {
                     var bindRelationList = BindRelations(listScrapResult, articleObject);
                     return bindRelationList;
@@ -216,14 +204,14 @@
                 {
                     return listScrapResult;
                 }
-                
+
             }
             else
             {
                 return null;
             }
         }
-        private IEnumerable<ScrapResult> BindRelations(IEnumerable<ScrapResult> scrapList , Article article)
+        private IEnumerable<ScrapResult> BindRelations(IEnumerable<ScrapResult> scrapList, Article article)
         {
             //get a list of articles
             var storedScrapList = scrapList.ToList();
@@ -238,10 +226,9 @@
                         //check both side color
                         foreach (var color in readableArticle.Colors)
                         {
-                            if(ColorNameEquality(scrapitem.ColorName , color.Name))
+                            if (ColorNameEquality(scrapitem.ColorName, color.Name))
                             {
                                 scrapitem.ColorID = color.ID;
-                                scrapitem.PriceID = color.PriceMetaID;
                                 colorFounded = true;
                                 break;
                             }
@@ -262,38 +249,7 @@
                 return storedScrapList;
             }
         }
-        private string CleanColorName(string txt)
-        {
-            return txt.Replace(":", string.Empty).Replace("رنگ", string.Empty).Replace(" ", string.Empty).Trim();
-        }
-        private bool ColorNameEquality(string rightName , string leftName)
-        {
-            //first clean both sides
-            rightName = CleanColorName(rightName);
-            leftName = CleanColorName(leftName);
-            //check dictionary for exising
-            //side right to left contain comparisson
-            if (rightName.Contains(leftName))
-            {
-                return true;
-            }
-            //side left to right contain comparisson
-            else if (leftName.Contains(rightName))
-            {
-                return true;
-            }
-            //check equality
-            else if (leftName.Equals(rightName))
-            {
-                return true;
-            }
-            //if it didn't found do nothing
-            else
-            {
-                return false;
-            }
-        }
-        private IEnumerable<ScrapResult> ClickAndExtract(IEnumerable<Container> container , Article article, Provider provider, IEnumerable<Container>? clickAndContinueContainer = null)
+        private IEnumerable<ScrapResult> ClickAndExtract(IEnumerable<Container> container, Article article, Provider provider, IEnumerable<Container>? clickAndContinueContainer = null)
         {
             //loop through click elements
             //try to find container
@@ -302,7 +258,7 @@
             var scrapList = new List<ScrapResult>();
             if (clickableElements == null || clickableElements.Count == 0)
             {
-                scrapList.Add(new ScrapResult() { HaveMessage = true, Messages = "Can't find click elements", ProviderID = provider.ID, ArticleID = article.ID , Source=provider.Name });
+                scrapList.Add(new ScrapResult() { HaveMessage = true, Messages = "Can't find click elements", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name });
                 return scrapList;
             }
             else
@@ -312,19 +268,8 @@
                     if (clickElement == null)
                         continue;
                     RemoveAd();
-                    //containerObject.Path+"/"+clickElement.TagName + "[class='" + clickElement.GetAttribute("class") + "']"
-                    //try to get xpath string from webelement
-                    //clickElement.header + clickElement.TagName + clickElement.GetAttribute("class") 
                     //try to find element
                     clickElement.Click();
-                    //try
-                    //{
-                    //}
-                    //catch (Exception)
-                    //{
-                    //    RemoveAd();
-                    //    clickElement.Click();
-                    //}
                     //wait 1 second after click on element for processing AJAX
                     Thread.Sleep(500);
                     //after a successfull click , check for clickAndContinue elements
@@ -332,7 +277,7 @@
                     {
                         var clickAndContinue = clickAndContinueContainer.First();
                         ClickAndContinue(clickAndContinue);
-                        
+
                     }
                     //start extrating data from webpage
                     var scrapResult = new ScrapResult()
@@ -357,12 +302,12 @@
             }
             return scrapList;
         }
-        private IEnumerable<ScrapResult> ListExtract(IEnumerable<Container> container , Article article ,Provider provider)
+        private IEnumerable<ScrapResult> ListExtract(IEnumerable<Container> container, Article article, Provider provider)
         {
             var table = container.FirstOrDefault();
-            if(table == null)
+            if (table == null)
             {
-                yield return new ScrapResult() { HaveMessage = true , Messages="Container not found", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
+                yield return new ScrapResult() { HaveMessage = true, Messages = "Container not found", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
             }
             else
             {
@@ -386,7 +331,7 @@
                         {
                             if (pathItem.PathTag == "NoStock")
                                 continue;
-                            IWebElement? scrappedItem=null;
+                            IWebElement? scrappedItem = null;
                             bool scrapValidation;
                             //extract value from scrapResultElements
                             try
@@ -399,7 +344,7 @@
                                 scrapValidation = false;
                             }
 
-                            if(scrapValidation == false)
+                            if (scrapValidation == false)
                             {
                                 yield return new ScrapResult() { HaveMessage = true, Messages = "Container Row Not Found ", ProviderID = provider.ID, ArticleID = article.ID, Source = provider.Name };
                             }
@@ -416,7 +361,7 @@
                 }
             }
         }
-        private void ScrapExtratedElement(IWebElement element , string pathTag , ref ScrapResult scrapResult)
+        private void ScrapExtratedElement(IWebElement element, string pathTag, ref ScrapResult scrapResult)
         {
             //check if path item have color tag
             if (element.Text.Contains("رنگ") || pathTag == "رنگ")
@@ -451,78 +396,90 @@
                 }
             }
         }
-        private IWebElement? FindSingleElement(string path)
+        private bool ColorNameEquality(string rightName, string leftName)
         {
-            //try the following , if error occured , return null,
-            try
+            //first clean both sides
+            rightName = CleanColorName(rightName);
+            leftName = CleanColorName(leftName);
+            //check dictionary for exising
+            //side right to left contain comparisson
+            if (rightName.Contains(leftName))
             {
-                //if xpath argument is null or empty , return null
-                if (string.IsNullOrEmpty(path)) return null;
-                //return single value
-                //validate path by trying to find element
-                var isValid = _driveWaiter.Until((x) => { return _scripter.ExecuteScript($"return document.evaluate(\"{path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
-                //if element founded
-                if (isValid)
-                {
-                    return _drive.FindElement(By.XPath(path));
-                }
-                else
-                {
-                    return null;
-                }
-
+                return true;
             }
-            catch (Exception)
+            //side left to right contain comparisson
+            else if (leftName.Contains(rightName))
             {
-                return null;
+                return true;
+            }
+            //check equality
+            else if (leftName.Equals(rightName))
+            {
+                return true;
+            }
+            //if it didn't found do nothing
+            else
+            {
+                return false;
             }
         }
-        private ReadOnlyCollection<IWebElement>? FindChildren(string path)
+        private bool CheckStock(Container containerObject)
         {
-            //try the following , if error occured , return null,
-            try
+            if (containerObject == null)
+                return true;
+            //extract container nostock tag value
+            var searchResult = containerObject.PathItems.FirstOrDefault(x => x.PathTag == "NoStock");
+            if (searchResult != null)
             {
-                //if xpath argument is null or empty , return null
-                if (string.IsNullOrEmpty(path)) return null;
-                //return single value
-                //validate path by trying to find element
-                var isValid = _driveWaiter.Until((x) => { return _scripter.ExecuteScript($"return document.evaluate(\"{path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
-                //if element founded
-                if (isValid)
+                //try to find nostock element
+                try
                 {
-                    return _drive.FindElements(By.XPath(path+"/*"));
+                    var searchElementResult = _drive.FindElement(By.XPath(searchResult.Path));
+                    if (searchElementResult == null)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        var targetText = searchElementResult.Text;
+                        //try for search 'نا موجود' key word
+                        return !(targetText.Contains("موجود") || targetText == "نا موجود" || targetText == "ناموجود");
+                    }
                 }
-                else
+                catch (Exception)
                 {
-                    return null;
-                }
-                
-            }
-            catch (Exception)
-            {
-                return null;
-            }
 
+                    return true;
+                }
+            }
+            else
+            {
+                return true;
+            }
+        }
+        private string CleanColorName(string txt)
+        {
+            return txt.Replace(":", string.Empty).Replace("رنگ", string.Empty).Replace(" ", string.Empty).Trim();
         }
         private string ExtractColor(string colorName)
         {
-            if(colorName.Contains("سورمه"))
+            if (colorName.Contains("سورمه"))
             {
                 colorName = colorName.Replace("سورمه", "سرمه");
             }
             //search in color collection and find related color id
-            return colorName.Replace("رنگ" , string.Empty).Replace(":",string.Empty).Trim();
+            return colorName.Replace("رنگ", string.Empty).Replace(":", string.Empty).Trim();
         }
         private double ExtractPrice(string scrapString)
         {
             //try to split the string
             var result = scrapString.Split("\n\r");
-            if(result.Length > 1) 
+            if (result.Length > 1)
             {
 
             }
             //clean string
-            return double.TryParse(scrapString.RemoveWords().CorrectPersianNumber().Replace(",",string.Empty), out double price) ? price : 0;
+            return double.TryParse(scrapString.RemoveWords().CorrectPersianNumber().Replace(",", string.Empty), out double price) ? price : 0;
         }
         private void RemoveAd()
         {
@@ -541,178 +498,54 @@
 
 
         }
+        private WebDriver _drive;
+        private WebDriverWait _driveWaiter;
+        private IJavaScriptExecutor _scripter;
+        #endregion
+
+        #region WebScrap From ExcelFiles
+        private List<ScrapResult>? ScrapFromExcelFile()
+        {
+            return null;
+        }
+
+        #endregion
+
+        #region WebScrap From ImageFile
+        private List<ScrapResult>? ScrapFromImageFile()
+        {
+            return null;
+        }
+
+        #endregion
+
+        #region WebScrap From Social Media
+
+        #endregion
+
+        #region Main Entry
+        public IEnumerable<ScrapResult>? Scrap(Provider providerObject, Article? articleObject = null)
+        {
+            //detect scrap type
+            switch (providerObject.Extraction)
+            {
+                case Types.Enum.ExtractionTypes.Scrap:
+                    return ScrapFromWeb(providerObject, articleObject);
+                case Types.Enum.ExtractionTypes.Excel:
+                    return ScrapFromExcelFile();
+                case Types.Enum.ExtractionTypes.Image:
+                    return ScrapFromImageFile();
+            }
+            return null;
+        }
+
+        #endregion
+
+
+
         public void Dispose()
         {
             _drive.Quit();
         }
-
-        /*private ArticleDetails Example(WebDriver driver, Provider provider)
-        {
-            //navigate to the url
-            try
-            {
-                driver.Navigate().GoToUrl(URL);
-            }
-            catch (Exception)
-            {
-                return ReturnError("InternetProblem", driver);
-            }
-            WebDriverWait waiter = new(driver, new(0, 0, 10));
-            //create new instance for javascript
-            IJavaScriptExecutor scripter = driver;
-            //try to find click and extract containers
-            var clickAndExtractContainers = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndExtract);
-            //try to find list containers
-            var listContainers = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.List);
-            if (clickAndExtractContainers != null && clickAndExtractContainers.Any())
-            {
-                var priceViewList = new List<ArticleDetails>();
-                //loop trough click containers and click on each one of them
-                var clickContainer = clickAndExtractContainers.First();
-                // if clickContainer is null , go to next click container
-                if (clickContainer == null)
-                    return ReturnError("ظرف خالی میباشد", driver);
-                //wait for DOM to load completely
-                try
-                {
-                    waiter.Until((x) => { return scripter.ExecuteScript($"return document.evaluate(\"{clickContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null) != null; });
-                }
-                catch (Exception ex)
-                {
-                    //if couldn't find element , goto the next container
-                    ReturnError(ex.Message, driver);
-                }
-                var clickElementContainer = driver.FindElement(By.XPath(clickContainer.Path));
-                var clickElements = clickElementContainer.FindElements(By.XPath("*"));
-                foreach (IWebElement clickElement in clickElements)
-                {
-                    ArticleDetails newPriceView = new()
-                    {
-                        Provider = provider,
-                        Color = ""
-                    };
-                    if (clickElement == null)
-                        continue;
-                    //try to find close ad button
-                    ///html/body/div[3]/div[2]
-                    var adDetector = scripter.ExecuteScript($"return document.evaluate(\"/html/body/div[3]/div[2]\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
-                    if (adDetector is IWebElement adCloseButton)
-                    {
-                        adCloseButton.Click();
-                    }
-                    //click on element 
-                    clickElement.Click();
-                    //find next click element and loop through it 
-                    var clickAndContinue = provider.Containers.Where(x => x.Type == Types.Enum.ContainerType.ClickAndContinue).FirstOrDefault();
-                    if (clickAndContinue != null)
-                    {
-                        var diffClickElement = driver.FindElement(By.XPath(clickAndContinue.Path));
-                        //extract all children
-                        var diffClickElementChilds = diffClickElement.FindElements(By.XPath("*"));
-                        //if click element is 1 , ignore the loop and just click on it
-                        foreach (var diffClick in diffClickElementChilds)
-                        {
-                            if (diffClick == null)
-                                continue;
-                            //extract path items
-                            var diffClickPathes = clickAndContinue.PathItems;
-                            var diffPathSearch = diffClickPathes.Where(x => x.PathTag == "Search").FirstOrDefault();
-                            if (diffClickPathes.Count != 0 && diffPathSearch != null)
-                            {
-                                if (diffClick.Text == diffPathSearch.Path || diffClick.Text.Contains(diffPathSearch.Path))
-                                {
-                                    diffClick.Click();
-                                }
-                            }
-                        }
-                    }
-                    //wait 1 second to give html page some times to load AJAX
-                    Thread.Sleep(1000);
-                    //extract resources using xpath
-                    foreach (PathItem pathItem in clickContainer.PathItems)
-                    {
-                        //collection resources with straight xpath 
-                        var extractionResult = driver.FindElement(By.XPath(pathItem.Path)).Text;
-                        //check if extractionResult have any definition of color ,
-                        //if it does , set the extraction result as PriceView Color
-                        if (extractionResult.Contains("رنگ") || pathItem.PathTag == "رنگ")
-                        {
-                            newPriceView.Color = CleanString(extractionResult);
-                        }
-                        //create tagView object and add it to the tagList
-                        else
-                        {
-                            TagView newTag = new() { TagName = pathItem.PathTag, TagValue = CleanString(extractionResult) };
-                            newPriceView.Tags.Add(newTag);
-                        }
-                    }
-                    //return collected result
-                    priceViewList.Add(newPriceView);
-                }
-
-                //return scrap result collection
-                return priceViewList;
-            }
-            //collection resources based on List Container Type
-            else if (listContainers != null && listContainers.Any())
-            {
-                var priceViewList = new List<ArticleDetails>();
-                //if url doesn't have click container , continue with list containers
-                if (listContainers != null && listContainers.Any())
-                {
-                    foreach (Container listContainer in listContainers)
-                    {
-                        if (listContainer == null || listContainer.PathItems.Count == 0)
-                            continue;
-                        //extract container elements
-                        //check if containerpath is valid
-                        var checkResult = scripter.ExecuteScript($"return document.evaluate(\"{listContainer.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
-                        if (checkResult is not IWebElement)
-                            continue;
-                        var scrapResultElements = driver.FindElements(By.XPath(listContainer.Path + "/*"));
-                        foreach (IWebElement scrapElement in scrapResultElements)
-                        {
-                            ArticleDetails articleDetails = new()
-                            {
-                                Provider = provider,
-                                Color = "",
-                            };
-                            foreach (PathItem pathItem in listContainer.PathItems)
-                            {
-                                //extract value from scrapResultElements
-                                try
-                                {
-                                    var listScrapResult = scrapElement.FindElement(By.XPath($".{pathItem.Path}"));
-                                    if (listScrapResult.Text.Contains("رنگ") || pathItem.PathTag == "رنگ")
-                                    {
-                                        articleDetails.Color = listScrapResult.Text;
-                                    }
-                                    //create tagView object and add it to the tagList
-                                    else
-                                    {
-                                        TagView newTag = new() { TagName = pathItem.PathTag, TagValue = listScrapResult.Text };
-                                        articleDetails.Tags.Add(newTag);
-                                    }
-                                }
-                                catch (Exception)
-                                {
-                                    continue;
-                                }
-                            }
-                            priceViewList.Add(articleDetails);
-                        }
-                    }
-                }
-                else
-                {
-                    // if page doesn't have containers , check for straight xpath
-                    return ReturnError("مشکل در پیدا کردن ظروف", driver);
-                }
-                return priceViewList;
-            }
-            // if code reach here , it didn't find any source to collect
-            //return with error instance
-            return ReturnError("اطلاعاتی از منابع پیدا نشد", driver);
-        }*/
     }
 }

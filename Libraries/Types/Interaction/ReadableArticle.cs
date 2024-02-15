@@ -1,6 +1,5 @@
 ﻿namespace PriceSetterDesktop.Libraries.Types.Interaction
 {
-    using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Data;
     using System.Collections.Generic;
 
