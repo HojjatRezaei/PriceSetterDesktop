@@ -13,7 +13,9 @@
     {
         #region Scope Properties
         private List<ScrapResult> _scrapResult = [];
-
+        private readonly TimeSpan _driverLoadPageTimeOut = new TimeSpan(0, 0, 20);
+        private readonly TimeSpan _driverElementSearchTimeOut = new TimeSpan(0, 0, 3);
+        private readonly TimeSpan _driverScriptExecuterTimeOut = new TimeSpan(0, 0, 3);
         #endregion
 
         #region WebScrap From URL
@@ -38,6 +40,12 @@
         }
         private IWebElement? FindSingleElement(string path)
         {
+            if (_drive == null)
+                return null;
+            if (_driveWaiter == null)
+                return null;
+            if (_scripter == null)
+                return null;
             //try the following , if error occured , return null,
             try
             {
@@ -64,6 +72,12 @@
         }
         private ReadOnlyCollection<IWebElement>? FindChildren(string path)
         {
+            if (_drive == null)
+                return null;
+            if (_driveWaiter == null)
+                return null;
+            if (_scripter == null)
+                return null;
             //try the following , if error occured , return null,
             try
             {
@@ -143,11 +157,11 @@
             //create new instance for dirve waiter
             _driveWaiter = new(_drive, new(0, 0, 10));
             //time out for waiting a page to load
-            _drive.Manage().Timeouts().PageLoad = new TimeSpan(0, 0, 20);
+            _drive.Manage().Timeouts().PageLoad = _driverLoadPageTimeOut;
             //time out for searching for elements
-            _drive.Manage().Timeouts().ImplicitWait = new TimeSpan(0, 0, 2);
+            _drive.Manage().Timeouts().ImplicitWait = _driverElementSearchTimeOut;
             //time out for executing javascript commands
-            _drive.Manage().Timeouts().AsynchronousJavaScript = new TimeSpan(0, 0, 2);
+            _drive.Manage().Timeouts().AsynchronousJavaScript = _driverScriptExecuterTimeOut;
             //nagivate to url and for page to load completely 
             //catch navigation time out error
             try
@@ -498,9 +512,9 @@
 
 
         }
-        private WebDriver _drive;
-        private WebDriverWait _driveWaiter;
-        private IJavaScriptExecutor _scripter;
+        private WebDriver? _drive;
+        private WebDriverWait? _driveWaiter;
+        private IJavaScriptExecutor? _scripter;
         #endregion
 
         #region WebScrap From ExcelFiles

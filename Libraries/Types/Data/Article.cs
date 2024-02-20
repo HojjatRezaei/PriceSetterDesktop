@@ -19,20 +19,36 @@
         public double RegularPrice { get; set; } = 0;
         public int OptionID { get; set; } = -1;
         public string OptionValue { get; set; } = string.Empty;
+        public int ParentStockID { get; set; }
+        public string ParentStockStatus { get; set; }
+        public int ColorStockID { get; set; }
+        public string ColorStockStatus { get; set; }
         public JObject? OptionValueJson => OptionValue != string.Empty ? JObject.Parse(OptionValue) : null;
         public bool HaveVariable => ColorID != -1;
         public int RequestType = -1;
         public Article ConvertFromJson(JToken jObjectItem)
         {
-            ID = jObjectItem.Value<int>("ArticleID");
-            ArticleName = jObjectItem.Value<string>("ArticleName") ?? "";
-            ColorID = jObjectItem.Value<int>("ColorID");
-            ColorName = jObjectItem.Value<string>("ColorName") ?? "";
-            PriceID = jObjectItem.Value<int>("PriceID");
-            RegularPriceID = jObjectItem.Value<int>("RegularPriceID");
-            OptionID = jObjectItem.Value<int>("OptionID");
-            OptionValue = jObjectItem.Value<string>("OptionValue") ?? "";
-            return this;
+            try
+            {
+                ID = jObjectItem.Value<int>("ArticleID");
+                ArticleName = jObjectItem.Value<string>("ArticleName") ?? "";
+                ColorID = jObjectItem.Value<int>("ColorID");
+                ColorName = jObjectItem.Value<string>("ColorName") ?? "";
+                PriceID = jObjectItem.Value<int>("PriceID");
+                RegularPriceID = jObjectItem.Value<int>("RegularPriceID");
+                OptionID = jObjectItem.Value<int>("OptionID");
+                OptionValue = jObjectItem.Value<string>("OptionValue") ?? "";
+                ColorStockID = jObjectItem.Value<int>("ColorStockID");
+                ColorStockStatus = jObjectItem.Value<string>("ColorStockStatus") ?? "";
+                ParentStockID = jObjectItem.Value<int>("ParentStockID");
+                ParentStockStatus = jObjectItem.Value<string>("ParentStockStatus") ?? "";
+                return this;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
         }
         public JObject CreateJsonObject()
         {
@@ -46,6 +62,10 @@
                 { nameof(Price), Price },
                 { nameof(RegularPriceID), RegularPriceID },
                 { nameof(RegularPrice), RegularPrice },
+                { nameof(ColorStockID), ColorStockID },
+                { nameof(ColorStockStatus), ColorStockStatus },
+                { nameof(ParentStockID), ParentStockID },
+                { nameof(ParentStockStatus), ParentStockStatus },
                 { nameof(OptionID), OptionID },
                 { nameof(OptionValue), OptionValue },
                 { nameof(RequestType), RequestType },
