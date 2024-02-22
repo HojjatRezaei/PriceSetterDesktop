@@ -1,13 +1,11 @@
 ﻿namespace PriceSetterDesktop.ViewModel
 {
+    using Newtonsoft.Json;
     using Newtonsoft.Json.Linq;
-    using PriceSetterDesktop.Libraries.APIManager;
     using PriceSetterDesktop.Libraries.Engines;
     using PriceSetterDesktop.Libraries.Statics;
     using PriceSetterDesktop.Libraries.Types.Data;
     using PriceSetterDesktop.Libraries.Types.Interaction;
-    using System.Diagnostics;
-    using System.DirectoryServices;
     using System.Windows.Input;
     using WPFCollection.Data.List;
     using WPFCollection.Data.Statics;
@@ -20,7 +18,7 @@
         {
             var defList = APIDataStorage.ScrapManager.List;
             var lastDateUpdate = defList.Max(x => x.Date);
-            var restest1 = APIDataStorage.ArticleManager.List.Select((articleItem) => 
+            var restest1 = APIDataStorage.ArticleManager.List.Select((articleItem) =>
             {
                 var maxList = defList.Where(x => x.ArticleID == articleItem.ID && x.ColorID == articleItem.ColorID);
                 if (!maxList.Any())
@@ -128,20 +126,21 @@
                 scrapitem.Time = time;
                 scrapitem.Date = pd;
                 //send prices to scrappedPrices Table in hojjatdb DataBase
-                //APIDataStorage.ScrapManager.Add(scrapitem);
+                //**********APIDataStorage.ScrapManager.Add(scrapitem);
             }
             //Group Articles and Loop Through it
-            scrItems.GroupBy(x => x.ArticleID).ToList().ForEach((srcItem) => 
+            scrItems.GroupBy(x => x.ArticleID).ToList().ForEach((srcItem) =>
             {
                 //try to find 1 article object based on Grouped Key
                 var articleObject = APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == srcItem.Key);
-                
                 if (articleObject == null)
+                    return;
+                if (articleObject.ValidForProcess)
                     return;
                 //Check if Article Have Any Variables , Like Color . Size . . . etc
                 if (articleObject.HaveVariable)
                 {
-                    var articleColors = APIDataStorage.ArticleManager.List.Where(x => x.ID == srcItem.Key).ToList();
+                    var articleColors = APIDataStorage.ArticleManager.List.Where(x => x.ID == articleObject.ID).ToList();
                     foreach (var color in articleColors)
                     {
                         color.ColorStockStatus = "outofstock";
@@ -169,22 +168,22 @@
                     });
                     //extract article color list
                     //filter instock colors
-                    var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock");
                     var inStockColors = articleColors.Where(x => x.ColorStockStatus == "instock");
-
-                    var mininStockPrice = inStockColors.Min(x => x.Price);
+                    var minStockPrice = inStockColors.Min(x => x.Price);
+                    var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock").ToList();
+                    var unsetList = articleColors.Where(x => !inStockColors.Any(y => y.ColorID == x.ColorID) && !outofStockColors.Any(y => y.ColorID == x.ColorID)).ToList();
+                    outofStockColors.AddRange(unsetList);
                     foreach (var outStockColor in outofStockColors)
                     {
-                        if(outStockColor.Price < mininStockPrice)
+                        if (outStockColor.Price < minStockPrice)
                         {
-                            // 1 is price
-                            jObj.Last.First["price"][$"{outStockColor.ColorID}"] = mininStockPrice.ToString();
-                            // 2 is regular_price
-                            jObj.Last.First["regular_price"][$"{outStockColor.ColorID}"] = mininStockPrice.ToString();
-                            // 3 is regular sale_price
-                            jObj.Last.First["sale_price"][$"{outStockColor.ColorID}"] = mininStockPrice.ToString();
-                            outStockColor.Price = mininStockPrice;
-                            outStockColor.RegularPrice = mininStockPrice;
+                            outStockColor.Price = minStockPrice;
+                            outStockColor.RegularPrice = minStockPrice;
+                        }
+                        else
+                        {
+                            outStockColor.Price = outStockColor.Price;
+                            outStockColor.RegularPrice = outStockColor.Price;
                         }
                         outStockColor.RequestType = 0;
                         var res = APIDataStorage.ArticleManager.Add(outStockColor);
@@ -192,39 +191,90 @@
                     Article? singleStockObject = null;
                     foreach (var inStockColor in inStockColors)
                     {
-                        // 1 is price
-                        jObj.Last.First["price"][$"{inStockColor.ColorID}"] = inStockColor.Price.ToString();
-                        // 2 is regular_price
-                        jObj.Last.First["regular_price"][$"{inStockColor.ColorID}"] = inStockColor.Price.ToString();
-                        // 3 is regular sale_price
-                        jObj.Last.First["sale_price"][$"{inStockColor.ColorID}"] = inStockColor.Price.ToString();
                         inStockColor.RequestType = 0;
                         var res = APIDataStorage.ArticleManager.Add(inStockColor);
-                        singleStockObject = inStockColor;
+                        singleStockObject ??= inStockColor;
                     }
+                    var colorObjectList = new List<Article>();
+                    colorObjectList.AddRange(outofStockColors);
+                    colorObjectList.AddRange(inStockColors);
                     if (singleStockObject != null)
                     {
                         singleStockObject.RequestType = 2;
                         var res = APIDataStorage.ArticleManager.Add(singleStockObject);
                     }
-                    //find lowest submited price 
-                    if (jObj != null)
+                    else if (articleObject.ParentStockID != -1 && articleObject.ParentStockStatus != "outofstock")
                     {
-                        articleObject.OptionValue = jObj.ToString();
+                        articleObject.RequestType = 2;
+                        articleObject.ParentStockStatus = "outofstock";
+                        var res = APIDataStorage.ArticleManager.Add(articleObject);
+                    }
+                    //find lowest submited price 
+                    var jobjectResult = WriteJsonOject(jObj, colorObjectList);
+                    if (jobjectResult != null)
+                    {
+                        articleObject.OptionValue = jobjectResult.ToString(Formatting.None);
                         articleObject.RequestType = 1;
                         //send POST Request for updating wp_options
-                        APIDataStorage.ArticleManager.Add(articleObject);
+                        var res = APIDataStorage.ArticleManager.Add(articleObject);
                     }
                 }
                 else
                 {
                     //not implemented yet
                 }
-
             });
-            //scrItems
-            //detach unset value from site // set it to outofstock
-            var unsetList = APIDataStorage.ArticleManager.List.Where(x => scrItems.FirstOrDefault(y => y.ArticleID != x.ID) != default);
+            //set unscrapped article stock to outofstock
+            //filter unscrapped articles
+            var unscrappedArticles = APIDataStorage.ArticleManager.List.Where(x => !scrItems.Any(y => y.ArticleID == x.ID)).ToList();
+            unscrappedArticles.GroupBy(x => x.ID).ToList().ForEach((articleKey) => 
+            {
+                var childList = APIDataStorage.ArticleManager.List.Where(x => x.ID == articleKey.Key);
+                //unstock childs
+                foreach (var child in childList)
+                {
+                    if(child.ColorStockStatus != "outofstock")
+                    {
+                        child.RequestType = 3;
+                        child.ColorStockStatus = "outofstock";
+                        var res = APIDataStorage.ArticleManager.Add(child);
+                    }
+                }
+                var parent = APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == articleKey.Key);
+                //unstock parent 
+                if(parent != null && parent.ParentStockStatus != "outofstock")
+                {
+                    parent.RequestType = 3;
+                    parent.ParentStockStatus = "outofstock";
+                    var res = APIDataStorage.ArticleManager.Add(parent);
+                }
+            });
+        }
+        private JObject? WriteJsonOject(JObject? jObj, List<Article> colorList)
+        {
+            if (jObj == null) return null;
+            Dictionary<string, object>? dictionary = jObj.ToObject<Dictionary<string, object>>();
+            if (dictionary == null)
+                return null;
+            var colorJObject = new JObject();
+            foreach (var colorItem in colorList)
+            {
+                colorJObject.Add($"{colorItem.ColorID}", $"{colorItem.Price}");
+            }
+            var newJObject = new JObject
+            {
+                //add version token
+                { "version", $"{dictionary["version"]}" },
+                //add Hash Token
+                { dictionary.Last().Key, new JObject()
+                    {
+                        { "price",colorJObject},
+                        { "regular_price" ,colorJObject},
+                        { "sale_price",colorJObject},
+                    }
+                }
+            };
+            return newJObject;
         }
     }
 }

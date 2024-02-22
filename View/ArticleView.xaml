@@ -212,13 +212,6 @@
                     <DataTemplate>
                       <StackPanel>
                         <TextBlock Text="{Binding Name}" TextWrapping="Wrap" MinHeight="50"/>
-                        <ListView ItemsSource="{Binding Colors}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
-                          <ListView.ItemTemplate>
-                            <DataTemplate>
-                              <TextBlock Text="{Binding Name}"/>
-                            </DataTemplate>
-                          </ListView.ItemTemplate>
-                        </ListView>
                       </StackPanel>
                     </DataTemplate>
                   </ListView.ItemTemplate>

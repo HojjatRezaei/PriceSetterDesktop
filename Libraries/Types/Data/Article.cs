@@ -24,9 +24,10 @@
         public int ColorStockID { get; set; }
         public string ColorStockStatus { get; set; }
         public JObject? OptionValueJson => OptionValue != string.Empty ? JObject.Parse(OptionValue) : null;
+        public bool ValidForProcess => OptionID == -1 || PriceID == -1 || RegularPriceID == -1 || ParentStockID == -1;
         public bool HaveVariable => ColorID != -1;
         public int RequestType = -1;
-        public Article ConvertFromJson(JToken jObjectItem)
+        public Article? ConvertFromJson(JToken jObjectItem)
         {
             try
             {
@@ -46,7 +47,7 @@
             }
             catch (Exception)
             {
-                throw;
+                return null;
             }
 
         }
@@ -75,6 +76,12 @@
         public bool IsValidData()
         {
             return true;
+        }
+        public override bool Equals(object? obj)
+        {
+            return obj is Article article &&
+                   ID == article.ID &&
+                   ColorID == article.ColorID;
         }
     }
 }
