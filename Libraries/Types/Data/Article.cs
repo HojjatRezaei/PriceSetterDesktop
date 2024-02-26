@@ -23,6 +23,8 @@
         public string ParentStockStatus { get; set; }
         public int ColorStockID { get; set; }
         public string ColorStockStatus { get; set; }
+        public int DateID { get; set; }
+        public string DateValue { get; set; }
         public JObject? OptionValueJson => OptionValue != string.Empty ? JObject.Parse(OptionValue) : null;
         public bool ValidForProcess => OptionID == -1 || PriceID == -1 || RegularPriceID == -1 || ParentStockID == -1;
         public bool HaveVariable => ColorID != -1;
@@ -43,6 +45,8 @@
                 ColorStockStatus = jObjectItem.Value<string>("ColorStockStatus") ?? "";
                 ParentStockID = jObjectItem.Value<int>("ParentStockID");
                 ParentStockStatus = jObjectItem.Value<string>("ParentStockStatus") ?? "";
+                DateID = jObjectItem.Value<int>("DateID");
+                DateValue = jObjectItem.Value<string>("DateValue") ?? "";
                 return this;
             }
             catch (Exception)
@@ -70,6 +74,8 @@
                 { nameof(OptionID), OptionID },
                 { nameof(OptionValue), OptionValue },
                 { nameof(RequestType), RequestType },
+                { nameof(DateID), DateID },
+                { nameof(DateValue), DateValue },
             };
             return jobject;
         }

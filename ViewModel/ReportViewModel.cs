@@ -126,7 +126,7 @@
                 scrapitem.Time = time;
                 scrapitem.Date = pd;
                 //send prices to scrappedPrices Table in hojjatdb DataBase
-                //**********APIDataStorage.ScrapManager.Add(scrapitem);
+                //*************************************************APIDataStorage.ScrapManager.Add(scrapitem);
             }
             //Group Articles and Loop Through it
             scrItems.GroupBy(x => x.ArticleID).ToList().ForEach((srcItem) =>
@@ -158,10 +158,13 @@
                         //validate extracted price
                         if (minPrice < 10000)
                             return;
-                        articleWithColorObject.Price = (minPrice * 1.07).RoundUp(4);
-                        articleWithColorObject.RegularPrice = (minPrice * 1.07).RoundUp(4);
+                        //articleWithColorObject.Price = (minPrice * 1.07).RoundUp(4);
+                        //articleWithColorObject.RegularPrice = (minPrice * 1.07).RoundUp(4);
+                        articleWithColorObject.Price = CalculatePrice(minPrice);
+                        articleWithColorObject.RegularPrice = CalculatePrice(minPrice);
                         articleWithColorObject.ColorStockStatus = "instock";
                         articleWithColorObject.RequestType = 0;
+                        articleWithColorObject.DateValue = pd.ToString();
                         //try to find articleWithColor
                         var itemIndex = articleColors.IndexOf(articleWithColorObject);
                         articleColors[itemIndex] = articleWithColorObject;
@@ -169,10 +172,15 @@
                     //extract article color list
                     //filter instock colors
                     var inStockColors = articleColors.Where(x => x.ColorStockStatus == "instock");
+                    //calculate minimum existing stock price 
                     var minStockPrice = inStockColors.Min(x => x.Price);
+                    //filter out outofstock colors
                     var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock").ToList();
+                    //filter out not used colors
                     var unsetList = articleColors.Where(x => !inStockColors.Any(y => y.ColorID == x.ColorID) && !outofStockColors.Any(y => y.ColorID == x.ColorID)).ToList();
+                    //Append Unset Color List to OutofStock Colors List
                     outofStockColors.AddRange(unsetList);
+                    //Loop through each OutofStock Color object and Calculate Minimum Price
                     foreach (var outStockColor in outofStockColors)
                     {
                         if (outStockColor.Price < minStockPrice)
@@ -188,11 +196,16 @@
                         outStockColor.RequestType = 0;
                         var res = APIDataStorage.ArticleManager.Add(outStockColor);
                     }
+                    //Create an Object to indicate whenever a color exist in current article scope 
                     Article? singleStockObject = null;
+                    //loop through each InStock Colors
                     foreach (var inStockColor in inStockColors)
                     {
+                        //set request type 
                         inStockColor.RequestType = 0;
+                        //send API POST Request for updating value in Wordpress DataBase
                         var res = APIDataStorage.ArticleManager.Add(inStockColor);
+                        //if there's a stock color in current article scope , instock parent in Wordpress DataBase
                         singleStockObject ??= inStockColor;
                     }
                     var colorObjectList = new List<Article>();
@@ -227,13 +240,13 @@
             //set unscrapped article stock to outofstock
             //filter unscrapped articles
             var unscrappedArticles = APIDataStorage.ArticleManager.List.Where(x => !scrItems.Any(y => y.ArticleID == x.ID)).ToList();
-            unscrappedArticles.GroupBy(x => x.ID).ToList().ForEach((articleKey) => 
+            unscrappedArticles.GroupBy(x => x.ID).ToList().ForEach((articleKey) =>
             {
                 var childList = APIDataStorage.ArticleManager.List.Where(x => x.ID == articleKey.Key);
                 //unstock childs
                 foreach (var child in childList)
                 {
-                    if(child.ColorStockStatus != "outofstock")
+                    if (child.ColorStockStatus != "outofstock")
                     {
                         child.RequestType = 3;
                         child.ColorStockStatus = "outofstock";
@@ -242,7 +255,7 @@
                 }
                 var parent = APIDataStorage.ArticleManager.List.FirstOrDefault(x => x.ID == articleKey.Key);
                 //unstock parent 
-                if(parent != null && parent.ParentStockStatus != "outofstock")
+                if (parent != null && parent.ParentStockStatus != "outofstock")
                 {
                     parent.RequestType = 3;
                     parent.ParentStockStatus = "outofstock";
@@ -275,6 +288,19 @@
                 }
             };
             return newJObject;
+        }
+        private double CalculatePrice(double price)
+        {
+            //if buy price is greater than 10,000,000 Rial , Multiple Value by 7% ==> 1.07
+            if (price > 10000000)
+            {
+                return (price * 1.07).RoundUp(4);
+            }
+            //if buy price is lesser than 10,000,000 Rial , Multiple Value By 8% ==> 1.08
+            else
+            {
+                return (price * 1.08).RoundUp(4);
+            }
         }
     }
 }

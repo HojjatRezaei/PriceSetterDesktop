@@ -1,6 +1,5 @@
 ﻿namespace PriceSetterDesktop.Libraries.APIManager
 {
-    using OpenQA.Selenium;
     using System.Collections.Generic;
     using System.Net.Http;
     using WPFCollection.Data.Interface.Generic;
