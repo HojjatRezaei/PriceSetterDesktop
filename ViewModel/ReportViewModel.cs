@@ -126,7 +126,7 @@
                 scrapitem.Time = time;
                 scrapitem.Date = pd;
                 //send prices to scrappedPrices Table in hojjatdb DataBase
-                //*************************************************APIDataStorage.ScrapManager.Add(scrapitem);
+                APIDataStorage.ScrapManager.Add(scrapitem);
             }
             //Group Articles and Loop Through it
             scrItems.GroupBy(x => x.ArticleID).ToList().ForEach((srcItem) =>

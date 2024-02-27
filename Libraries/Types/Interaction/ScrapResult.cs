@@ -106,7 +106,7 @@
         public string Source { get; set; } = string.Empty;
         public bool HaveMessage { get; set; }
         public string Messages { get; set; } = string.Empty;
-        public bool ValidData => ColorID != -1 && PriceID != -1 && Price > 10;
+        public bool ValidData => ColorID != -1 && PriceID != -1 && Price > 100000;
         public string DateTimeStr => Date.ToString() + "-" + Time;
         public JObject? OptionValueJson => OptionValue != string.Empty ? JObject.Parse(OptionValue) : null;
         public Article? GetArticle()

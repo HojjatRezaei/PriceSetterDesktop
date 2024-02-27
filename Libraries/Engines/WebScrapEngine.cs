@@ -14,10 +14,10 @@
         #region Scope Properties
         private List<ScrapResult> _scrapResult = [];
         private readonly TimeSpan _driverLoadPageTimeOut = new TimeSpan(0, 0, 20);
-        private readonly TimeSpan _driverElementSearchTimeOut = new TimeSpan(0, 0, 3);
-        private readonly TimeSpan _driverScriptExecuterTimeOut = new TimeSpan(0, 0, 3);
+        private readonly TimeSpan _driverElementSearchTimeOut = new TimeSpan(0, 0, 2);
+        private readonly TimeSpan _driverScriptExecuterTimeOut = new TimeSpan(0, 0, 2);
+        private readonly TimeSpan _driverWaiterTimeSpan = new TimeSpan(0, 0, 2);
         #endregion
-
         #region WebScrap From URL
         public void TurnOn()
         {
@@ -28,7 +28,6 @@
             chromeOption.AddArgument("--disable-popup-blocking");
             //create new instance of chrome driver
             _drive = new ChromeDriver(chromeOption);
-
             //create instance for executing javascript commands
             _scripter = _drive;
             //create new list container for saving scrapped result
@@ -155,7 +154,7 @@
             if (articleObject == null)
                 return [new ScrapResult() { HaveMessage = true, Messages = "Cannot Find Article Object", ProviderID = providerObject.ID, Source = providerObject.Name }];
             //create new instance for dirve waiter
-            _driveWaiter = new(_drive, new(0, 0, 10));
+            _driveWaiter = new(_drive, _driverWaiterTimeSpan);
             //time out for waiting a page to load
             _drive.Manage().Timeouts().PageLoad = _driverLoadPageTimeOut;
             //time out for searching for elements
@@ -448,16 +447,21 @@
                 //try to find nostock element
                 try
                 {
-                    var searchElementResult = _drive.FindElement(By.XPath(searchResult.Path));
-                    if (searchElementResult == null)
-                    {
+                    //var searchElementResult = _scripter.ExecuteScript($"return document.evaluate(\"{searchResult.Path}\",document,null,XPathResult.FIRST_ORDERED_NODE_TYPE,null).singleNodeValue", null);
+                    var searchElementResult = FindSingleElement(searchResult.Path);
+                    //var searchElementResult = _drive.FindElement(By.XPath(searchResult.Path));
+                    if (searchElementResult is null)
                         return true;
+                    if (searchElementResult is IWebElement castedElement)
+                    {
+                        var targetText = castedElement.Text;
+                        //try for search 'نا موجود' key word
+                        return !(targetText.Contains("موجود") || targetText == "نا موجود" || targetText == "ناموجود");
                     }
                     else
                     {
-                        var targetText = searchElementResult.Text;
-                        //try for search 'نا موجود' key word
-                        return !(targetText.Contains("موجود") || targetText == "نا موجود" || targetText == "ناموجود");
+
+                        return true;
                     }
                 }
                 catch (Exception)
@@ -512,9 +516,9 @@
 
 
         }
-        private WebDriver? _drive;
-        private WebDriverWait? _driveWaiter;
-        private IJavaScriptExecutor? _scripter;
+        private WebDriver _drive;
+        private WebDriverWait _driveWaiter;
+        private IJavaScriptExecutor _scripter;
         #endregion
 
         #region WebScrap From ExcelFiles
