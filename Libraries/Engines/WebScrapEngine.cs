@@ -21,13 +21,26 @@
         #region WebScrap From URL
         public void TurnOn()
         {
+            var chromeDriverService = ChromeDriverService.CreateDefaultService();
+            chromeDriverService.HideCommandPromptWindow = true;
             //setup chrome startup option
             ChromeOptions chromeOption = new();
-            //add maximized parameter to the chromeoption instance
+            //parameter list for chrome instance
+            //disable-popup-blocking
             chromeOption.AddArgument("--start-maximized");
             chromeOption.AddArgument("--disable-popup-blocking");
+            chromeOption.AddArgument("--no-sandbox");
+            //chromeOption.AddArgument("--headless");
+            chromeOption.AddArgument("--disable-web-security");
+            chromeOption.AddArgument("--disable-gpu");
+            chromeOption.AddArgument("--incognito");
+            chromeOption.AddArgument("--proxy-bypass-list=*");
+            chromeOption.AddArgument("--proxy-server='direct://'");
+            chromeOption.AddArgument("--log-level=3");
+            chromeOption.AddArgument("--hide-scrollbars");
+
             //create new instance of chrome driver
-            _drive = new ChromeDriver(chromeOption);
+            _drive = new ChromeDriver(chromeDriverService, chromeOption);
             //create instance for executing javascript commands
             _scripter = _drive;
             //create new list container for saving scrapped result
@@ -104,6 +117,8 @@
         }
         private IEnumerable<ScrapResult>? ScrapFromWeb(Provider providerObject, Article? articleObject = null)
         {
+            if (providerObject.ID == 11)
+                return null;
             //detect if is a single scrap or a list scrap
             if (articleObject == null)
             {
@@ -280,10 +295,17 @@
                 {
                     if (clickElement == null)
                         continue;
-                    RemoveAd();
                     //try to find element
-                    clickElement.Click();
-                    //wait 1 second after click on element for processing AJAX
+                    try
+                    {
+                        clickElement.Click();
+                    }
+                    catch (Exception)
+                    {
+                        RemoveAd();
+                        clickElement.Click();
+                    }
+                    //wait 0.5 second after click on element for processing AJAX
                     Thread.Sleep(500);
                     //after a successfull click , check for clickAndContinue elements
                     if (clickAndContinueContainer != null && clickAndContinueContainer.Any())

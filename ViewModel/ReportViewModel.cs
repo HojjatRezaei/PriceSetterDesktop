@@ -126,7 +126,7 @@
                 scrapitem.Time = time;
                 scrapitem.Date = pd;
                 //send prices to scrappedPrices Table in hojjatdb DataBase
-                APIDataStorage.ScrapManager.Add(scrapitem);
+                //APIDataStorage.ScrapManager.Add(scrapitem);
             }
             //Group Articles and Loop Through it
             scrItems.GroupBy(x => x.ArticleID).ToList().ForEach((srcItem) =>
@@ -154,14 +154,14 @@
                         var articleWithColorObject = articleColors.FirstOrDefault(x => x.ID == srcItem.Key && x.ColorID == colorItem.Key);
                         if (articleWithColorObject == null)
                             return;
-                        var minPrice = colorItem.Min(x => x.Price);
+                        var avgPrice = colorItem.Average(x => x.Price);
                         //validate extracted price
-                        if (minPrice < 10000)
+                        if (avgPrice < 10000)
                             return;
                         //articleWithColorObject.Price = (minPrice * 1.07).RoundUp(4);
                         //articleWithColorObject.RegularPrice = (minPrice * 1.07).RoundUp(4);
-                        articleWithColorObject.Price = CalculatePrice(minPrice);
-                        articleWithColorObject.RegularPrice = CalculatePrice(minPrice);
+                        articleWithColorObject.Price = CalculatePrice(avgPrice);
+                        articleWithColorObject.RegularPrice = CalculatePrice(avgPrice);
                         articleWithColorObject.ColorStockStatus = "instock";
                         articleWithColorObject.RequestType = 0;
                         articleWithColorObject.DateValue = pd.ToString();
@@ -173,7 +173,7 @@
                     //filter instock colors
                     var inStockColors = articleColors.Where(x => x.ColorStockStatus == "instock");
                     //calculate minimum existing stock price 
-                    var minStockPrice = inStockColors.Min(x => x.Price);
+                    var averageInStockPrice = inStockColors.Average(x => x.Price);
                     //filter out outofstock colors
                     var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock").ToList();
                     //filter out not used colors
@@ -183,10 +183,10 @@
                     //Loop through each OutofStock Color object and Calculate Minimum Price
                     foreach (var outStockColor in outofStockColors)
                     {
-                        if (outStockColor.Price < minStockPrice)
+                        if (outStockColor.Price < averageInStockPrice)
                         {
-                            outStockColor.Price = minStockPrice;
-                            outStockColor.RegularPrice = minStockPrice;
+                            outStockColor.Price = averageInStockPrice;
+                            outStockColor.RegularPrice = averageInStockPrice;
                         }
                         else
                         {
