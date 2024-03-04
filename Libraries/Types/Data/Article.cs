@@ -3,7 +3,7 @@
     using Newtonsoft.Json.Linq;
     using WPFCollection.Data.Interface.Generic;
 
-    public partial class Article : IJsonConverter<Article>
+    public class Article : IJsonConverter<Article>
     {
         public Article()
         {

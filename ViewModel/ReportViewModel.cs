@@ -112,7 +112,6 @@
             webScrap.TurnOff();
             ScrapItems = scrapList;
         }
-
         public ICommand SendPriceToWebCommand { get; set; } = new FastCommand
             ((object parameter) => { ReportViewModel model = (ReportViewModel)parameter; model.SendPriceToWebCommandHandler(); }, (object parameter) => { return true; });
         private void SendPriceToWebCommandHandler()
@@ -162,7 +161,7 @@
                         //articleWithColorObject.RegularPrice = (minPrice * 1.07).RoundUp(4);
                         articleWithColorObject.Price = CalculatePrice(avgPrice);
                         articleWithColorObject.RegularPrice = CalculatePrice(avgPrice);
-                        articleWithColorObject.ColorStockStatus = "instock";
+                        articleWithColorObject.ColorStockStatus = "outofstock";
                         articleWithColorObject.RequestType = 0;
                         articleWithColorObject.DateValue = pd.ToString();
                         //try to find articleWithColor
@@ -173,7 +172,9 @@
                     //filter instock colors
                     var inStockColors = articleColors.Where(x => x.ColorStockStatus == "instock");
                     //calculate minimum existing stock price 
-                    var averageInStockPrice = inStockColors.Average(x => x.Price);
+                    double averageInStockPrice = -1;
+                    if (inStockColors.Any())
+                        averageInStockPrice= inStockColors.Average(x => x.Price);
                     //filter out outofstock colors
                     var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock").ToList();
                     //filter out not used colors
@@ -197,7 +198,7 @@
                         var res = APIDataStorage.ArticleManager.Add(outStockColor);
                     }
                     //Create an Object to indicate whenever a color exist in current article scope 
-                    Article? singleStockObject = null;
+                    //Article? singleStockObject = null;
                     //loop through each InStock Colors
                     foreach (var inStockColor in inStockColors)
                     {
@@ -206,23 +207,24 @@
                         //send API POST Request for updating value in Wordpress DataBase
                         var res = APIDataStorage.ArticleManager.Add(inStockColor);
                         //if there's a stock color in current article scope , instock parent in Wordpress DataBase
-                        singleStockObject ??= inStockColor;
+                        //singleStockObject ??= inStockColor;
                     }
                     var colorObjectList = new List<Article>();
                     colorObjectList.AddRange(outofStockColors);
                     colorObjectList.AddRange(inStockColors);
-                    if (singleStockObject != null)
+                    /*if (singleStockObject != null)
                     {
                         singleStockObject.RequestType = 2;
                         var res = APIDataStorage.ArticleManager.Add(singleStockObject);
                     }
-                    else if (articleObject.ParentStockID != -1 && articleObject.ParentStockStatus != "outofstock")
+                    else*/
+                    if (articleObject.ParentStockID != -1 && articleObject.ParentStockStatus != "outofstock")
                     {
                         articleObject.RequestType = 2;
                         articleObject.ParentStockStatus = "outofstock";
                         var res = APIDataStorage.ArticleManager.Add(articleObject);
                     }
-                    //find lowest submited price 
+                    //find average submited price 
                     var jobjectResult = WriteJsonOject(jObj, colorObjectList);
                     if (jobjectResult != null)
                     {
