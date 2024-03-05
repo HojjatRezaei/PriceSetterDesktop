@@ -172,22 +172,30 @@
                     //filter instock colors
                     var inStockColors = articleColors.Where(x => x.ColorStockStatus == "instock");
                     //calculate minimum existing stock price 
-                    double averageInStockPrice = -1;
+                    double minInStockPrice = -1;
                     if (inStockColors.Any())
-                        averageInStockPrice= inStockColors.Average(x => x.Price);
+                    {
+                        minInStockPrice= inStockColors.Min(x => x.Price);
+                    }
+                    else
+                    {
+                        minInStockPrice = articleColors.Min(x => x.Price);
+                    }
+                    
                     //filter out outofstock colors
                     var outofStockColors = articleColors.Where(x => x.ColorStockStatus == "outofstock").ToList();
                     //filter out not used colors
                     var unsetList = articleColors.Where(x => !inStockColors.Any(y => y.ColorID == x.ColorID) && !outofStockColors.Any(y => y.ColorID == x.ColorID)).ToList();
                     //Append Unset Color List to OutofStock Colors List
                     outofStockColors.AddRange(unsetList);
+
                     //Loop through each OutofStock Color object and Calculate Minimum Price
                     foreach (var outStockColor in outofStockColors)
                     {
-                        if (outStockColor.Price < averageInStockPrice)
+                        if (outStockColor.Price < minInStockPrice)
                         {
-                            outStockColor.Price = averageInStockPrice;
-                            outStockColor.RegularPrice = averageInStockPrice;
+                            outStockColor.Price = minInStockPrice;
+                            outStockColor.RegularPrice = minInStockPrice;
                         }
                         else
                         {
